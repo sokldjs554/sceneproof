@@ -1,0 +1,40 @@
+# Local stack: RTSP simulator -> edge analyzer -> Go gateway -> review server (+console).
+# Evidence is a shared volume between edge and gateway (same device); the gateway uploads to the server.
+services:
+  rtsp-sim:
+    build: { context: ., dockerfile: deploy/docker/Dockerfile.rtsp-sim }
+    volumes: ["./data/videos:/videos:ro"]
+    ports: ["8554:8554"]
+    healthcheck: { test: ["CMD-SHELL", "ss -ltn | grep -q 8554 || exit 1"], interval: 5s, retries: 10 }
+
+  server:
+    build: { context: ., dockerfile: deploy/docker/Dockerfile.server }
+    environment:
+      ZW_SERVER_DATA_DIR: /data
+      ZW_SERVER_VIDEOS_DIR: /videos
+      ZW_SERVER_VLM_PROVIDER: ${ZW_VLM_PROVIDER:-mock}
+      ZW_SERVER_VLM_MODEL: ${ZW_VLM_MODEL:-}
+      ZW_SERVER_VLM_BUDGET_USD: ${ZW_VLM_BUDGET_USD:-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes: ["server-data:/data", "./data/videos:/videos:ro"]
+    ports: ["8000:8000", "50052:50052"]
+
+  gateway:
+    build: { context: ./gateway }
+    command: ["--listen", ":50051", "--server", "server:50052", "--device-id", "edge-01",
+              "--queue-dir", "/data/gateway", "--evidence-root", "/evidence", "--http", ":9100", "--insecure"]
+    volumes: ["gateway-data:/data", "evidence:/evidence:ro"]
+    ports: ["9100:9100"]
+    depends_on: [server]
+
+  edge:
+    build: { context: ., dockerfile: deploy/docker/Dockerfile.edge }
+    command: ["--config", "configs/edge.compose.yaml", "run", "--gateway", "gateway:50051"]
+    volumes: ["evidence:/app/data/evidence", "./models:/app/models:ro", "./data/videos:/app/data/videos:ro",
+              "./configs:/app/configs:ro"]
+    depends_on: [gateway, rtsp-sim]
+
+volumes:
+  server-data: {}
+  gateway-data: {}
+  evidence: {}

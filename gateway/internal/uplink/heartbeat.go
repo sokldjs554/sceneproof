@@ -15,8 +15,11 @@ type HeartbeatOptions struct {
 	Status   *status.Registry
 	Logger   *slog.Logger
 	Interval time.Duration // default 2s
-	// RPCTimeout bounds one Heartbeat RPC; default is the interval, so a
-	// stalled call never piles up behind the next tick.
+	// RPCTimeout bounds one Heartbeat RPC (default 10s, never less than
+	// Interval). It is deliberately longer than the interval: a slow link
+	// must not be mistaken for a dead one, and a lost TCP connection is
+	// caught much sooner by the channel-state watcher in Conn. Ticks that
+	// fire while a call is still in flight are simply skipped.
 	RPCTimeout time.Duration
 	// OnSent, if set, is called after every successful heartbeat (tests).
 	OnSent func(ds *zonewatchv1.DeviceStatus, ack *zonewatchv1.HeartbeatAck)
@@ -36,6 +39,9 @@ func RunHeartbeat(ctx context.Context, o HeartbeatOptions) {
 		o.Interval = 2 * time.Second
 	}
 	if o.RPCTimeout <= 0 {
+		o.RPCTimeout = 10 * time.Second
+	}
+	if o.RPCTimeout < o.Interval {
 		o.RPCTimeout = o.Interval
 	}
 	if o.Logger == nil {

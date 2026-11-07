@@ -79,8 +79,7 @@ class Store:
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA synchronous=NORMAL")
         self._conn.execute("PRAGMA busy_timeout=5000")
-        with self.tx() as c:
-            c.executescript(SCHEMA)
+        self._conn.executescript(SCHEMA)  # autocommit mode: executescript manages its own transaction
 
     @contextmanager
     def tx(self):

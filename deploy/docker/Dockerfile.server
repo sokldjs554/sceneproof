@@ -1,0 +1,17 @@
+# ZoneWatch review server: FastAPI + gRPC ingest + VLM worker + static console.
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY proto ./proto
+COPY console ./console
+RUN pip install --no-cache-dir -e ".[server]"
+RUN mkdir -p data/server && useradd -m zw && chown -R zw /app
+USER zw
+EXPOSE 8000 50052
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD curl -fsS http://127.0.0.1:8000/api/health || exit 1
+ENTRYPOINT ["zonewatch-server"]
+CMD ["run"]

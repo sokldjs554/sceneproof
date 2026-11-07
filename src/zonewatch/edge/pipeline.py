@@ -61,7 +61,7 @@ class CameraPipeline:
         self.tracker = ByteTracker(tp)
         zones = zones_override if zones_override is not None else [z.to_spec() for z in cam.zones]
         self.monitor = ZoneMonitor(zones, cam.camera_id, pc.trajectory_stride)
-        self.ctx = RunContext(run_id, cfg.device_id, cam.camera_id, self.source_uri, edge_version,
+        self.ctx = RunContext(run_id, cfg.device_id, cam.camera_id, self.source_uri, cam.name or cam.camera_id, edge_version,
                               detector.info.model_name, detector.info.model_version, detector.info.backend,
                               f"bytetrack@{tp.hash()}", cfg.config_hash(),
                               (detector.info.input_width, detector.info.input_height))

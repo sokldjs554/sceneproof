@@ -33,6 +33,9 @@ class ServerSettings(BaseSettings):
     vlm_transformers_model: str = "HuggingFaceTB/SmolVLM-500M-Instruct"
     vlm_max_tokens: int = 700
     vlm_budget_usd: float = 5.0  # hard stop for paid providers (estimated spend)
+    vlm_mock_delay_s: float = 0.2  # fault injection for tests/scenarios (mock provider only)
+    vlm_mock_fail_every: int = 0
+    vlm_mock_invalid_every: int = 0
 
     # demo mode
     replay_bundle: str = ""  # path to a recorded run dir (events.jsonl + evidence/) imported at startup

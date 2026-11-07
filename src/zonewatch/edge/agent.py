@@ -54,6 +54,9 @@ class EdgeAgent:
                 raise KeyError(f"unknown camera {camera_id}")
             cam = CameraConfig(camera_id=camera_id, name=camera_id, source=source)
         with self._lock:
+            old = self.pipelines.get(camera_id)
+            if old is not None and not old.ended and old.source_uri == (source or cam.source):
+                return f"{camera_id} already running ({old.source_uri})"  # idempotent: repeated START is a no-op
             old = self.pipelines.pop(camera_id, None)
         if old is not None:
             old.stop(CloseReason.SHUTDOWN)

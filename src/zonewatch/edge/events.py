@@ -42,6 +42,7 @@ class RunContext:
     device_id: str
     camera_id: str
     source: str
+    camera_name: str
     edge_version: str
     model_name: str
     model_version: str
@@ -66,6 +67,7 @@ def episode_to_event(ep: Episode, ctx: RunContext, ev: EvidenceState, frame_wh: 
         close_reason=_CLOSE.get(ep.close_reason, pb.CLOSE_REASON_UNSPECIFIED) if ep.closed else pb.CLOSE_REASON_UNSPECIFIED,
         track_id=ep.track_id, entry_frame_index=ep.entry_frame, media_entry_s=ep.entry_media_s,
         dwell_seconds=ep.dwell_seconds, frame_width=frame_wh[0], frame_height=frame_wh[1], source=ctx.source,
+        camera_name=ctx.camera_name,
     )
     e.entry_ts.CopyFrom(ts(ep.entry_wall_ts))
     e.detected_at.CopyFrom(ts(time.time()))

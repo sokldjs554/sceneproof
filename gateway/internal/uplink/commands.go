@@ -12,6 +12,10 @@ import (
 	"github.com/sokldjs554/zonewatch/gateway/internal/status"
 )
 
+// longLivedStream is how long a WatchCommands stream must have lived for
+// its end to count as "normal" rather than as a failure.
+const longLivedStream = 30 * time.Second
+
 // CommandSink receives commands from the server (implemented by the ingress
 // command bus, which fans them out to analyzer subscribers).
 type CommandSink interface {
@@ -71,6 +75,7 @@ func RunCommandWatcher(ctx context.Context, o WatcherOptions) {
 		}
 		log.Info("watching commands", "device_id", o.DeviceID)
 		received := 0
+		opened := time.Now()
 		for {
 			cmd, err := stream.Recv()
 			if err != nil {
@@ -93,6 +98,12 @@ func RunCommandWatcher(ctx context.Context, o WatcherOptions) {
 			log.Info("command received", "command_id", cmd.GetCommandId(), "type", cmd.GetType().String(),
 				"camera_id", cmd.GetCameraId())
 			o.Sink.Publish(cmd)
+		}
+		if time.Since(opened) > longLivedStream {
+			// A stream that lived this long was healthy; its end (a
+			// server-side idle timeout, a rolling restart) is not a reason
+			// to slow down the next watch.
+			bo.Reset()
 		}
 		if _, _, ok := o.Conn.Current(); ok {
 			// Connection still fine → the stream itself ended; back off a bit.

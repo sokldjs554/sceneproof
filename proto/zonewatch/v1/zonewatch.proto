@@ -123,6 +123,7 @@ message Event {
   int32 frame_width = 23;
   int32 frame_height = 24;
   string source = 25;                   // camera source URI (file:// or rtsp://)
+  string camera_name = 26;              // human label from the device config (so replay bundles are self-contained)
 }
 
 enum CameraState {

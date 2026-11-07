@@ -72,6 +72,19 @@ func RunSender(ctx context.Context, o SenderOptions) {
 
 		pending := o.Queue.Pending()
 		now := time.Now()
+		if len(notBefore) > 0 {
+			// Forget cool-downs for events that are no longer pending
+			// (acked by a later pass, or evicted).
+			live := make(map[string]struct{}, len(pending))
+			for _, ev := range pending {
+				live[ev.EventId] = struct{}{}
+			}
+			for id := range notBefore {
+				if _, ok := live[id]; !ok {
+					delete(notBefore, id)
+				}
+			}
+		}
 		var sentAny bool
 		wait := o.IdlePoll
 		for _, ev := range pending {

@@ -207,6 +207,11 @@ func (c *Conn) dial(ctx context.Context) (*grpc.ClientConn, error) {
 		case connectivity.Shutdown:
 			cc.Close()
 			return nil, errors.New("channel shut down during dial")
+		case connectivity.TransientFailure:
+			// Fail fast: grpc-go would retry on its own schedule, but the
+			// Conn loop owns the backoff, so hand the attempt back now.
+			cc.Close()
+			return nil, fmt.Errorf("connect to %s failed (%s)", c.opts.Target, s)
 		case connectivity.Idle:
 			cc.Connect()
 		}

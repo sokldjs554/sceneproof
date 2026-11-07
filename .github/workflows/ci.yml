@@ -1,0 +1,64 @@
+name: ci
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: System deps (ffmpeg, GStreamer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg gstreamer1.0-tools gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-rtsp \
+            gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gir1.2-gst-rtsp-server-1.0 \
+            libgirepository-2.0-dev libcairo2-dev pkg-config libgl1
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[server,dev,gst]"
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Fetch models (nano+tiny only) and sample videos
+        run: |
+          VARIANTS="yolox_nano yolox_tiny" bash scripts/fetch_models.sh || true
+          bash scripts/fetch_data.sh
+      - name: Unit tests
+        run: pytest -q -m "not torch and not slow"
+      - name: Proto freshness
+        run: |
+          pip install grpcio-tools
+          bash scripts/gen_proto.sh >/dev/null 2>&1 || true
+          git diff --exit-code -- src/zonewatch/proto || (echo "generated python proto is stale" && exit 1)
+  go-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults: { run: { working-directory: gateway } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.24", cache-dependency-path: gateway/go.sum }
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...
+      - run: make build
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: |
+          docker build -f deploy/docker/Dockerfile.server -t zonewatch-server:ci .
+          docker build -t zonewatch-gateway:ci gateway
+          docker build -f deploy/docker/Dockerfile.edge -t zonewatch-edge:ci .
+      - name: Smoke server image
+        run: |
+          docker run -d --name srv -p 8000:8000 -e ZW_SERVER_VLM_PROVIDER=mock zonewatch-server:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8000/api/status
+          docker rm -f srv

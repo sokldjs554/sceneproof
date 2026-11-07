@@ -1,6 +1,6 @@
 module github.com/sokldjs554/zonewatch/gateway
 
-go 1.24.7
+go 1.24.0
 
 require (
 	google.golang.org/grpc v1.80.0

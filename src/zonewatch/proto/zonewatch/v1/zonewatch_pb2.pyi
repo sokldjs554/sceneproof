@@ -162,7 +162,7 @@ class RunInfo(_message.Message):
     def __init__(self, run_id: _Optional[str] = ..., edge_version: _Optional[str] = ..., model_name: _Optional[str] = ..., model_version: _Optional[str] = ..., backend: _Optional[str] = ..., tracker: _Optional[str] = ..., config_hash: _Optional[str] = ..., input_width: _Optional[int] = ..., input_height: _Optional[int] = ...) -> None: ...
 
 class Event(_message.Message):
-    __slots__ = ("event_id", "revision", "device_id", "camera_id", "zone_id", "zone_name", "kind", "status", "close_reason", "track_id", "entry_ts", "exit_ts", "detected_at", "entry_frame_index", "exit_frame_index", "media_entry_s", "media_exit_s", "dwell_seconds", "trajectory", "evidence", "run", "zone_polygon", "frame_width", "frame_height", "source")
+    __slots__ = ("event_id", "revision", "device_id", "camera_id", "zone_id", "zone_name", "kind", "status", "close_reason", "track_id", "entry_ts", "exit_ts", "detected_at", "entry_frame_index", "exit_frame_index", "media_entry_s", "media_exit_s", "dwell_seconds", "trajectory", "evidence", "run", "zone_polygon", "frame_width", "frame_height", "source", "camera_name")
     EVENT_ID_FIELD_NUMBER: _ClassVar[int]
     REVISION_FIELD_NUMBER: _ClassVar[int]
     DEVICE_ID_FIELD_NUMBER: _ClassVar[int]
@@ -188,6 +188,7 @@ class Event(_message.Message):
     FRAME_WIDTH_FIELD_NUMBER: _ClassVar[int]
     FRAME_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     SOURCE_FIELD_NUMBER: _ClassVar[int]
+    CAMERA_NAME_FIELD_NUMBER: _ClassVar[int]
     event_id: str
     revision: int
     device_id: str
@@ -213,7 +214,8 @@ class Event(_message.Message):
     frame_width: int
     frame_height: int
     source: str
-    def __init__(self, event_id: _Optional[str] = ..., revision: _Optional[int] = ..., device_id: _Optional[str] = ..., camera_id: _Optional[str] = ..., zone_id: _Optional[str] = ..., zone_name: _Optional[str] = ..., kind: _Optional[_Union[EventKind, str]] = ..., status: _Optional[_Union[EventStatus, str]] = ..., close_reason: _Optional[_Union[CloseReason, str]] = ..., track_id: _Optional[int] = ..., entry_ts: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., exit_ts: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., detected_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., entry_frame_index: _Optional[int] = ..., exit_frame_index: _Optional[int] = ..., media_entry_s: _Optional[float] = ..., media_exit_s: _Optional[float] = ..., dwell_seconds: _Optional[float] = ..., trajectory: _Optional[_Iterable[_Union[TrackPoint, _Mapping]]] = ..., evidence: _Optional[_Union[Evidence, _Mapping]] = ..., run: _Optional[_Union[RunInfo, _Mapping]] = ..., zone_polygon: _Optional[_Iterable[_Union[Point, _Mapping]]] = ..., frame_width: _Optional[int] = ..., frame_height: _Optional[int] = ..., source: _Optional[str] = ...) -> None: ...
+    camera_name: str
+    def __init__(self, event_id: _Optional[str] = ..., revision: _Optional[int] = ..., device_id: _Optional[str] = ..., camera_id: _Optional[str] = ..., zone_id: _Optional[str] = ..., zone_name: _Optional[str] = ..., kind: _Optional[_Union[EventKind, str]] = ..., status: _Optional[_Union[EventStatus, str]] = ..., close_reason: _Optional[_Union[CloseReason, str]] = ..., track_id: _Optional[int] = ..., entry_ts: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., exit_ts: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., detected_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., entry_frame_index: _Optional[int] = ..., exit_frame_index: _Optional[int] = ..., media_entry_s: _Optional[float] = ..., media_exit_s: _Optional[float] = ..., dwell_seconds: _Optional[float] = ..., trajectory: _Optional[_Iterable[_Union[TrackPoint, _Mapping]]] = ..., evidence: _Optional[_Union[Evidence, _Mapping]] = ..., run: _Optional[_Union[RunInfo, _Mapping]] = ..., zone_polygon: _Optional[_Iterable[_Union[Point, _Mapping]]] = ..., frame_width: _Optional[int] = ..., frame_height: _Optional[int] = ..., source: _Optional[str] = ..., camera_name: _Optional[str] = ...) -> None: ...
 
 class CameraStatus(_message.Message):
     __slots__ = ("camera_id", "source", "name", "zones", "state", "input_fps", "processed_fps", "analysis_lag_ms", "queue_depth", "queue_capacity", "dropped_frames", "frames_received", "frames_processed", "infer_ms_p50", "infer_ms_p95", "stage_ms_decode", "stage_ms_preprocess", "stage_ms_infer", "stage_ms_postprocess", "stage_ms_track", "stage_ms_evidence", "reconnect_count", "last_error", "last_frame_ts", "open_episodes", "ring_buffer_bytes", "media_time_s")

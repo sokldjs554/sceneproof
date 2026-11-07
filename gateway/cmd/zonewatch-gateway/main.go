@@ -260,6 +260,7 @@ func run(cfg config) int {
 		scancel()
 	}
 	wg.Wait()
+	pending := q.Stats().Pending
 	if err := ledger.Close(); err != nil {
 		log.Warn("close ledger", "error", err.Error())
 	}
@@ -267,6 +268,6 @@ func run(cfg config) int {
 		log.Error("close queue", "error", err.Error())
 		return 1
 	}
-	log.Info("zonewatch-gateway stopped", "pending_events", 0)
+	log.Info("zonewatch-gateway stopped", "pending_events", pending, "pending_uploads", uploader.Pending())
 	return 0
 }

@@ -1,0 +1,24 @@
+# ZoneWatch edge analyzer: GStreamer + PyGObject + ONNX Runtime (CPU). Python 3.12 from Debian.
+FROM python:3.12-slim-bookworm AS base
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ffmpeg gstreamer1.0-tools gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+      gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-rtsp \
+      gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gir1.2-gst-rtsp-server-1.0 \
+      python3-gi python3-gst-1.0 libgirepository-1.0-1 libcairo2 \
+      libgl1 libglib2.0-0 ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY proto ./proto
+COPY configs ./configs
+COPY scripts ./scripts
+# PyGObject from Debian is for /usr/bin/python3; use the system interpreter's site-packages via PYTHONPATH
+RUN pip install --no-cache-dir -e ".[gst]" || pip install --no-cache-dir -e . \
+    && python -c "import onnxruntime, cv2; print('ort', onnxruntime.__version__, 'cv2', cv2.__version__)"
+ENV PYTHONPATH=/usr/lib/python3/dist-packages
+RUN mkdir -p data/evidence models && useradd -m zw && chown -R zw /app
+USER zw
+ENTRYPOINT ["zonewatch-edge"]
+CMD ["--config", "configs/edge.yaml", "run"]
