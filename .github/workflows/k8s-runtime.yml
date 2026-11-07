@@ -3,8 +3,11 @@ on:
   workflow_dispatch:
   push:
     paths: ["deploy/**", "scripts/k8s_verify.sh", "gateway/**", "src/**", ".github/workflows/k8s-runtime.yml"]
-permissions: { contents: read }
-concurrency: { group: k8s-${{ github.ref }}, cancel-in-progress: true }
+permissions:
+  contents: read
+concurrency:
+  group: k8s-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   kind:
     runs-on: ubuntu-latest
