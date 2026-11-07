@@ -1,0 +1,82 @@
+# 공고 대응표 — [Solution] AI Software Engineer Intern (전환형), Nota AI (공고번호 240161)
+
+> 공고 원문은 사용자가 보내준 캡처 3장을 기준으로 옮겼습니다(이 세션에서 career.nota.ai 접근이 차단되어 원문 페이지는 열지 못했습니다). 다른 직무·이전 공고 내용은 섞지 않았습니다.
+> "검증 상태" 표기: **실행 검증** = 이 세션에서 실제 실행·측정 / **구현 완료** = 코드·테스트 있음, 실행은 로컬 또는 CI 필요 / **설정만** = 파일만 준비 / **미검증(장비·권한)** / **사용자 확인 필요**.
+
+## 공고 원문 정리
+
+**팀 소개**: Solution Tech Division은 노타의 핵심 AI 기술을 실제 산업 현장(ITS, 산업안전 등)에 적용해 고객 가치를 바로 만들어내는 조직. 축적된 Computer Vision 역량 위에 VLM 등 GenAI를 결합해 현장 적합성과 확장성을 갖춘 제품을 빠르게 반복 개발. 실사용 데이터를 기반으로 문제를 정의·검증·고도화하며 출시와 딜리버리까지 책임지는 팀.
+
+**해당 포지션**: 다양한 버티컬 과제를 직접 정의하고 솔루션화하는 전 과정 주도. 컴퓨터 비전과 VLM을 결합해 실시간 인지·해석·결정까지 이어지는 제품을 만들고, 현장 전문가·AI/백엔드 엔지니어와 협업해 상용 수준 품질로 출시. 실제 운영 환경의 제약(지연, 리소스, 네트워크, 보안)을 데이터와 실험으로 돌파하며 제품이 현장에서 성과를 내는 전 과정을 엔드투엔드로 경험.
+
+**주요 업무**
+1. CV 모델과 VLM 등을 활용한 AI 응용 소프트웨어 개발
+2. 다양한 산업(교통·산업 안전·제조 등)에서 영상 데이터를 실시간 인식·분석하며, 모델 추론 성능 최적화
+3. 엣지·서버·클라우드 환경에 AI 응용 소프트웨어의 배포 및 유지보수
+4. 개념 증명(POC)에서 시작한 아이디어를 상업적 품질의 제품으로 발전
+5. 각 산업 전문가, AI 엔지니어, 백엔드 엔지니어 등 다양한 전문가들과의 협업
+
+**자격요건**
+1. AI Native 개발(Claude, Cursor, Codex 등 활용)에 익숙하고, 이를 통해 신속한 기능 요구사항 대응 뿐만 아니라 설계 고도화, 리팩토링이 가능하신 분
+2. 컴퓨터과학/인공지능 전공 또는 동등 역량 보유, AI 모델과 소프트웨어 공학 모두에 대한 폭넓은 이해
+3. CV/VLM 기법에 대한 이론·구현 이해 및 정량(벤치마크·메트릭)·정성(사용성·오탐 분석) 성능 검증 능력
+4. Python 숙련 및 Unix/Linux 개발 경험, Pytorch/ONNX/TensorRT/vLLM 등 기술 이해도
+5. Github, Jira, Confluence, Slack 등 협업 도구를 활용한 팀 개발 경험(코드리뷰·이슈관리·문서화)
+6. 영문 기술 문서·논문을 읽고 요약/재현/응용할 수 있는 능력
+7. 최소 6개월 이상 근무 가능하신 분
+8. 해외 여행에 결격사유가 없으신 분
+
+**우대사항**
+1. 자료구조·알고리즘·소프트웨어 설계 원리에 대한 탁월한 이해와 실전 적용 경험
+2. CV/VLM 연구 또는 대규모 데이터·모델 실험 운영 경험
+3. Docker/Kubernetes/DeepStream/GStreamer/Protobuf 등으로 실시간 스트리밍·추론 파이프라인을 구성한 경험
+4. 엣지/임베디드 시스템(Jetson 등) 최적화 및 디바이스-클라우드 연동(gRPC/RTSP/MQTT 등) 경험
+5. Python 외에도 C, Go를 하나 이상 능숙하게 다루시는 분
+
+**채용 절차**: 서류 검토 → 1차 인터뷰 → 2차 인터뷰 → 최종 선발 (절차 간에 추가적인 과제가 있을 수 있음)
+
+## 대응표
+
+### A. 주요 업무
+
+| 공고에서 요구하는 역량 | 프로젝트에서 보여줄 기능·설계 | 확인할 코드·실험·화면 | 검증 상태·남은 한계 |
+|---|---|---|---|
+| CV 모델과 VLM을 활용한 AI 응용 SW 개발 | YOLOX(사람 탐지)+ByteTrack(추적)+구역 상태머신으로 사건 생성, 서버 VLM 워커가 사건 전후 프레임을 해석해 구조화 설명 저장. CV와 VLM의 책임 분리(D7) | `src/zonewatch/edge/{detector,tracker,zones,pipeline}.py`, `src/zonewatch/server/vlm/*`, 콘솔 "CV 근거 / VLM 설명" 패널 | CV 경로 **실행 검증**(오프라인·실시간·RTSP). VLM은 mock 제공자로 파이프라인 **실행 검증**, 실제 모델 호출은 **사용자 승인 대기**(유료 API) / 로컬 소형 VLM은 **네트워크 허용 필요** |
+| 영상 데이터 실시간 인식·분석, 추론 성능 최적화 | GStreamer RTSP 입력, 드롭 정책이 있는 유계 큐, 단계별 지연 측정, PyTorch→ONNX 내보내기와 ONNX Runtime 그래프 최적화·스레드 비교, 모델 크기(nano/tiny/s) 비교 | `scripts/export_onnx.py`, `src/zonewatch/eval/bench_detector.py`, `docs/eval/README.md` | **실행 검증**(CPU 4코어). TensorRT/GPU는 **미검증(장비)** — 설정 경로만 |
+| 엣지·서버·클라우드 배포 및 유지보수 | 엣지(분석기+Go 게이트웨이) / 서버 분리, Dockerfile 4종, docker-compose, Kubernetes 매니페스트(프로브·리소스·PVC), kind 검증 스크립트, 운영 runbook·상태 엔드포인트·메트릭 | `deploy/`, `docker-compose.yml`, `scripts/k8s_verify.sh`, `docs/ops/runbook.md`, 게이트웨이 `/metrics` | 로컬 프로세스 배포 **실행 검증**. 컨테이너 빌드·k8s는 **CI 워크플로 준비**(이 샌드박스는 컨테이너 내부 네트워크·중첩 런타임 제약으로 빌드/kind 실행 실패, 증적 `docs/evidence/k8s-local-attempt/`). 공개 데모 **설정만**(Render/Pages, 자격 증명 필요) |
+| POC → 상업 품질 제품 | 빈/로딩/오류/재시도 화면, 멱등·재시작 복구, 감사 로그, 내보내기, 실행 조건 기록, 장애 시나리오 6종 스크립트 | `scripts/failure_scenarios.py`, `docs/evidence/failure-scenarios/`, 콘솔 | **실행 검증**(시나리오 결과는 evidence 디렉터리) |
+| 산업 전문가·AI·백엔드 엔지니어 협업 | 역할 경계를 계약(proto/API/스키마)으로 명시, 현장 관리자용 표현과 엔지니어용 상세 분리 | `docs/architecture.md`, `proto`, 콘솔 "상세 정보" | 설계로 제시. **실제 팀 협업 경험은 이 프로젝트에 포함되지 않음**(아래 E 참조) |
+
+### B. 자격요건 — 기술 이해도·구현
+
+| 공고 요건 | 프로젝트에서 보여줄 것 | 확인할 곳 | 검증 상태·한계 |
+|---|---|---|---|
+| AI Native 개발(설계 고도화·리팩토링) | 계약 우선 설계 후 에이전트 위임(Go 게이트웨이·콘솔), 발견한 실패와 수정 전후를 기록 | `docs/dev-log.md`(L1–L8, 리팩토링 절), 커밋 로그 | **문서화 완료** |
+| CS/AI 전공 동등 역량, 모델+SW 공학 이해 | 모델 실행·최적화(탐지기 백엔드 추상화)와 시스템 설계(큐·WAL·상태머신·멱등) 양쪽 코드 | 전체 | — |
+| CV/VLM 이론·구현 이해, 정량·정성 검증 | 사건 단위 P/R/F1·FP/h·중복·놓침, 시작·종료 오차, PyTorch↔ONNX 수치 일치, VLM 구조화 출력 검증, 오탐 분석(경계 통과·가림 라벨), 사람 채점 루브릭 | `docs/eval/README.md`, `docs/eval/ground-truth.md`, `src/zonewatch/eval/*` | CV 지표 **실행 검증**(정답은 draft, 사용자 검수 필요). VLM 정성 평가는 **승인 후 실행** |
+| Python·Linux, PyTorch/ONNX/TensorRT/vLLM 이해 | PyTorch 추론·내보내기, ONNX Runtime 서빙·최적화 비교, TensorRT EP 설정 경로, vLLM용 OpenAI 호환 VLM 클라이언트 | `detector.py`, `export_onnx.py`, `vlm/openai_compat.py`, `docs/papers-and-docs.md` §3·§8 | PyTorch/ONNX **실행 검증**. TensorRT·vLLM **미검증(장비)** |
+| 영문 문서·논문 읽고 재현·응용 | ByteTrack·YOLOX 재현 범위와 차이, GStreamer/ORT/gRPC/Claude 문서 적용 | `docs/papers-and-docs.md` | 원문 재다운로드는 네트워크 차단으로 못함 — 읽은 범위 명시 |
+
+### C. 우대사항
+
+| 공고 항목 | 프로젝트에서 보여줄 것 | 확인할 곳 | 검증 상태·한계 |
+|---|---|---|---|
+| 자료구조·알고리즘·설계 원리 | 유계 큐(폐기 vs 무손실), 시간 범위 링버퍼(pin), 상태 전이(구역·업링크), 헝가리안 매칭, 칼만 필터, WAL+CRC 복구, 병합 큐, 멱등 upsert, 동시성(스레드 경계·asyncio 워커) | `frames.py`, `zones.py`, `tracker.py`, `gateway/internal/queue`, `db.py` | **구현+테스트** |
+| CV/VLM 실험 운영 | 변형 3종×설정 반복 측정, 원시 결과 보존, 재채점 도구 | `docs/eval/raw/*.json`, `rescore.py` | **실행 검증** |
+| Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker/k8s **CI 준비**. DeepStream **미적용** |
+| 엣지(Jetson) 최적화, gRPC/RTSP/MQTT 연동 | gRPC 양방향 계약(사건·근거 업로드·하트비트·명령), RTSP 입력·재연결, MQTT는 미채택(이유 기록) | `proto`, `gateway/`, `docs/design/decisions.md` | gRPC/RTSP **실행 검증**. Jetson **미검증(장비)**. MQTT **미적용** |
+| C/Go | Go 게이트웨이(내구 큐·업링크·업로드·상태) | `gateway/` | **구현+테스트+실행 검증** |
+
+### D. 사용자 확인이 필요한 요건
+
+| 공고 요건 | 상태 |
+|---|---|
+| 최소 6개월 이상 근무 가능 | **사용자 확인 필요** — 프로젝트로 보일 수 없는 항목 |
+| 해외 여행 결격사유 없음 | **사용자 확인 필요** |
+
+### E. 팀 개발 경험(Github·Jira·Confluence·Slack, 코드리뷰·이슈관리·문서화)
+
+이 프로젝트는 혼자(AI 보조) 진행했습니다. 저장소에는 커밋 이력·문서·검토 가이드·CI가 있지만 **다른 사람과 수행한 코드리뷰·이슈 관리 기록은 없습니다**. 자소서에서는 이 항목을 다른 경험(학교·이전 프로젝트)으로 채워야 하며, 이 저장소를 팀 개발 경험으로 서술하지 않습니다.
+
+## 갱신 이력
+- 초안: 구현 중 작성. 최종 수치·검증 상태는 `docs/eval/README.md`와 `docs/handoff.md`의 완료 보고와 일치하도록 마지막에 갱신.
