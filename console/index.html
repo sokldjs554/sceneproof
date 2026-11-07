@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ZoneWatch 관제 콘솔</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
@@ -19,7 +19,7 @@
   </header>
 
   <div id="banner" class="banner hidden" role="alert">
-    <span>⚠ 서버에 연결할 수 없습니다. 마지막으로 받은 데이터를 표시하고 있습니다.</span>
+    <span id="banner-text">⚠ 서버에 연결할 수 없습니다. 마지막으로 받은 데이터를 표시하고 있습니다.</span>
     <span id="banner-detail" class="small"></span>
     <button id="retry" class="btn btn-sm btn-danger" type="button">재시도</button>
   </div>
@@ -111,6 +111,6 @@
   </div>
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

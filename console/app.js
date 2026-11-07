@@ -21,7 +21,12 @@ const L = {
 };
 const ROLES = ['context_before', 'entry', 'dwell', 'exit', 'context_after'];
 const RETRYABLE = ['failed', 'invalid', 'timeout', 'skipped'];
-const POLL_MS = 2000;
+// Static replay (GitHub Pages): when window.ZW_STATIC_BASE is set (e.g. 'data'), every GET reads the API's JSON
+// from files under that base and every write is disabled. Data never changes there, so polling is slow.
+const STATIC_BASE = typeof window.ZW_STATIC_BASE === 'string' && window.ZW_STATIC_BASE.trim() ? window.ZW_STATIC_BASE.trim().replace(/\/+$/, '') : null;
+const IS_STATIC = STATIC_BASE !== null;
+const STATIC_MSG = '정적 재생 모드에서는 변경할 수 없습니다';
+const POLL_MS = IS_STATIC ? 30000 : 2000;
 
 // ---------------------------------------------------------------- 2. utils
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -89,6 +94,14 @@ function originalVideoName(source) {
   const m = /^file:\/\/.*?([^/\\]+\.mp4)$/i.exec(source || '');
   return m ? m[1] : null;
 }
+/** Server media URLs (/api/evidence/<path>, /api/videos/<name>) → files under STATIC_BASE in static mode. The one place that rewrites them. */
+function mediaUrl(u) {
+  if (!u || !IS_STATIC) return u;
+  if (u.startsWith('/api/evidence/')) return `${STATIC_BASE}/evidence/${u.slice('/api/evidence/'.length)}`;
+  if (u.startsWith('/api/videos/')) return `${STATIC_BASE}/videos/${u.slice('/api/videos/'.length)}`;
+  return u;
+}
+const rawEventUrl = (id) => (IS_STATIC ? `${STATIC_BASE}/events/${encodeURIComponent(id)}.json` : `/api/events/${encodeURIComponent(id)}`);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** Re-render `el` only when `sig` differs from the last render. Returns true when it re-rendered. */
 function renderIfChanged(el, sig, build) {
@@ -126,7 +139,26 @@ async function api(path, opts = {}) {
     throw e;
   } finally { clearTimeout(timer); }
 }
-const API = {
+/** Static mode: read a JSON file once; a missing file (404) is remembered and treated as empty, never re-requested. */
+const missingStatic = new Set();
+async function staticJson(name) {
+  const path = `${STATIC_BASE}/${name}`;
+  if (missingStatic.has(path)) return null;
+  try { return await api(path); } catch (e) { if (e.status === 404) { missingStatic.add(path); return null; } throw e; }
+}
+const staticWrite = async () => { const e = new Error(STATIC_MSG); e.status = 403; e.static = true; throw e; };
+const API_STATIC = {
+  status: async () => (await staticJson('status.json')) || { mode: 'replay', devices: {}, vlm: {}, ingest: {}, events: {}, missing: true },
+  events: async () => (await staticJson('events.json')) || { items: [], counts: {} },   // filters are applied client-side (filteredEvents)
+  event: (id) => staticJson(`events/${encodeURIComponent(id)}.json`),
+  timeline: async (cameraId) => { const r = await staticJson('timeline.json'); return { items: ((r && r.items) || []).filter((i) => !cameraId || i.camera_id === cameraId) }; },
+  audit: async () => (await staticJson('audit.json')) || { items: [] },
+  devices: async () => (await staticJson('devices.json')) || { items: [] },
+  videos: async () => (await staticJson('videos.json')) || { items: [] },
+  displayed: async () => ({ ok: true, static: true }),   // silent no-op: one toast per rendered row would be noise
+  review: staticWrite, explain: staticWrite, command: staticWrite, commandStatus: staticWrite,
+};
+const API_LIVE = {
   status: () => api('/api/status'),
   events: () => api('/api/events?limit=500'),
   event: (id) => api(`/api/events/${encodeURIComponent(id)}`),
@@ -138,7 +170,9 @@ const API = {
   commandStatus: (id) => api(`/api/commands/${encodeURIComponent(id)}`),
   timeline: (cameraId) => api(`/api/timeline?camera_id=${encodeURIComponent(cameraId)}`),
   audit: () => api('/api/audit?limit=500'),
+  devices: () => api('/api/devices'),
 };
+const API = IS_STATIC ? API_STATIC : API_LIVE;
 
 // ---------------------------------------------------------------- 4. state
 const state = {
@@ -269,11 +303,12 @@ function renderAll() {
 
 function renderTopbar() {
   const st = state.status; const badge = $('#mode-badge');
-  const mode = st ? st.mode : null;
-  const cls = mode === 'live' ? 'live' : mode === 'replay' ? 'replay' : 'unknown';
-  const text = mode === 'live' ? '● 실시간 분석' : mode === 'replay' ? '▶ 저장된 실행 결과 재생' : '● 상태 확인 중';
-  const title = mode === 'replay' ? '실시간 추론이 아니라 저장된 실행 결과를 재생합니다'
-    : mode === 'live' ? '엣지 장치가 보내는 실시간 분석 결과를 수신합니다' : '';
+  const mode = IS_STATIC ? 'static' : st ? st.mode : null;
+  const cls = mode === 'live' ? 'live' : mode === 'replay' || mode === 'static' ? 'replay' : 'unknown';
+  const text = mode === 'live' ? '● 실시간 분석' : mode === 'static' ? '▶ 저장된 실행 결과 재생 (정적)' : mode === 'replay' ? '▶ 저장된 실행 결과 재생' : '● 상태 확인 중';
+  const title = mode === 'static' ? '서버 없이 저장된 실행 결과 파일(JSON·영상)을 재생합니다. 처리 상태 변경·해석 요청·장치 명령은 할 수 없습니다'
+    : mode === 'replay' ? '실시간 추론이 아니라 저장된 실행 결과를 재생합니다'
+      : mode === 'live' ? '엣지 장치가 보내는 실시간 분석 결과를 수신합니다' : '';
   if (badge.className !== `mode-badge ${cls}`) badge.className = `mode-badge ${cls}`;
   if (badge.textContent !== text) badge.textContent = text;
   if (badge.title !== title) badge.title = title;
@@ -291,6 +326,8 @@ function renderTopbar() {
 }
 function renderBanner() {
   $('#banner').classList.toggle('hidden', !state.serverDown);
+  $('#banner-text').textContent = IS_STATIC ? '⚠ 데이터 파일을 불러올 수 없습니다. 마지막으로 읽은 데이터를 표시하고 있습니다.'
+    : '⚠ 서버에 연결할 수 없습니다. 마지막으로 받은 데이터를 표시하고 있습니다.';
   $('#banner-detail').textContent = state.serverDown ? `(${state.lastError})` : '';
 }
 
@@ -316,7 +353,8 @@ function renderCameras() {
   // so they are patched in place instead of rebuilding the row: the 분석 시작/정지 buttons stay stable under the mouse.
   const want = [];
   if (!devList.length) {
-    want.push({ key: 'note', sig: `note|${replay}`, build: () => h('p', { class: 'note', style: 'margin:0 0 8px' }, replay
+    want.push({ key: 'note', sig: `note|${replay}`, build: () => h('p', { class: 'note', style: 'margin:0 0 8px' }, IS_STATIC
+      ? '정적 재생 모드: 저장된 사건의 카메라만 표시합니다. 장치 명령은 보낼 수 없습니다.' : replay
       ? '재생 모드: 연결된 장치가 없습니다. 저장된 사건의 카메라만 표시합니다.'
       : '연결된 엣지 장치가 없습니다 (하트비트 없음). 사건에 나타난 카메라만 표시합니다.') });
   }
@@ -373,8 +411,8 @@ function buildCamRow(c, replay, deviceOnline, hasOrig, orig) {
       dt('영상 위치'), h('dd', { dataset: { k: 'media' } }, v.media),
       cs.last_error ? [dt('마지막 오류'), h('dd', { class: 'err', dataset: { k: 'err' } }, v.err)] : null));
   }
-  const canCmd = !replay && deviceOnline;
-  const why = replay ? '재생 모드에서는 장치 명령을 보낼 수 없습니다 (실시간 장치 없음)'
+  const canCmd = !IS_STATIC && !replay && deviceOnline;
+  const why = IS_STATIC ? '정적 재생 모드에서는 장치 명령을 보낼 수 없습니다' : replay ? '재생 모드에서는 장치 명령을 보낼 수 없습니다 (실시간 장치 없음)'
     : !deviceOnline ? '장치 하트비트가 없어 명령을 보낼 수 없습니다' : '';
   row.append(h('div', { class: 'cam-actions' },
     h('button', { class: 'btn btn-sm btn-primary', type: 'button', disabled: !canCmd, title: why || '이 카메라의 분석을 시작합니다',
@@ -417,7 +455,8 @@ function renderVlm() {
   renderIfChanged(root, JSON.stringify(v), () => {
     const out = [];
     if (v.provider === 'mock') out.push(h('div', { class: 'warn-chip', title: '모의(mock) 제공자는 프레임을 해석하지 않고 응답 형식만 흉내 냅니다' }, '⚠ VLM 모의 응답(mock): 실제 해석 아님'));
-    if (!v.provider || v.provider === 'none') out.push(h('div', { class: 'warn-chip' }, '⚠ VLM 비활성화: 해석이 생성되지 않습니다'));
+    if (IS_STATIC) out.push(h('div', { class: 'warn-chip' }, '정적 재생: 저장된 해석만 표시하며 새 해석은 생성되지 않습니다'));
+    else if (!v.provider || v.provider === 'none') out.push(h('div', { class: 'warn-chip' }, '⚠ VLM 비활성화: 해석이 생성되지 않습니다'));
     out.push(h('dl', { class: 'kv' },
       dt('제공자'), dd(v.provider || '—'), dt('모델'), dd(v.model || '—'),
       dt('프롬프트 / 스키마'), dd(`${v.prompt_version || '—'} / ${v.schema_version || '—'}`),
@@ -467,7 +506,7 @@ function buildRow(ev) {
     ev.ingest_source === 'replay' ? h('span', { class: 'tag tag-replay', title: '저장된 실행 결과에서 재생된 사건' }, '재생') : null,
     h('span', { class: 'ev-dwell' }, `체류 ${fmtSec(ev.dwell_seconds)}`)));
   row.append(h('div', { class: 'ev-l2' }, h('span', { class: 'ev-cam' }, ev.camera_name || ev.camera_id), h('span', { class: 'ev-zone' }, ev.zone_name || ev.zone_id)));
-  const retry = vs == null || RETRYABLE.includes(vs);
+  const retry = !IS_STATIC && (vs == null || RETRYABLE.includes(vs));
   row.append(h('div', { class: 'ev-l3' },
     h('span', { class: `chip st-${ev.review.state}` }, `● ${L.review[ev.review.state] || ev.review.state}`),
     h('span', { class: `chip vlm-chip vlm-${vs || 'none'}`, title: x ? `VLM ${L.vlmStatus[vs] || vs}${x.error ? ': ' + x.error : ''}` : '해석이 요청되지 않았습니다' },
@@ -580,7 +619,7 @@ function renderStage() {
     syncStageFrame(ev);
   } else {
     frameImg.classList.add('hidden'); notice.classList.add('hidden'); nav.classList.add('hidden'); video.classList.remove('hidden');
-    setVideoSrc(mode === 'original' ? `/api/videos/${encodeURIComponent(orig)}` : ev.evidence.clip_url);
+    setVideoSrc(mediaUrl(mode === 'original' ? `/api/videos/${encodeURIComponent(orig)}` : ev.evidence.clip_url));
     applyPendingSeek(ev, mode);
   }
   renderStageBar(ev, hasOrig, mode); drawOverlay(); updateSpanLabel(); updatePlayhead();
@@ -619,7 +658,7 @@ function setImgSrc(img, url) {
 }
 function syncStageFrame(ev) {
   const f = frameFor(ev, state.frameRole);
-  setImgSrc(frameImg, f.pick && f.pick.available ? f.pick.url : '');
+  setImgSrc(frameImg, f.pick && f.pick.available ? mediaUrl(f.pick.url) : '');
   renderIfChanged($('#frame-nav'), JSON.stringify([ev.event_id, state.frameRole]), () => ROLES.map((r) =>
     h('button', { class: `btn${r === state.frameRole ? ' active' : ''}`, type: 'button', onclick: () => setFrameRole(r) }, L.frameRole[r])));
 }
@@ -810,7 +849,7 @@ function syncFrames(ev) {
   if (thumbs) {
     for (const b of thumbs.children) {
       const r = b.dataset.role; const f = frameFor(ev, r); const img = b.querySelector('img');
-      const url = f.pick && f.pick.available ? f.pick.url : '';
+      const url = f.pick && f.pick.available ? mediaUrl(f.pick.url) : '';
       setImgSrc(img, url);
       b.classList.toggle('active', r === state.frameRole); b.classList.toggle('missing', !url);
       b.querySelector('.ph').classList.toggle('hidden', !!url); img.classList.toggle('hidden', !url);
@@ -820,7 +859,7 @@ function syncFrames(ev) {
   const view = $('#frame-view');
   if (view) {
     const f = frameFor(ev, state.frameRole); const img = view.querySelector('img');
-    const url = f.pick && f.pick.available ? f.pick.url : '';
+    const url = f.pick && f.pick.available ? mediaUrl(f.pick.url) : '';
     setImgSrc(img, url);
     view.querySelector('.nopic').classList.toggle('hidden', !!url); img.classList.toggle('hidden', !url);
     view.querySelector('.cap').textContent = `${L.frameRole[state.frameRole]} · ${state.annot ? '주석' : '원본'}`
@@ -848,8 +887,8 @@ function buildVlmTab(ev) {
   const x = ev.explanation; const vs = x ? x.status : null; const out = [];
   const prov = state.status && state.status.vlm ? state.status.vlm.provider : '';
   if ((x && x.provider === 'mock') || (!x && prov === 'mock')) out.push(h('div', { class: 'warn-chip', style: 'margin-bottom:10px' }, '⚠ VLM 모의 응답(mock): 실제 해석 아님'));
-  const retryBtn = (label = '다시 해석') => h('button', { class: 'btn btn-sm btn-primary', type: 'button', disabled: state.explainBusy || !ev.evidence_ready,
-    title: !ev.evidence_ready ? '근거 업로드가 끝나야 해석을 요청할 수 있습니다' : '서버에 해석을 다시 요청합니다', onclick: () => requestExplain(ev.event_id) }, `↻ ${label}`);
+  const retryBtn = (label = '다시 해석') => h('button', { class: 'btn btn-sm btn-primary', type: 'button', disabled: IS_STATIC || state.explainBusy || !ev.evidence_ready,
+    title: IS_STATIC ? STATIC_MSG : !ev.evidence_ready ? '근거 업로드가 끝나야 해석을 요청할 수 있습니다' : '서버에 해석을 다시 요청합니다', onclick: () => requestExplain(ev.event_id) }, `↻ ${label}`);
   if (!x) {
     out.push(h('div', { class: 'vlm-none' }, h('div', null, '해석이 요청되지 않았습니다.'), h('div', { style: 'margin-top:6px' }, retryBtn('해석 요청'))));
   } else if (vs === 'queued' || vs === 'running') {
@@ -890,20 +929,22 @@ function buildReviewTab(ev, full) {
     st === 'resolved' && rv.resolution ? h('span', { class: 'chip chip-lg', style: 'background:var(--panel-2)' }, `결과: ${L.resolution[rv.resolution] || rv.resolution}`) : null,
     rv.updated_at ? h('span', { class: 'muted small' }, `${fmtDateTime(rv.updated_at)} · ${rv.actor || '—'}`) : null));
   if (rv.note) out.push(h('p', { class: 'small', style: 'margin:0 0 8px' }, '메모: ', rv.note));
-  out.push(h('div', { class: 'actor-row' }, h('label', { for: 'actor' }, '담당자'),
+  if (!IS_STATIC) out.push(h('div', { class: 'actor-row' }, h('label', { for: 'actor' }, '담당자'),
     h('input', { id: 'actor', type: 'text', value: state.actor, maxlength: '80', placeholder: '이름 또는 ID',
       oninput: (e) => { state.actor = e.target.value; try { localStorage.setItem('zw.actor', state.actor); } catch { /* ignore */ } } }),
     h('span', { class: 'muted small' }, '(이 브라우저에 저장됩니다)')));
   const acts = h('div', { class: 'review-actions' });
-  const busy = state.reviewBusy;
-  if (st === 'needs_review') acts.append(btn('▶ 검토 시작', 'btn-primary', () => doReview(ev.event_id, 'in_review'), { disabled: busy, id: 'btn-start-review' }));
+  // In static mode every transition button stays visible (so the flow is still readable) but disabled, with the reason as tooltip + text.
+  const lock = IS_STATIC ? { disabled: true, title: STATIC_MSG } : { disabled: state.reviewBusy };
+  if (st === 'needs_review') acts.append(btn('▶ 검토 시작', 'btn-primary', () => doReview(ev.event_id, 'in_review'), { ...lock, id: 'btn-start-review' }));
   if (st === 'in_review') {
-    acts.append(btn('✓ 처리 완료…', 'btn-success', () => { state.form.open = true; renderDetail(); }, { disabled: busy, id: 'btn-resolve' }));
-    acts.append(btn('↩ 다시 확인 필요로', '', () => doReview(ev.event_id, 'needs_review'), { disabled: busy, id: 'btn-back' }));
+    acts.append(btn('✓ 처리 완료…', 'btn-success', () => { state.form.open = true; renderDetail(); }, { ...lock, id: 'btn-resolve' }));
+    acts.append(btn('↩ 다시 확인 필요로', '', () => doReview(ev.event_id, 'needs_review'), { ...lock, id: 'btn-back' }));
   }
-  if (st === 'resolved') acts.append(btn('↻ 재검토', '', () => doReview(ev.event_id, 'in_review'), { disabled: busy, id: 'btn-reopen' }));
-  acts.append(h('span', { class: 'muted small' }, st === 'needs_review' ? '검토를 시작하면 "검토 중"으로 바뀝니다.'
-    : st === 'in_review' ? '처리 결과를 골라 완료하거나, 다시 확인 필요로 되돌립니다.' : '처리 완료된 사건입니다. 필요하면 재검토할 수 있습니다.'));
+  if (st === 'resolved') acts.append(btn('↻ 재검토', '', () => doReview(ev.event_id, 'in_review'), { ...lock, id: 'btn-reopen' }));
+  acts.append(IS_STATIC ? h('span', { class: 'err-text', id: 'review-static-note' }, `⚠ ${STATIC_MSG} (저장된 실행 결과를 읽기 전용으로 재생 중)`)
+    : h('span', { class: 'muted small' }, st === 'needs_review' ? '검토를 시작하면 "검토 중"으로 바뀝니다.'
+      : st === 'in_review' ? '처리 결과를 골라 완료하거나, 다시 확인 필요로 되돌립니다.' : '처리 완료된 사건입니다. 필요하면 재검토할 수 있습니다.'));
   out.push(acts);
   if (state.form.open && st === 'in_review') out.push(buildResolveForm(ev));
   if (state.reviewError) out.push(h('p', { class: 'err-text' }, `⚠ ${state.reviewError}`));
@@ -952,7 +993,7 @@ function buildEng(ev, full) {
       h('h3', { style: 'margin-top:10px' }, 'VLM 원문 응답'),
       h('pre', { class: 'raw' }, full ? (x && x.raw_text) || '(원문 없음)' : '(불러오는 중…)'),
       h('p', { class: 'note mono' }, `event_id ${ev.event_id} · revision ${ev.revision} · `,
-        h('a', { href: `/api/events/${encodeURIComponent(ev.event_id)}`, target: '_blank', rel: 'noopener' }, 'raw JSON 열기'),
+        h('a', { href: rawEventUrl(ev.event_id), target: '_blank', rel: 'noopener' }, 'raw JSON 열기'),
         full && ev.evidence_files ? ` · 근거 파일 ${ev.evidence_files.length}개` : '')));
 }
 
@@ -987,6 +1028,7 @@ function renderAudit() {
   }));
 }
 function updateExportLinks() {
+  if (IS_STATIC) { $('#export-csv').classList.add('hidden'); $('#export-json').href = `${STATIC_BASE}/export.json`; return; }
   const p = new URLSearchParams();
   if (state.filters.camera) p.set('camera_id', state.filters.camera);
   if (state.filters.state) p.set('state', state.filters.state);
@@ -1015,6 +1057,7 @@ async function loadDetail(id) {
   try {
     const d = await API.event(id);
     if (state.selectedId !== id) return;
+    if (!d) { state.detailError = IS_STATIC ? `상세 파일이 없습니다 (${STATIC_BASE}/events/${id}.json)` : '사건을 찾을 수 없습니다'; renderDetail(); return; }
     state.detail = d; state.detailSig = sigOf(d); state.detailError = null;
     renderSelHeader(); renderStage(); renderDetail();
   } catch (e) {
@@ -1039,6 +1082,7 @@ function setFilter(key, value) {
 function toggleCameraFilter(cameraId) { setFilter('camera', state.filters.camera === cameraId ? '' : cameraId); }
 
 async function doReview(id, toState, extra = {}) {
+  if (IS_STATIC) { toast(STATIC_MSG, 'err'); return; }
   if (state.reviewBusy) return;
   state.reviewError = null; state.reviewBusy = true; renderDetail();
   try {
@@ -1062,6 +1106,7 @@ async function doReview(id, toState, extra = {}) {
   refreshTimeline(); if (state.auditOpen) { state.auditSig = ''; refreshAudit(); }
 }
 async function requestExplain(id) {
+  if (IS_STATIC) { toast(STATIC_MSG, 'err'); return; }
   if (state.explainBusy) return;
   state.explainBusy = true; renderDetail();
   try {
@@ -1074,6 +1119,7 @@ async function requestExplain(id) {
   if (state.selectedId === id) { state.detailSig = null; loadDetail(id); }
 }
 async function sendCommand(c, type) {
+  if (IS_STATIC) { toast(STATIC_MSG, 'err'); return; }
   const key = c.camera_id; const label = type === 'START_CAMERA' ? '분석 시작' : '정지';
   state.commands[key] = { phase: 'wait', message: `${label} 명령 전송 중…` }; renderCameras();
   try {
@@ -1116,6 +1162,7 @@ function onKey(e) {
   }
 }
 function init() {
+  if (IS_STATIC) document.title += ' — 정적 재생';
   try { state.actor = localStorage.getItem('zw.actor') || '담당자'; } catch { /* storage unavailable */ }
   $('#f-camera').addEventListener('change', (e) => setFilter('camera', e.target.value));
   $('#f-state').addEventListener('change', (e) => setFilter('state', e.target.value));
