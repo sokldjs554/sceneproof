@@ -1,0 +1,33 @@
+# python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# data / runtime artifacts (downloaded or generated)
+data/videos/
+data/evidence/
+data/runs/
+data/*.db
+data/*.db-*
+models/*.pth
+models/*.onnx
+models/*.engine
+!models/README.md
+gateway/bin/
+gateway/data/
+*.wal
+*.log
+
+# node / playwright
+node_modules/
+test-results/
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

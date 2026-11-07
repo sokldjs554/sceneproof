@@ -1,0 +1,22 @@
+{
+  "variant": "yolox_nano",
+  "weights": "models/yolox_nano.pth",
+  "weights_sha256_12": "cd28f55fbbc1",
+  "onnx_sha256_12": "f69a466a1462",
+  "opset": 17,
+  "input_wh": [
+    416,
+    416
+  ],
+  "torch": "2.15.0+cu132",
+  "onnx": "1.23.2",
+  "onnxruntime": "1.31.1",
+  "export_seconds": 0.72,
+  "raw_output_max_abs_diff_random_input": 1.5854835510253906e-05,
+  "output_shape": [
+    1,
+    3549,
+    85
+  ],
+  "note": "output is the raw head tensor [1,N,85]; grid decoding + NMS happen in zonewatch.edge.detector"
+}

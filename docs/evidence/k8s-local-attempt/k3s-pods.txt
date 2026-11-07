@@ -1,0 +1,4 @@
+NAMESPACE     NAME                                      READY   STATUS              RESTARTS   AGE
+kube-system   coredns-796449bc5d-256rx                  0/1     ContainerCreating   0          3m23s
+kube-system   local-path-provisioner-5b5f758bcf-9x4gz   0/1     ContainerCreating   0          3m23s
+kube-system   metrics-server-564cb4ff68-b5rdb           0/1     ContainerCreating   0          3m23s
