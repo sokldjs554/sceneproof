@@ -14,7 +14,7 @@ NS=zonewatch
 log "=== build images ($(git rev-parse --short HEAD)) ==="
 docker build -q -f deploy/docker/Dockerfile.server -t zonewatch-server:local . | tail -1
 docker build -q -t zonewatch-gateway:local gateway | tail -1
-docker build -q -f deploy/docker/Dockerfile.edge --build-arg BAKE_MODELS=1 -t zonewatch-edge:local . | tail -1
+docker build -q -f deploy/docker/Dockerfile.edge -t zonewatch-edge:local . | tail -1
 docker build -q -f deploy/docker/Dockerfile.rtsp-sim -t zonewatch-rtsp-sim:local . | tail -1
 
 log "=== cluster ==="
