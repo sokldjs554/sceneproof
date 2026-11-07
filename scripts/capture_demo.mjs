@@ -55,7 +55,7 @@ const desc = { '01_overview.png': '첫 화면: 카메라 상태 · 선택 사건
   '04_event_review.png': '처리 상태 전이와 처리 이력', '05_original_video.png': '원본 영상에서 사건 구간 보기',
   '06_engineer_details.png': '상세 정보(모델·버전·지연·원시 응답)', '07_audit.png': '처리 기록(감사 로그)',
   'demo.webm': '위 흐름을 녹화한 짧은 시연 영상 (Playwright 녹화)' };
-const rows = fs.readdirSync(out).filter((f) => f.endsWith('.png') || f.endsWith('.webm')).sort().map((f) => `| ${f} | ${desc[f] || ''} |`).join('\n');
-fs.writeFileSync(path.join(out, 'README.md'), `# 화면 캡처·시연 영상\n\n생성 커밋: \`${git}\` · 생성 시각: ${new Date().toISOString()} · 대상: ${base} (실시간 모드, VLM=mock)\n\n| 파일 | 내용 |\n|---|---|\n${rows}\n\n` +
+const rowsMd = fs.readdirSync(out).filter((f) => f.endsWith('.png') || f.endsWith('.webm')).sort().map((f) => `| ${f} | ${desc[f] || ''} |`).join('\n');
+fs.writeFileSync(path.join(out, 'README.md'), `# 화면 캡처·시연 영상\n\n생성 커밋: \`${git}\` · 생성 시각: ${new Date().toISOString()} · 대상: ${base} (실시간 모드, VLM=mock)\n\n| 파일 | 내용 |\n|---|---|\n${rowsMd}\n\n` +
   `\`node scripts/capture_demo.mjs <server-url> docs/images\` 로 재생성합니다. 콘솔 오류: ${errors.length}건${errors.length ? ' — ' + errors.slice(0, 3).join(' | ') : ''}\n`);
 console.log(JSON.stringify({ git, screenshots: fs.readdirSync(out).filter((f) => f.endsWith('.png')).length, errors }));
