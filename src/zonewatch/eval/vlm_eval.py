@@ -45,7 +45,7 @@ def main() -> int:
     ev_eval = json.loads(Path(args.event_eval).read_text())
     # prediction outcome per event_id
     outcome: dict[str, str] = {}
-    for cam, s in ev_eval["per_video"].items():
+    for s in ev_eval["per_video"].values():
         d = s["details"]
         for pid, _ in d["tp"]:
             outcome[pid] = "tp"

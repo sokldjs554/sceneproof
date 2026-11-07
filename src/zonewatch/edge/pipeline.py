@@ -19,7 +19,7 @@ import psutil
 
 from .config import CameraConfig, EdgeConfig
 from .detector import PersonDetector
-from .events import EvidenceState, RunContext, episode_to_event, EventSink
+from .events import EventSink, EvidenceState, RunContext, episode_to_event
 from .evidence import EvidenceWriter
 from .frames import FrameQueue, FrameRing, StageTimer
 from .sources import SourceState, VideoSource, open_source
@@ -157,7 +157,7 @@ class CameraPipeline:
                 st.processed_fps = len(st._fps_window) / 2.0
                 with self._final_cv:
                     self._final_cv.notify_all()
-            except Exception as e:  # noqa: BLE001 - keep analysing; report the error
+            except Exception as e:
                 log.exception("frame %s failed", frame.index)
                 self.stats.last_error = str(e)[:200]
 
@@ -178,7 +178,7 @@ class CameraPipeline:
                     end = ep.exit_media_s if ep.exit_media_s is not None else ep.last_media_s
                     self._pending_final.append((ep, end + self.cfg.pipeline.post_roll_s))
                     self._final_cv.notify_all()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.exception("evidence for %s failed", ep.episode_id)
             self.stats.last_error = f"evidence: {e}"[:200]
         self._emit(ep)
@@ -211,7 +211,7 @@ class CameraPipeline:
                 if clip is not None:
                     ev.clip = clip
                 self.timer.add("clip", (time.perf_counter() - t0) * 1e3)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 log.exception("clip for %s failed", ep.episode_id)
                 self.stats.last_error = f"clip: {e}"[:200]
             ep.revision += 1

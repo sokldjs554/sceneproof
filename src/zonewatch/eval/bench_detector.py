@@ -26,6 +26,14 @@ import psutil
 from zonewatch.edge.detector import build_detector
 
 
+def _cpu_model() -> str:
+    try:
+        with open("/proc/cpuinfo") as f:
+            return next((ln.split(":", 1)[1].strip() for ln in f if "model name" in ln), "")
+    except OSError:
+        return ""
+
+
 def load_frames(video: str, n: int, step: int = 1) -> list[np.ndarray]:
     cap = cv2.VideoCapture(video)
     frames = []
@@ -115,7 +123,7 @@ def main() -> int:
 
     frames = load_frames(args.video, args.frames, args.step)
     env = {"platform": platform.platform(), "python": sys.version.split()[0], "cpu_count": os.cpu_count(),
-           "cpu_model": next((ln.split(":", 1)[1].strip() for ln in open("/proc/cpuinfo") if "model name" in ln), ""),
+           "cpu_model": _cpu_model(),
            "video": args.video, "frames": len(frames), "frame_wh": [frames[0].shape[1], frames[0].shape[0]],
            "repeats": args.repeats, "conf_threshold": args.conf, "time": time.strftime("%Y-%m-%dT%H:%M:%S")}
     import onnxruntime as ort

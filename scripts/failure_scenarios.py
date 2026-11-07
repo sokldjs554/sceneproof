@@ -70,7 +70,7 @@ class Stack:
     def start_edge(self, cfg: dict, cameras: list[str]) -> None:
         cfg_path = self.work / "edge.yaml"
         cfg_path.write_text(yaml.safe_dump(cfg, allow_unicode=True))
-        self._spawn("edge", [PY, "-m", "zonewatch.edge.cli", "--config", str(cfg_path), "run", *sum([["--camera", c] for c in cameras], [])])
+        self._spawn("edge", [PY, "-m", "zonewatch.edge.cli", "--config", str(cfg_path), "run", *[a for c in cameras for a in ("--camera", c)]])
 
     def stop(self, name: str, sig: int = signal.SIGTERM, wait: float = 10.0) -> None:
         p = self.procs.pop(name, None)
@@ -130,7 +130,7 @@ ZONE_BENCH = [{"zone_id": "z-bench", "name": "작업대 반경 통제구역", "p
 def camera_snapshot(camera_id: str) -> dict | None:
     try:
         st = get(f"{SRV}/api/status")
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     for dev in st["devices"].values():
         for c in dev["status"].get("cameras", []):
@@ -144,7 +144,7 @@ def camera_snapshot(camera_id: str) -> dict | None:
 def gateway_snapshot() -> dict | None:
     try:
         s = get(f"{GW}/status")
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     u = s.get("uplink", {})
     q = s.get("queue", {})
@@ -167,7 +167,7 @@ def observe(seconds: float, camera_id: str | None, every: float = 1.0) -> list[d
 def live_events() -> list[dict]:
     try:
         return [x for x in get(f"{SRV}/api/events?limit=500")["items"] if x["ingest_source"] == "live"]
-    except Exception:  # noqa: BLE001
+    except Exception:
         return []
 
 
@@ -243,9 +243,10 @@ def sc_vlm_faults(st: Stack, work: Path) -> dict:
     st.start_server({"ZW_SERVER_VLM_MOCK_DELAY_S": "3", "ZW_SERVER_VLM_TIMEOUT_S": "1.5", "ZW_SERVER_VLM_MAX_ATTEMPTS": "2",
                      "ZW_SERVER_VLM_MOCK_FAIL_EVERY": "2", "ZW_SERVER_VLM_MAX_CONCURRENCY": "1"})
     # while the VLM is stuck, publish fresh events straight to the ingest port and time the ack
+    import grpc
+
     from zonewatch.proto.zonewatch.v1 import zonewatch_pb2 as pb
     from zonewatch.proto.zonewatch.v1 import zonewatch_pb2_grpc as pbg
-    import grpc
 
     ch = grpc.insecure_channel(f"127.0.0.1:{PORTS['grpc']}")
     stub = pbg.IngestStub(ch)
@@ -335,15 +336,16 @@ def sc_uplink_loss(st: Stack, work: Path) -> dict:
 def get_safe(url: str):
     try:
         return get(url)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
 def sc_duplicates(st: Stack, work: Path) -> dict:
     st.start_server()
+    import grpc
+
     from zonewatch.proto.zonewatch.v1 import zonewatch_pb2 as pb
     from zonewatch.proto.zonewatch.v1 import zonewatch_pb2_grpc as pbg
-    import grpc
 
     stub = pbg.IngestStub(grpc.insecure_channel(f"127.0.0.1:{PORTS['grpc']}"))
     eid = str(uuid.uuid4())
@@ -428,7 +430,7 @@ def main() -> int:
         try:
             res = SCENARIOS[name](st, work)
             res["ok"] = all(v for v in res["checks"].values() if v is not None)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             res = {"error": f"{type(e).__name__}: {e}", "checks": {}, "ok": False}
             import traceback
 

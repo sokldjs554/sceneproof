@@ -89,7 +89,7 @@ class IngestService(pbg.IngestServicer):
         self.ingest_source = ingest_source
         self.counters = {"events": 0, "duplicates": 0, "uploads": 0, "upload_bytes": 0, "heartbeats": 0}
 
-    async def PublishEvent(self, request: pb.Event, context) -> pb.Ack:  # noqa: N802
+    async def PublishEvent(self, request: pb.Event, context) -> pb.Ack:
         ev = json.loads(json_format.MessageToJson(request, preserving_proto_field_name=True))
         if not ev.get("event_id"):
             return pb.Ack(accepted=False, message="event_id required")
@@ -100,7 +100,7 @@ class IngestService(pbg.IngestServicer):
         return pb.Ack(event_id=ev["event_id"], revision=rev, accepted=accepted, duplicate=duplicate,
                       message="stored" if accepted else f"have revision {rev}")
 
-    async def UploadEvidence(self, request_iterator, context) -> pb.UploadResult:  # noqa: N802
+    async def UploadEvidence(self, request_iterator, context) -> pb.UploadResult:
         event_id = path = ""
         h = hashlib.sha256()
         tmp = None
@@ -144,13 +144,13 @@ class IngestService(pbg.IngestServicer):
             if row:
                 self.worker.maybe_enqueue_for_event(json.loads(row["event_json"]), accepted=True)
             return pb.UploadResult(event_id=event_id, path=path, ok=True, size=size)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.exception("upload failed")
             if tmp is not None:
                 tmp.unlink(missing_ok=True)
             return pb.UploadResult(event_id=event_id, path=path, ok=False, message=str(e)[:200])
 
-    async def Heartbeat(self, request: pb.DeviceStatus, context) -> pb.HeartbeatAck:  # noqa: N802
+    async def Heartbeat(self, request: pb.DeviceStatus, context) -> pb.HeartbeatAck:
         status = json.loads(json_format.MessageToJson(request, preserving_proto_field_name=True))
         self.store.upsert_device(request.device_id, status, request.gateway_version, request.analyzer_run_id)
         self.counters["heartbeats"] += 1
@@ -158,7 +158,7 @@ class IngestService(pbg.IngestServicer):
         ack.server_ts.CopyFrom(_ts(time.time()))
         return ack
 
-    async def WatchCommands(self, request: pb.WatchRequest, context):  # noqa: N802
+    async def WatchCommands(self, request: pb.WatchRequest, context):
         q = self.hub.subscribe(request.device_id)
         log.info("device %s watching commands", request.device_id)
         try:
@@ -175,7 +175,7 @@ class IngestService(pbg.IngestServicer):
             self.hub.unsubscribe(request.device_id, q)
             log.info("device %s command stream closed", request.device_id)
 
-    async def PublishCommandResult(self, request: pb.CommandResult, context) -> pb.Empty:  # noqa: N802
+    async def PublishCommandResult(self, request: pb.CommandResult, context) -> pb.Empty:
         self.store.complete_command(request.command_id, request.ok, request.message)
         return pb.Empty()
 

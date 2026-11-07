@@ -36,6 +36,7 @@ class VLMWorker:
         self.evidence_dir = Path(settings.resolved_evidence())
         self._stop = asyncio.Event()
         self._task: asyncio.Task | None = None
+        self._jobs: set[asyncio.Task] = set()
         self._inflight = 0
         self.stats = {"done": 0, "invalid": 0, "failed": 0, "timeout": 0, "skipped": 0}
 
@@ -103,7 +104,9 @@ class VLMWorker:
                 continue
             for job in jobs:
                 self.store.update_explanation(job["id"], status="running", started_at=time.time())
-                asyncio.create_task(self._run_with_sem(sem, job))
+                task = asyncio.create_task(self._run_with_sem(sem, job))
+                self._jobs.add(task)
+                task.add_done_callback(self._jobs.discard)
             await asyncio.sleep(0.2)
 
     async def _run_with_sem(self, sem: asyncio.Semaphore, job: dict) -> None:
@@ -114,7 +117,7 @@ class VLMWorker:
                 await asyncio.wait_for(loop.run_in_executor(None, self._run_job, job), timeout=self.s.vlm_timeout_s)
             except TimeoutError:
                 self._on_timeout(job)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 log.exception("explanation job %s crashed", job["id"])
                 self._finish(job, "failed", error=f"{type(e).__name__}: {e}"[:300])
             finally:
@@ -141,7 +144,7 @@ class VLMWorker:
             scale = min(1.0, self.s.vlm_frame_max_side / max(h, w))
             if scale < 1.0:
                 img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
-                ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+                _ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
                 data = buf.tobytes()
             out.append(FrameInput(role, data, float(kf.get("media_time_s", 0.0)), img.shape[1], img.shape[0]))
         return out

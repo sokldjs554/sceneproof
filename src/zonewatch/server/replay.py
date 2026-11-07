@@ -37,7 +37,7 @@ def import_bundle(store: Store, bundle_dir: str | Path, evidence_dir: str | Path
     for ev in latest.values():
         if camera_names and ev.get("camera_id") in camera_names:
             ev["camera_name"] = camera_names[ev["camera_id"]]
-        accepted, duplicate, _ = store.upsert_event(ev, ingest_source)
+        accepted, _duplicate, _ = store.upsert_event(ev, ingest_source)
         stats["events" if accepted else "duplicates"] += 1
         paths = [k["path"] for k in ev.get("evidence", {}).get("key_frames", [])]
         if ev.get("evidence", {}).get("clip_path"):

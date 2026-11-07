@@ -56,7 +56,7 @@ def main() -> int:
         i += 1
     segs = []
     start = None
-    for k, c in enumerate(counts + [0]):
+    for k, c in enumerate([*counts, 0]):
         if c > 0 and start is None:
             start = k
         elif c == 0 and start is not None:

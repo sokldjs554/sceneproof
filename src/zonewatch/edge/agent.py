@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import subprocess
 import threading
@@ -23,11 +24,9 @@ log = logging.getLogger(__name__)
 
 def edge_version() -> str:
     sha = ""
-    try:
+    with contextlib.suppress(OSError, subprocess.SubprocessError):
         sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, timeout=2,
                              cwd=Path(__file__).resolve().parents[3]).stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        pass
     return f"{__version__}+{sha}" if sha else __version__
 
 
@@ -150,14 +149,14 @@ class EdgeAgent:
                 res.ok = True
             else:
                 res.message = f"unsupported command type {cmd.type}"
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             res.message = f"{type(e).__name__}: {e}"[:200]
             log.exception("command %s failed", cmd.command_id)
         res.completed_at.CopyFrom(ts(time.time()))
         if isinstance(self.sink, GatewaySink):
             try:
                 self.sink.stub().ReportCommandResult(res, timeout=2.0)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 log.warning("could not report command result %s", cmd.command_id)
         log.info("command %s %s: %s", cmd.command_id, "ok" if res.ok else "FAILED", res.message)
 

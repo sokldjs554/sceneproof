@@ -1,6 +1,14 @@
 import numpy as np
 
-from zonewatch.edge.zones import CloseReason, FrameMeta, Transition, ZoneMonitor, ZoneSpec, anchor_point, point_in_polygon
+from zonewatch.edge.zones import (
+    CloseReason,
+    FrameMeta,
+    Transition,
+    ZoneMonitor,
+    ZoneSpec,
+    anchor_point,
+    point_in_polygon,
+)
 
 SQUARE = [(0.25, 0.25), (0.75, 0.25), (0.75, 0.75), (0.25, 0.75)]
 

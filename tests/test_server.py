@@ -1,6 +1,5 @@
 """Review server: idempotent ingest, evidence readiness, review transitions, VLM worker with the mock provider."""
 
-import json
 import time
 
 import pytest
@@ -54,8 +53,8 @@ def _seed(state, tmp_dir, eid="ev-1", closed=True):
     paths = [f"{eid}/entry.jpg", f"{eid}/entry_annot.jpg"]
     ev = event(eid, rev=3 if closed else 1, status="EVENT_STATUS_CLOSED" if closed else "EVENT_STATUS_OPEN", paths=paths)
     state.store.upsert_event(ev)
-    import numpy as np
     import cv2
+    import numpy as np
 
     for p in paths:
         f = state.worker.evidence_dir / p
@@ -97,7 +96,7 @@ def test_mock_vlm_worker_produces_validated_explanation(client):
 
 
 def test_replay_mode_rejects_commands_and_lists_status(client):
-    c, state = client
+    c, _state = client
     r = c.post("/api/devices/d/commands", json={"type": "START_CAMERA", "camera_id": "c"})
     assert r.status_code == 409
     st = c.get("/api/status").json()

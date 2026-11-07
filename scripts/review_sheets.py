@@ -30,11 +30,12 @@ def main() -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     latest: dict[str, dict] = {}
-    for line in open(args.events, encoding="utf-8"):
-        if line.strip():
-            ev = json.loads(line)
-            if ev["event_id"] not in latest or ev.get("revision", 0) > latest[ev["event_id"]].get("revision", 0):
-                latest[ev["event_id"]] = ev
+    with open(args.events, encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                ev = json.loads(line)
+                if ev["event_id"] not in latest or ev.get("revision", 0) > latest[ev["event_id"]].get("revision", 0):
+                    latest[ev["event_id"]] = ev
     rows = []
     for i, ev in enumerate(sorted(latest.values(), key=lambda e: e.get("media_entry_s", 0)), 1):
         kfs = {k["role"]: k for k in ev.get("evidence", {}).get("key_frames", [])}

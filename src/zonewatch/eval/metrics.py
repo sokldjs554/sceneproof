@@ -125,11 +125,12 @@ def preds_from_jsonl(path: str) -> list[PredEvent]:
     import json
 
     latest: dict[str, dict] = {}
-    for line in open(path, encoding="utf-8"):
-        if line.strip():
-            ev = json.loads(line)
-            if ev["event_id"] not in latest or int(ev.get("revision", 0)) > int(latest[ev["event_id"]]["revision"]):
-                latest[ev["event_id"]] = ev
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                ev = json.loads(line)
+                if ev["event_id"] not in latest or int(ev.get("revision", 0)) > int(latest[ev["event_id"]]["revision"]):
+                    latest[ev["event_id"]] = ev
     out = []
     for ev in latest.values():
         end = ev.get("media_exit_s")

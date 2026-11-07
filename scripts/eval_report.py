@@ -67,11 +67,13 @@ def bench_section() -> str:
            f"환경: {env['cpu_model']} ×{env['cpu_count']} vCPU, {env['platform']}, Python {env['python']}, torch {env['torch']}, onnxruntime {env['onnxruntime']}. "
            f"입력 {env['video']} 앞 {env['frames']}프레임({env['frame_wh'][0]}×{env['frame_wh'][1]}), 워밍업 10프레임, **{env['repeats']}회 반복의 중앙값**. 원시 per-frame 시간은 `raw/bench_detector.json`.", "",
            "| 모델 | 스레드 | 설정 | infer p50 (ms) | infer p95 (ms) | 전체 p50 (ms) | 전체 p95 (ms) | 전처리 p50 | 후처리 p50 | fps | CPU % | RSS MB |", "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    def med(r, k, q):
+        return np.median([x["stages_ms"][k][q] for x in r["runs"]])
+
     for r in d["results"]:
         if r["setting"] == "parity":
             continue
-        med = lambda k, q: np.median([x["stages_ms"][k][q] for x in r["runs"]])  # noqa: E731
-        out.append(f"| {r['variant']} | {r['threads']} | {r['setting']} | {med('infer','p50'):.1f} | {med('infer','p95'):.1f} | {med('total','p50'):.1f} | {med('total','p95'):.1f} | {med('preprocess','p50'):.2f} | {med('postprocess','p50'):.2f} | {np.median([x['fps'] for x in r['runs']]):.1f} | {np.median([x['cpu_percent'] for x in r['runs']]):.0f} | {np.median([x['rss_mb'] for x in r['runs']]):.0f} |")
+        out.append(f"| {r['variant']} | {r['threads']} | {r['setting']} | {med(r, 'infer', 'p50'):.1f} | {med(r, 'infer', 'p95'):.1f} | {med(r, 'total', 'p50'):.1f} | {med(r, 'total', 'p95'):.1f} | {med(r, 'preprocess', 'p50'):.2f} | {med(r, 'postprocess', 'p50'):.2f} | {np.median([x['fps'] for x in r['runs']]):.1f} | {np.median([x['cpu_percent'] for x in r['runs']]):.0f} | {np.median([x['rss_mb'] for x in r['runs']]):.0f} |")
     out += ["", "반복 간 변동(infer p50, 3회의 최소–최대):", ""]
     for r in d["results"]:
         if r["setting"] == "parity":

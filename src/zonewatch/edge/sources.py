@@ -85,7 +85,7 @@ class VideoSource:
     def _run_guarded(self) -> None:
         try:
             self._run()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.exception("source crashed: %s", self.uri)
             self.status.state = SourceState.ERROR
             self.status.last_error = str(e)
@@ -207,6 +207,71 @@ class GStreamerSource(VideoSource):
             scale = f"! videoscale ! video/x-raw,width={self.max_width},pixel-aspect-ratio=1/1 "
         return f"{src} ! {q} ! videoconvert {scale}! {caps} ! {sink}"
 
+    def _run_once(self, Gst, GLib) -> tuple[dict, float]:
+        """Builds one pipeline, runs it until EOS/ERROR/stop. Returns ({eos, error}, last_media_s)."""
+        pipeline = Gst.parse_launch(self._launch_string())
+        sink = pipeline.get_by_name("sink")
+        bus = pipeline.get_bus()
+        done = threading.Event()
+        result = {"eos": False, "error": ""}
+        counters = {"index": 0, "last_media": 0.0, "first_pts": None}
+
+        def on_sample(appsink):
+            sample = appsink.emit("pull-sample")
+            if sample is None:
+                return Gst.FlowReturn.OK
+            buf = sample.get_buffer()
+            caps_ = sample.get_caps().get_structure(0)
+            w, h = caps_.get_value("width"), caps_.get_value("height")
+            ok, mi = buf.map(Gst.MapFlags.READ)
+            if not ok:
+                return Gst.FlowReturn.OK
+            try:
+                arr = np.frombuffer(mi.data, dtype=np.uint8, count=w * h * 3).reshape(h, w, 3).copy()
+            finally:
+                buf.unmap(mi)
+            pts = buf.pts / 1e9 if buf.pts != Gst.CLOCK_TIME_NONE else counters["index"] / 25.0
+            if counters["first_pts"] is None:
+                counters["first_pts"] = pts
+            media_s = max(0.0, pts - counters["first_pts"])
+            if self.status.state != SourceState.STREAMING:
+                self.status.state = SourceState.STREAMING
+            self._emit(arr, media_s)
+            counters["last_media"] = media_s
+            counters["index"] += 1
+            return Gst.FlowReturn.OK
+
+        def on_bus(bus_, msg):
+            t = msg.type
+            if t == Gst.MessageType.EOS:
+                result["eos"] = True
+                done.set()
+            elif t == Gst.MessageType.ERROR:
+                err, dbg = msg.parse_error()
+                result["error"] = f"{err.message} ({dbg or ''})"[:300]
+                done.set()
+            return True
+
+        sink.connect("new-sample", on_sample)
+        bus.add_signal_watch()
+        bus.connect("message", on_bus)
+        pipeline.set_state(Gst.State.PLAYING)
+        self._pipeline = pipeline
+        loop = GLib.MainLoop()  # GLib main loop in this thread so bus signals are dispatched
+        self._mainloop = loop
+
+        def poll():
+            if done.is_set() or self._stop.is_set():
+                loop.quit()
+                return False
+            return True
+
+        GLib.timeout_add(100, poll)
+        loop.run()
+        pipeline.set_state(Gst.State.NULL)
+        bus.remove_signal_watch()
+        return result, counters["last_media"]
+
     def _run(self) -> None:
         import gi
 
@@ -218,71 +283,7 @@ class GStreamerSource(VideoSource):
         backoff = 0.5
         while not self._stop.is_set():
             self.status.state = SourceState.CONNECTING if self.status.reconnects == 0 else SourceState.RECONNECTING
-            pipeline = Gst.parse_launch(self._launch_string())
-            sink = pipeline.get_by_name("sink")
-            bus = pipeline.get_bus()
-            done = threading.Event()
-            result = {"eos": False, "error": ""}
-            local_index = 0
-            last_media = 0.0
-            t_first_pts: list[float] = []
-
-            def on_sample(appsink):
-                nonlocal local_index, last_media
-                sample = appsink.emit("pull-sample")
-                if sample is None:
-                    return Gst.FlowReturn.OK
-                buf = sample.get_buffer()
-                caps_ = sample.get_caps().get_structure(0)
-                w, h = caps_.get_value("width"), caps_.get_value("height")
-                ok, mi = buf.map(Gst.MapFlags.READ)
-                if not ok:
-                    return Gst.FlowReturn.OK
-                try:
-                    arr = np.frombuffer(mi.data, dtype=np.uint8, count=w * h * 3).reshape(h, w, 3).copy()
-                finally:
-                    buf.unmap(mi)
-                pts = buf.pts / 1e9 if buf.pts != Gst.CLOCK_TIME_NONE else local_index / 25.0
-                if not t_first_pts:
-                    t_first_pts.append(pts)
-                media_s = max(0.0, pts - t_first_pts[0])
-                if self.status.state != SourceState.STREAMING:
-                    self.status.state = SourceState.STREAMING
-                self._emit(arr, media_s)
-                last_media = media_s
-                local_index += 1
-                return Gst.FlowReturn.OK
-
-            def on_bus(bus_, msg):
-                t = msg.type
-                if t == Gst.MessageType.EOS:
-                    result["eos"] = True
-                    done.set()
-                elif t == Gst.MessageType.ERROR:
-                    err, dbg = msg.parse_error()
-                    result["error"] = f"{err.message} ({dbg or ''})"[:300]
-                    done.set()
-                return True
-
-            sink.connect("new-sample", on_sample)
-            bus.add_signal_watch()
-            bus.connect("message", on_bus)
-            pipeline.set_state(Gst.State.PLAYING)
-            self._pipeline = pipeline
-            # GLib main loop in this thread so bus signals are dispatched
-            loop = GLib.MainLoop()
-            self._mainloop = loop
-
-            def poll():
-                if done.is_set() or self._stop.is_set():
-                    loop.quit()
-                    return False
-                return True
-
-            GLib.timeout_add(100, poll)
-            loop.run()
-            pipeline.set_state(Gst.State.NULL)
-            bus.remove_signal_watch()
+            result, last_media = self._run_once(Gst, GLib)
             if self._stop.is_set():
                 return
             if result["error"]:
