@@ -69,7 +69,9 @@ def _event_view(store: Store, row: dict, expl: dict | None, devices: dict[str, d
         "trajectory": ev.get("trajectory", []), "run": ev.get("run", {}),
         "explanation": _expl_view(expl),
         "latency": {
-            "ingest_ms": (row["first_received_at"] - row["detected_at"]) * 1e3 if row.get("detected_at") else None,
+            # ingest latency only makes sense for live ingestion; replayed bundles carry old detected_at values
+            "ingest_ms": (row["first_received_at"] - row["detected_at"]) * 1e3
+            if row.get("detected_at") and row.get("ingest_source") == "live" else None,
             "first_display_ms": (row["first_displayed_at"] - row["entry_ts"]) * 1e3 if row.get("first_displayed_at") and row.get("entry_ts") else None,
         },
     }

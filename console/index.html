@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZoneWatch 관제 콘솔</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">ZoneWatch<span class="brand-sub">통제구역 사건 검토 콘솔</span></div>
+    <div id="mode-badge" class="mode-badge unknown" title="서버 상태를 불러오는 중">● 연결 중…</div>
+    <div class="top-stats" id="top-stats"></div>
+    <div class="top-actions">
+      <a id="export-csv" class="btn btn-sm" href="/api/export?format=csv" title="현재 카메라/상태 필터를 적용해 CSV로 내보냅니다">⇩ CSV</a>
+      <a id="export-json" class="btn btn-sm" href="/api/export?format=json" target="_blank" rel="noopener" title="현재 카메라/상태 필터를 적용해 JSON으로 내보냅니다">⇩ JSON</a>
+      <button id="audit-toggle" class="btn btn-sm" type="button" aria-pressed="false" title="모든 사건의 처리 상태 변경 이력">☰ 처리 기록</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner hidden" role="alert">
+    <span>⚠ 서버에 연결할 수 없습니다. 마지막으로 받은 데이터를 표시하고 있습니다.</span>
+    <span id="banner-detail" class="small"></span>
+    <button id="retry" class="btn btn-sm btn-danger" type="button">재시도</button>
+  </div>
+
+  <main class="layout">
+    <!-- 좌: 카메라 / 영상 선택 & 상태 -->
+    <aside class="col col-left" id="col-left">
+      <section class="panel" id="panel-cameras">
+        <h2>카메라 / 영상</h2>
+        <div id="cameras"><div class="skel"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:85%"></div></div>
+      </section>
+      <section class="panel" id="panel-uplink">
+        <h2>업링크 (장치 → 서버)</h2>
+        <div id="uplink"><div class="skel"></div><div class="skel" style="width:60%"></div></div>
+      </section>
+      <section class="panel" id="panel-vlm">
+        <h2>VLM 해석기</h2>
+        <div id="vlm"><div class="skel"></div><div class="skel" style="width:60%"></div></div>
+      </section>
+    </aside>
+
+    <!-- 중앙: 선택 사건 → 영상 → 타임라인 → 상세 -->
+    <section class="col col-center">
+      <div id="sel-header" class="sel-header">
+        <div class="sel-line"><span class="sel-title">사건을 선택하세요</span></div>
+        <div class="sel-sub">오른쪽 목록에서 사건을 고르면 영상·근거·해석·처리 상태가 함께 표시됩니다.</div>
+      </div>
+      <div class="stage-wrap">
+        <div class="stage" id="stage">
+          <video id="video" controls preload="metadata" playsinline muted></video>
+          <img id="frame-img" class="frame-img hidden" alt="근거 프레임">
+          <svg id="overlay" class="overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div id="zone-label" class="zone-label hidden"></div>
+          <div id="stage-notice" class="stage-notice hidden"></div>
+          <div id="stage-span" class="stage-span hidden"></div>
+          <div id="frame-nav" class="frame-nav hidden"></div>
+          <div id="stage-empty" class="stage-empty"><b>영상 없음</b><span>사건을 선택하면 근거 영상이 여기에 재생됩니다.</span></div>
+        </div>
+        <div class="stage-bar" id="stage-bar"></div>
+      </div>
+      <section class="timeline" id="timeline-panel">
+        <div class="tl-head" id="tl-head"><span>타임라인</span></div>
+        <div id="timeline"></div>
+      </section>
+      <section class="detail" id="detail">
+        <div class="detail-empty">오른쪽 목록에서 사건을 선택하면 CV 근거, VLM 설명, 처리 상태가 여기에 표시됩니다.</div>
+      </section>
+    </section>
+
+    <!-- 우: 사건 목록 -->
+    <aside class="col col-right">
+      <div class="list-head">
+        <div class="list-title">
+          <h2>사건 목록</h2>
+          <span id="list-shown" class="small muted"></span>
+        </div>
+        <div class="counts" id="counts"></div>
+        <div class="filters">
+          <select id="f-camera" aria-label="카메라 필터"><option value="">모든 카메라</option></select>
+          <select id="f-state" aria-label="처리 상태 필터">
+            <option value="">모든 상태</option>
+            <option value="needs_review">확인 필요</option>
+            <option value="in_review">검토 중</option>
+            <option value="resolved">처리 완료</option>
+          </select>
+          <select id="f-kind" aria-label="사건 종류 필터">
+            <option value="">진입+체류</option>
+            <option value="EVENT_KIND_ZONE_ENTRY">진입</option>
+            <option value="EVENT_KIND_ZONE_DWELL">체류</option>
+          </select>
+          <input id="f-q" type="search" placeholder="구역 이름 / 사건 ID 검색" aria-label="검색">
+        </div>
+      </div>
+      <div id="event-list" class="event-list" role="listbox" aria-label="사건 목록" tabindex="0">
+        <div class="skel-row"><div class="skel" style="width:60%"></div><div class="skel"></div></div>
+        <div class="skel-row"><div class="skel" style="width:50%"></div><div class="skel"></div></div>
+        <div class="skel-row"><div class="skel" style="width:70%"></div><div class="skel"></div></div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="audit-drawer" class="drawer hidden" aria-label="처리 기록">
+    <div class="drawer-head">
+      <h2>처리 기록 (전체 사건)</h2>
+      <span id="audit-count" class="small muted"></span>
+      <button id="audit-close" class="btn btn-sm" type="button">닫기</button>
+    </div>
+    <div class="drawer-body" id="audit-body"></div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
