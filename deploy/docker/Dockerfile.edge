@@ -18,7 +18,11 @@ COPY scripts ./scripts
 RUN pip install --no-cache-dir -e ".[gst]" || pip install --no-cache-dir -e . \
     && python -c "import onnxruntime, cv2; print('ort', onnxruntime.__version__, 'cv2', cv2.__version__)"
 ENV PYTHONPATH=/usr/lib/python3/dist-packages
-RUN mkdir -p data/evidence models && useradd -m zw && chown -R zw /app
+ARG BAKE_MODELS=0
+COPY models/README.md models/
+# optional: bake the default ONNX model into the image (CI/k8s); compose mounts ./models instead
+COPY models/*.onnx models/
+RUN mkdir -p data/evidence && useradd -m zw && chown -R zw /app
 USER zw
 ENTRYPOINT ["zonewatch-edge"]
 CMD ["--config", "configs/edge.yaml", "run"]

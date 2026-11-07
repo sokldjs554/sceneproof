@@ -1,0 +1,15 @@
+# Public demo image: the review server in replay mode with a recorded bundle baked in (demo/bundle).
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY proto ./proto
+COPY console ./console
+COPY demo ./demo
+RUN pip install --no-cache-dir -e ".[server]" && mkdir -p /tmp/zonewatch
+ENV ZW_SERVER_MODE=replay ZW_SERVER_REPLAY_BUNDLE=/app/demo/bundle ZW_SERVER_VLM_PROVIDER=none ZW_SERVER_DATA_DIR=/tmp/zonewatch ZW_SERVER_VIDEOS_DIR=/app/demo/videos
+EXPOSE 10000
+CMD ["sh", "-c", "zonewatch-server run --port ${ZW_SERVER_HTTP_PORT:-10000}"]

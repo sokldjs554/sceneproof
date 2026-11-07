@@ -1,0 +1,44 @@
+# Ground truth — campus-walkway.mp4 (vtest.avi), zone "잔디 출입금지 구역"
+video: campus-walkway.mp4
+fps: 10
+duration_s: 79.5
+zones:
+  - zone_id: z-grass
+    name: 잔디 출입금지 구역
+    polygon: [[0.0, 0.44], [0.36, 0.50], [0.53, 0.63], [0.61, 0.82], [0.66, 1.0], [0.0, 1.0]]
+rules: { entry_confirm_seconds: 0.3, exit_confirm_seconds: 0.8, dwell_seconds: 5 }
+events:
+  - id: e01
+    start_s: 0.0
+    end_s: 0.9
+    label: boundary_pass
+    dwell: false
+    note: "검은 재킷 보행자가 잔디 경계선을 따라 걷는다. 발이 경계선 위(0.2s) → 보도(0.9s). 침입 아님."
+  - id: e02
+    start_s: 52.5
+    end_s: 60.2
+    label: intrusion
+    dwell: true
+    note: "빨간 재킷 보행자가 잔디 중앙으로 들어와 7초 이상 머문 뒤 보도(삼각대 옆)로 나감."
+  - id: e03
+    start_s: 53.4
+    end_s: 75.5
+    label: intrusion
+    dwell: true
+    note: "흰 머리·자주색 재킷 보행자가 잔디 좌하단을 오래 거닌다. 58~62s에는 화면 하단에 걸려 발이 보이지 않지만 잔디 위에 있다(한 사건으로 본다)."
+  - id: e04
+    start_s: 74.7
+    end_s: 79.0
+    label: boundary_pass
+    dwell: false
+    note: "빨간 재킷 보행자가 잔디 경계선을 따라 보도 쪽으로 이동. 발은 경계/보도 위."
+negatives:
+  - { start_s: 10.0, end_s: 50.0, note: "다수 보행자가 보도와 통제 테이프 부근을 통행. 잔디 진입 없음." }
+annotation:
+  method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 프레임 단위 점유(zone_occupancy.py, conf0.2) 대조"
+  status: draft
+  reviewer: ""
+  needs_human_review:
+    - "e01·e04 경계 통과 판정(발 위치가 경계선과 겹침)"
+    - "e03의 58~62s 구간(발이 화면 밖) 처리 방식"
+    - "52~60s 구간에서 세 번째 인물의 잔디 접촉 여부"

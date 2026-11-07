@@ -52,6 +52,11 @@ class ZoneSpec:
     exit_confirm_frames: int = 5
     dwell_seconds: float = 5.0
     lost_grace_seconds: float = 1.5
+    # Time-based debounce (preferred). Frame counts depend on the camera fps: 8 frames is 0.27 s at
+    # 30 fps but 0.8 s at 10 fps, which produced split episodes on 30 fps footage. When set, these
+    # override the frame counts.
+    entry_confirm_seconds: float | None = None
+    exit_confirm_seconds: float | None = None
 
     def polygon_px(self, w: int, h: int) -> list[tuple[float, float]]:
         return [(x * w, y * h) for x, y in self.polygon]
@@ -123,8 +128,16 @@ class EpisodeEvent:
 class _TrackZoneState:
     inside_count: int = 0
     outside_count: int = 0
+    inside_since: float | None = None   # media time of the first consecutive inside frame
+    outside_since: float | None = None  # media time of the first consecutive outside frame
     episode: Episode | None = None
     last_seen_media_s: float = 0.0
+
+
+def box_clipped_at_bottom(xyxy, height: int, margin: int = 2) -> bool:
+    """True when the box touches the frame bottom: the feet are out of view, so the anchor point is
+    not the ground position. The zone state is held (neither inside nor outside is counted)."""
+    return float(xyxy[3]) >= height - margin
 
 
 @dataclass
@@ -169,6 +182,7 @@ class ZoneMonitor:
         self.open_episodes.pop(ep.episode_id, None)
         st.episode = None
         st.inside_count = st.outside_count = 0
+        st.inside_since = st.outside_since = None
 
     # ------------------------------------------------------------------ main step
     def update(self, tracks: list, meta: FrameMeta) -> list[EpisodeEvent]:
@@ -182,12 +196,25 @@ class ZoneMonitor:
                 st = self._state.setdefault(key, _TrackZoneState())
                 st.last_seen_media_s = meta.media_s
                 ax, ay = anchor_point(t.xyxy)
+                clipped = box_clipped_at_bottom(t.xyxy, meta.height)
                 inside = zone.contains_px(ax, ay, meta.width, meta.height)
+                if clipped:
+                    # feet not visible: hold the current state, but keep an open episode alive
+                    if st.episode is not None:
+                        ep = st.episode
+                        ep.last_frame, ep.last_media_s, ep.last_wall_ts = meta.frame_index, meta.media_s, meta.wall_ts
+                        ep.last_xyxy = tuple(float(v) for v in t.xyxy)
+                        st.outside_count, st.outside_since = 0, None
+                    continue
                 if st.episode is None:
                     if inside:
                         st.inside_count += 1
                         st.outside_count = 0
-                        if st.inside_count >= zone.entry_confirm_frames:
+                        if st.inside_since is None:
+                            st.inside_since = meta.media_s
+                        confirmed = (meta.media_s - st.inside_since >= zone.entry_confirm_seconds
+                                     if zone.entry_confirm_seconds is not None else st.inside_count >= zone.entry_confirm_frames)
+                        if confirmed:
                             ep = self._new_episode(zone, t.track_id, meta, t.xyxy)
                             ep.revision = 1
                             st.episode = ep
@@ -196,11 +223,11 @@ class ZoneMonitor:
                                                            tuple(float(v) for v in t.xyxy), float(t.score), True))
                             out.append(EpisodeEvent(Transition.OPENED, ep))
                     else:
-                        st.inside_count = 0
+                        st.inside_count, st.inside_since = 0, None
                 else:
                     ep = st.episode
                     if inside:
-                        st.outside_count = 0
+                        st.outside_count, st.outside_since = 0, None
                         ep.last_frame, ep.last_media_s, ep.last_wall_ts = meta.frame_index, meta.media_s, meta.wall_ts
                         ep.last_xyxy = tuple(float(v) for v in t.xyxy)
                         if not ep.dwell_escalated and ep.dwell_seconds >= zone.dwell_seconds:
@@ -210,10 +237,14 @@ class ZoneMonitor:
                             out.append(EpisodeEvent(Transition.DWELL, ep))
                     else:
                         st.outside_count += 1
+                        if st.outside_since is None:
+                            st.outside_since = meta.media_s
                     if (meta.frame_index - ep.entry_frame) % self.trajectory_stride == 0 and len(ep.trajectory) < 600:
                         ep.trajectory.append(TrajPoint(meta.frame_index, meta.media_s, meta.wall_ts,
                                                        tuple(float(v) for v in t.xyxy), float(t.score), inside))
-                    if st.outside_count >= zone.exit_confirm_frames:
+                    exited = (st.outside_since is not None and meta.media_s - st.outside_since >= zone.exit_confirm_seconds
+                              if zone.exit_confirm_seconds is not None else st.outside_count >= zone.exit_confirm_frames)
+                    if exited:
                         self._close(st, CloseReason.EXITED, meta, out)
         # tracks that vanished this frame
         for key, st in list(self._state.items()):

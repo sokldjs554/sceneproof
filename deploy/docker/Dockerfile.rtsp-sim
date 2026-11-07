@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY src/zonewatch/tools/rtsp_sim.py ./rtsp_sim.py
+# sample videos (run scripts/fetch_data.sh first); mounted over by compose
+COPY data/videos/*.mp4 /videos/
 EXPOSE 8554
 ENTRYPOINT ["/usr/bin/python3", "rtsp_sim.py"]
 CMD ["--dir", "/videos", "--port", "8554"]

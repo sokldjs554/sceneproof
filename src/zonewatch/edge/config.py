@@ -21,6 +21,8 @@ class ZoneConfig(BaseModel):
     exit_confirm_frames: int = 5
     dwell_seconds: float = 5.0
     lost_grace_seconds: float = 1.5
+    entry_confirm_seconds: float | None = None
+    exit_confirm_seconds: float | None = None
 
     @field_validator("polygon")
     @classmethod
@@ -32,7 +34,8 @@ class ZoneConfig(BaseModel):
 
     def to_spec(self) -> ZoneSpec:
         return ZoneSpec(self.zone_id, self.name, [tuple(p) for p in self.polygon], self.entry_confirm_frames,
-                        self.exit_confirm_frames, self.dwell_seconds, self.lost_grace_seconds)
+                        self.exit_confirm_frames, self.dwell_seconds, self.lost_grace_seconds,
+                        self.entry_confirm_seconds, self.exit_confirm_seconds)
 
 
 class CameraConfig(BaseModel):

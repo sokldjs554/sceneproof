@@ -103,3 +103,38 @@ def test_two_tracks_two_episodes_and_close_all():
     assert len(ev) == 2 and len(m.open_episodes) == 2
     ev = m.close_all(CloseReason.STREAM_ENDED, meta(3))
     assert len(ev) == 2 and all(e.episode.close_reason == CloseReason.STREAM_ENDED for e in ev)
+
+
+def test_time_based_debounce_is_fps_independent():
+    z = zone(entry_confirm_seconds=0.3, exit_confirm_seconds=0.5, entry_confirm_frames=1, exit_confirm_frames=1)
+    for fps in (10.0, 30.0):
+        m = ZoneMonitor([z], "cam")
+        ev = []
+        i = 0
+        while not ev:
+            ev += m.update([T(1, 100, 100)], meta(i, fps))
+            i += 1
+        assert abs(ev[0].episode.entry_media_s - 0.3) < 1.0 / fps + 1e-9, fps
+        ev = []
+        j = i
+        while not ev:
+            ev += m.update([T(1, 10, 100)], meta(j, fps))
+            j += 1
+        assert abs((ev[0].episode.exit_media_s or 0) - (i / fps + 0.5)) < 1.0 / fps + 1e-9, fps
+
+
+def test_box_clipped_at_frame_bottom_holds_state():
+    """A person walking at the bottom edge (feet out of view) must not end the episode."""
+    m = ZoneMonitor([zone()], "cam")
+    ev = []
+    for i in range(3):
+        ev += m.update([T(1, 100, 100)], meta(i))
+    assert [e.transition for e in ev] == [Transition.OPENED]
+    ev = []
+    for i in range(3, 40):  # box bottom at the frame edge (y=200): anchor would be on the boundary
+        ev += m.update([T(1, 100, 200)], meta(i))
+    assert ev == [] and len(m.open_episodes) == 1
+    ev = []
+    for i in range(40, 43):  # clearly outside now
+        ev += m.update([T(1, 10, 100)], meta(i))
+    assert [e.transition for e in ev] == [Transition.CLOSED]

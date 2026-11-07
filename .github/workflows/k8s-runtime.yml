@@ -1,0 +1,30 @@
+name: k8s-runtime
+on:
+  workflow_dispatch:
+  push:
+    paths: ["deploy/**", "scripts/k8s_verify.sh", "gateway/**", "src/**", ".github/workflows/k8s-runtime.yml"]
+permissions: { contents: read }
+concurrency: { group: k8s-${{ github.ref }}, cancel-in-progress: true }
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Sample videos + models (needed to bake images)
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+          bash scripts/fetch_data.sh
+          pip install -e ".[torch]" onnx
+          VARIANTS="yolox_tiny" bash scripts/fetch_models.sh
+      - name: Install kind
+        run: |
+          curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/kind
+          kind version
+      - name: Verify on kind
+        run: bash scripts/k8s_verify.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: k8s-evidence, path: docs/evidence/k8s/ }

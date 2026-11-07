@@ -1,0 +1,17 @@
+# Render blueprint: public demo in REPLAY mode (no device attached; recorded run + recorded VLM results).
+# The console labels this mode explicitly ("저장된 실행 결과 재생"). Live mode needs an edge device + gateway.
+services:
+  - type: web
+    name: zonewatch-demo
+    runtime: docker
+    dockerfilePath: ./deploy/docker/Dockerfile.demo
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - { key: ZW_SERVER_MODE, value: replay }
+      - { key: ZW_SERVER_REPLAY_BUNDLE, value: /app/demo/bundle }
+      - { key: ZW_SERVER_VLM_PROVIDER, value: none }
+      - { key: ZW_SERVER_DATA_DIR, value: /tmp/zonewatch }
+      - { key: ZW_SERVER_HTTP_PORT, value: "10000" }
+      - { key: ZW_SERVER_PUBLIC_URL, value: https://zonewatch-demo.onrender.com }

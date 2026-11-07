@@ -1,0 +1,43 @@
+# Ground truth — people-indoor.mp4, zone "출입문 앞 통제구역"
+video: people-indoor.mp4
+fps: 12
+duration_s: 49.7
+zones:
+  - zone_id: z-door
+    name: 출입문 앞 통제구역
+    polygon: [[0.02, 0.52], [0.33, 0.50], [0.36, 0.98], [0.02, 0.98]]
+rules: { entry_confirm_seconds: 0.3, exit_confirm_seconds: 0.8, dwell_seconds: 5 }
+events:
+  - id: e01
+    start_s: 16.6
+    end_s: 20.2
+    label: intrusion
+    dwell: false
+    note: "검은 상의 인물이 방 중앙에서 왼쪽 출입문으로 걸어가 구역을 통과한 뒤 문 밖으로 사라짐(추적 끊김이 정상 종료)."
+  - id: e02
+    start_s: 18.1
+    end_s: 20.8
+    label: intrusion
+    dwell: false
+    note: "줄무늬 치마 인물이 같은 경로로 출입문 통과."
+  - id: e03
+    start_s: 29.8
+    end_s: 33.2
+    label: intrusion
+    dwell: false
+    note: "체크 셔츠 인물이 출입문으로 이동."
+  - id: e04
+    start_s: 45.2
+    end_s: 46.5
+    label: intrusion
+    dwell: false
+    note: "뛰어서 출입문으로 나가는 인물(모션 블러)."
+negatives:
+  - { start_s: 0.0, end_s: 16.0, note: "빈 방." }
+  - { start_s: 21.0, end_s: 29.5, note: "구역 밖 통행." }
+annotation:
+  method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조(세그먼트 16.3–20.8, 29.6–33.3, 45.1–46.5)"
+  status: draft
+  reviewer: ""
+  needs_human_review:
+    - "e04 시작 시각(블러로 발 위치 불명확)"

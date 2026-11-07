@@ -1,0 +1,40 @@
+# Ground truth — store-aisle.mp4, zone "통로 안쪽 재고 구역"
+# Hard case: shelves/plate stacks hide people's feet, so the detector's box bottom is NOT the ground position
+# for people in the middle of the aisle. Those are labelled `occluded` (neither TP nor FP).
+video: store-aisle.mp4
+fps: 30
+duration_s: 65.4
+zones:
+  - zone_id: z-stock
+    name: 통로 안쪽 재고 구역
+    polygon: [[0.28, 0.18], [0.60, 0.18], [0.72, 0.45], [0.22, 0.45]]
+rules: { entry_confirm_seconds: 0.3, exit_confirm_seconds: 0.8, dwell_seconds: 5 }
+events:
+  - id: e01
+    start_s: 28.9
+    end_s: 42.7
+    label: intrusion
+    dwell: true
+    note: "자주색 상의 인물이 통로 끝(선반 앞)에서 물건을 고른다. 42.7s 이후 가림/놓침."
+  - id: e02
+    start_s: 47.9
+    end_s: 65.4
+    label: intrusion
+    dwell: true
+    note: "통로 끝의 같은 자주색 상의 인물이 영상 끝까지 머문다(50.2–50.8s 깜빡임은 같은 사건)."
+  - id: e03
+    start_s: 50.0
+    end_s: 65.4
+    label: occluded
+    dwell: false
+    note: "파란 재킷·금발 인물이 통로 중간에 서 있으나 발이 접시 더미에 가려 지면 위치 판단 불가. 예측이 겹쳐도 TP/FP로 세지 않음."
+negatives:
+  - { start_s: 0.0, end_s: 27.0, note: "통로 앞쪽 통행. 구역 밖." }
+annotation:
+  method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조"
+  status: draft
+  reviewer: ""
+  needs_human_review:
+    - "e01과 e02가 같은 인물의 연속 체류인지(42.7–47.9s 공백) 확인"
+    - "e03 가림 구간의 실제 지면 위치"
+    - "초록 상의 인물(오른쪽 선반)의 구역 접촉 여부"

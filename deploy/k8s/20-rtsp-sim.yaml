@@ -1,0 +1,24 @@
+# Camera stand-in: RTSP server serving the sample videos baked into the image.
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: rtsp-sim, namespace: zonewatch, labels: { app: rtsp-sim } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: rtsp-sim } }
+  template:
+    metadata: { labels: { app: rtsp-sim } }
+    spec:
+      containers:
+        - name: rtsp-sim
+          image: zonewatch-rtsp-sim:local
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: rtsp, containerPort: 8554 }]
+          readinessProbe: { tcpSocket: { port: rtsp }, periodSeconds: 5 }
+          resources: { requests: { cpu: 50m, memory: 64Mi }, limits: { cpu: 500m, memory: 256Mi } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: rtsp-sim, namespace: zonewatch }
+spec:
+  selector: { app: rtsp-sim }
+  ports: [{ name: rtsp, port: 8554, targetPort: rtsp }]

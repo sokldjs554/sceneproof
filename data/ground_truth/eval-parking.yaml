@@ -1,0 +1,38 @@
+# Ground truth — parking-lot.mp4, zone "주차 구역 출입금지". Mostly non-person movers (car) = negatives.
+video: parking-lot.mp4
+fps: 12
+duration_s: 53.9
+zones:
+  - zone_id: z-stalls
+    name: 주차 구역 출입금지
+    polygon: [[0.28, 0.06], [0.98, 0.06], [0.98, 0.40], [0.35, 0.40]]
+rules: { entry_confirm_seconds: 0.3, exit_confirm_seconds: 0.8, dwell_seconds: 5 }
+events:
+  - id: e01
+    start_s: 27.0
+    end_s: 29.0
+    label: intrusion
+    dwell: false
+    note: "자전거 탄 사람이 주차 구획 상단을 가로질러 오른쪽으로 빠져나감(사람으로 탐지되는 것이 맞다)."
+  - id: e02
+    start_s: 44.4
+    end_s: 45.8
+    label: boundary_pass
+    dwell: false
+    note: "보행자가 구역 좌상단 경계선 바깥(위쪽)을 따라 걷는다."
+  - id: e03
+    start_s: 45.8
+    end_s: 49.2
+    label: intrusion
+    dwell: false
+    note: "자전거 탄 사람이 다시 구획 상단을 가로질러 오른쪽으로 나감."
+negatives:
+  - { start_s: 44.0, end_s: 48.0, note: "승용차가 화면 하단을 지나감(사람 아님, 알림 없어야 함)." }
+  - { start_s: 0.0, end_s: 26.0, note: "빈 주차장." }
+annotation:
+  method: "yolox_s@640 conf0.3 초안 → 확대 크롭 육안 검토(원거리 소형 객체) → 점유 타임라인 대조"
+  status: draft
+  reviewer: ""
+  needs_human_review:
+    - "e02 보행자의 경계 안쪽 진입 여부(원거리라 발 위치 판독 어려움)"
+    - "e01/e03 시작·종료 시각(±0.5s)"
