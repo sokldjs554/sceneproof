@@ -120,7 +120,9 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 
 ## 5. CV만 vs CV+VLM
 
-실제 VLM 제공자 실행은 사용자 승인(유료 API) 또는 네트워크 허용(로컬 모델) 후 진행합니다. 실행 명령: `docs/eval/README.md` 하단 재현 절차 §5. 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.
+- **로컬 소형 VLM(SmolVLM-500M-Instruct, CPU)**: 네트워크 허용 후 실제로 실행했으나 구조화 출력·장면 기술 모두 신뢰할 수 없어 비교 수치로 쓰지 않았습니다(이미지 분할 기본값에서는 1건에 9분 초과, 분할을 끄면 25초지만 스키마 위반·예시 복제). 시도별 원시 출력: `docs/evidence/vlm-local/`.
+- **API 모델(Claude)**: 유료이므로 사용자 승인 후 `bash scripts/run_vlm_eval.sh`(제공자 anthropic, 예산 상한 환경변수)로 실행하면 이 절이 자동으로 채워집니다. 추정 비용은 `docs/handoff.md` §4.
+- 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.
 
 ## 재현 절차
 

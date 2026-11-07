@@ -120,8 +120,13 @@ def scenarios_section() -> str:
 def vlm_section() -> str:
     d = load("vlm_eval.json")
     if not d:
-        return ("## 5. CV만 vs CV+VLM\n\n실제 VLM 제공자 실행은 사용자 승인(유료 API) 또는 네트워크 허용(로컬 모델) 후 진행합니다. "
-                "실행 명령: `docs/eval/README.md` 하단 재현 절차 §5. 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.\n")
+        return ("## 5. CV만 vs CV+VLM\n\n"
+                "- **로컬 소형 VLM(SmolVLM-500M-Instruct, CPU)**: 네트워크 허용 후 실제로 실행했으나 구조화 출력·장면 기술 모두 신뢰할 수 없어 "
+                "비교 수치로 쓰지 않았습니다(이미지 분할 기본값에서는 1건에 9분 초과, 분할을 끄면 25초지만 스키마 위반·예시 복제). "
+                "시도별 원시 출력: `docs/evidence/vlm-local/`.\n"
+                "- **API 모델(Claude)**: 유료이므로 사용자 승인 후 `bash scripts/run_vlm_eval.sh`(제공자 anthropic, 예산 상한 환경변수)로 실행하면 "
+                "이 절이 자동으로 채워집니다. 추정 비용은 `docs/handoff.md` §4.\n"
+                "- 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.\n")
     out = [f"## 5. CV만 vs CV+VLM ({d['provider']} / {d['model']} / prompt {d['prompt_version']})", "",
            f"- 해석 상태 분포: {json.dumps(d['explanations_by_status'])}", f"- 해석 지연 p50/p95: {fmt(d['latency_ms']['p50'],0)} / {fmt(d['latency_ms']['p95'],0)} ms (n={d['latency_ms']['n']}), 추정 비용 {d['estimated_cost_usd']} USD",
            f"- CV만: 모든 사건이 '확인 필요' ({d['cv_only']['events_needing_review']}건; 그중 정답 침입 {d['cv_only']['true_intrusions_flagged']}, CV 오탐 {d['cv_only']['cv_false_alarms_flagged']})",
