@@ -27,7 +27,7 @@ RTSP/파일 → [엣지 분석기: GStreamer → YOLOX(ONNX Runtime) → ByteTra
 ## 바로 실행
 
 ```bash
-git clone <repo> zonewatch && cd zonewatch
+git clone https://github.com/sokldjs554/zonewatch.git && cd zonewatch
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[server,dev,torch]"          # PyGObject(GStreamer)는 선택: pip install -e ".[gst]"
 bash scripts/fetch_data.sh && bash scripts/fetch_models.sh
