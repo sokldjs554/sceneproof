@@ -57,6 +57,34 @@ def build_user_text(ctx: EventContext, lang: str = "ko") -> str:
             f"Frame order: {', '.join(ctx.frame_roles)}\n\nAnswer with one JSON object following this schema: {schema}")
 
 
+# The example is deliberately from a different scene (a loading dock, no person) so that a model that merely
+# echoes it is detectable: the worker rejects results whose scene_summary equals the example's.
+COMPACT_EXAMPLE = {
+    "schema_version": "1",
+    "scene_summary": "Empty loading dock with a parked forklift; nobody is inside the marked area.",
+    "observations": [{"frame": "entry", "text": "A forklift is parked left of the red polygon; no person is visible."}],
+    "person": {"count_in_zone": 0, "appearance": None, "ppe_visible": None},
+    "activity": "none",
+    "zone_relation": "outside",
+    "assessment": "likely_benign",
+    "reasons": ["no person inside the red polygon in any frame"],
+    "uncertainties": ["the far corner of the dock is dark"],
+    "operator_question": None,
+}
+
+
+def build_compact_text(ctx: EventContext) -> str:
+    """Short English prompt with one example object instead of the JSON schema dump — for small local
+    models (≤1B) that cannot follow a long schema. Field names and enums are the same as schema v1."""
+    kind = "dwell" if ctx.kind.endswith("DWELL") else "entry"
+    return (f"Camera: {ctx.camera_name}. Zone: {ctx.zone_name}. Event: {kind}, {ctx.dwell_seconds:.0f} s inside. "
+            f"Frames: {', '.join(ctx.frame_roles)}.\n"
+            "Describe only what is visible in THESE frames (people, clothing, position relative to the red polygon, "
+            "the yellow box marks the tracked person). Answer with ONE single-line JSON object using exactly these keys "
+            "(zone_relation: clearly_inside|near_boundary|outside|unclear; assessment: needs_attention|likely_benign|unclear). "
+            "Format example from a DIFFERENT scene, do not copy its text:\n" + json.dumps(COMPACT_EXAMPLE))
+
+
 def system_prompt(lang: str = "ko") -> str:
     return SYSTEM_KO if lang == "ko" else SYSTEM_EN
 

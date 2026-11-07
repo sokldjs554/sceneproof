@@ -24,5 +24,6 @@ def build_provider(s: ServerSettings) -> VLMProvider | None:
     if p == "transformers":
         from .transformers_local import TransformersProvider
 
-        return TransformersProvider(s.vlm_model or s.vlm_transformers_model)
+        return TransformersProvider(s.vlm_model or s.vlm_transformers_model, max_images=s.vlm_transformers_max_images,
+                                    longest_edge=s.vlm_transformers_longest_edge)
     raise ValueError(f"unknown vlm provider {p!r}")

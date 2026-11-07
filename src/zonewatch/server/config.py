@@ -31,6 +31,8 @@ class ServerSettings(BaseSettings):
     vlm_openai_base_url: str = "http://127.0.0.1:8001/v1"
     vlm_openai_api_key: str = "none"
     vlm_transformers_model: str = "HuggingFaceTB/SmolVLM-500M-Instruct"
+    vlm_transformers_max_images: int = 2
+    vlm_transformers_longest_edge: int = 512
     vlm_max_tokens: int = 700
     vlm_budget_usd: float = 5.0  # hard stop for paid providers (estimated spend)
     vlm_mock_delay_s: float = 0.2  # fault injection for tests/scenarios (mock provider only)

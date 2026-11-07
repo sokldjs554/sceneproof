@@ -28,6 +28,12 @@ from .schema import SCHEMA_VERSION, extract_json, validate
 log = logging.getLogger(__name__)
 
 
+def _echoes_example(parsed) -> bool:
+    from .prompt import COMPACT_EXAMPLE
+
+    return parsed.scene_summary.strip() == COMPACT_EXAMPLE["scene_summary"]
+
+
 class VLMWorker:
     def __init__(self, store: Store, provider: VLMProvider | None, settings: ServerSettings) -> None:
         self.store = store
@@ -190,6 +196,8 @@ class VLMWorker:
                          usage=res.usage, attempts=attempts, input_meta=input_meta, model=res.model)
             return
         parsed, err = validate(extract_json(res.text))
+        if parsed is not None and _echoes_example(parsed):
+            parsed, err = None, "echoed the format example instead of describing the frames"
         raw = res.text
         repaired = False
         if parsed is None:
@@ -198,6 +206,8 @@ class VLMWorker:
             repaired = True
             raw = res.text + "\n\n--- repair ---\n\n" + res2.text
             parsed, err = validate(extract_json(res2.text))
+            if parsed is not None and _echoes_example(parsed):
+                parsed, err = None, "echoed the format example instead of describing the frames"
             res.usage = {k: res.usage.get(k, 0) + res2.usage.get(k, 0) for k in set(res.usage) | set(res2.usage)}
         ms = (time.perf_counter() - t0) * 1e3
         self._bump_spend(total_cost)
