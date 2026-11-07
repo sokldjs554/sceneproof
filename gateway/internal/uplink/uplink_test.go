@@ -9,8 +9,8 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 func equal(a, b []string) bool {
@@ -30,7 +30,7 @@ func TestEventsFlowDisconnectBackoffAndResendOnce(t *testing.T) {
 	h := newHarness(t, srv)
 	var mu sync.Mutex
 	var acked []string
-	h.startSender(func(ev *zonewatchv1.Event) {
+	h.startSender(func(ev *sceneproofv1.Event) {
 		mu.Lock()
 		acked = append(acked, ev.EventId)
 		mu.Unlock()
@@ -147,14 +147,14 @@ func TestCommandWatcherAndResults(t *testing.T) {
 	h.go_(func() { results.Run(h.ctx) })
 
 	// Results pushed before the connection is up are forwarded once it is.
-	results.Push(&zonewatchv1.CommandResult{CommandId: "c0", Ok: true})
+	results.Push(&sceneproofv1.CommandResult{CommandId: "c0", Ok: true})
 	waitFor(t, 5*time.Second, func() bool {
 		srv.svc.mu.Lock()
 		defer srv.svc.mu.Unlock()
 		return srv.svc.watchers == 1 && len(srv.svc.results) == 1
 	}, "watcher connected and result forwarded")
 
-	srv.svc.cmds <- &zonewatchv1.Command{CommandId: "c1", Type: zonewatchv1.CommandType_COMMAND_TYPE_START_CAMERA, CameraId: "cam-1", IssuedAt: timestamppb.Now()}
+	srv.svc.cmds <- &sceneproofv1.Command{CommandId: "c1", Type: sceneproofv1.CommandType_COMMAND_TYPE_START_CAMERA, CameraId: "cam-1", IssuedAt: timestamppb.Now()}
 	waitFor(t, 5*time.Second, func() bool { return sink.count() == 1 }, "command forwarded")
 	if sink.get(0).CommandId != "c1" {
 		t.Fatalf("got %v", sink.get(0))
@@ -163,21 +163,21 @@ func TestCommandWatcherAndResults(t *testing.T) {
 	// Stream survives a server restart: reconnect, re-watch, keep receiving.
 	srv.stop()
 	waitFor(t, 5*time.Second, func() bool { return h.reg.UplinkState() != status.StateConnected }, "disconnected")
-	results.Push(&zonewatchv1.CommandResult{CommandId: "c1", Ok: true})
+	results.Push(&sceneproofv1.CommandResult{CommandId: "c1", Ok: true})
 	srv.restart()
 	waitFor(t, 10*time.Second, func() bool {
 		srv.svc.mu.Lock()
 		defer srv.svc.mu.Unlock()
 		return srv.svc.watchers == 1 && len(srv.svc.results) == 2
 	}, "re-watched and queued result forwarded")
-	srv.svc.cmds <- &zonewatchv1.Command{CommandId: "c2", Type: zonewatchv1.CommandType_COMMAND_TYPE_STOP_CAMERA, CameraId: "cam-1"}
+	srv.svc.cmds <- &sceneproofv1.Command{CommandId: "c2", Type: sceneproofv1.CommandType_COMMAND_TYPE_STOP_CAMERA, CameraId: "cam-1"}
 	waitFor(t, 5*time.Second, func() bool { return sink.count() == 2 }, "command after restart forwarded")
 
 	// Bounded result queue drops the oldest when full.
 	srv.stop()
 	waitFor(t, 5*time.Second, func() bool { return h.reg.UplinkState() != status.StateConnected }, "disconnected again")
 	for i := 0; i < 6; i++ {
-		results.Push(&zonewatchv1.CommandResult{CommandId: "x" + itoa(i)})
+		results.Push(&sceneproofv1.CommandResult{CommandId: "x" + itoa(i)})
 	}
 	if results.Len() != 4 {
 		t.Fatalf("results len = %d, want 4", results.Len())
@@ -186,10 +186,10 @@ func TestCommandWatcherAndResults(t *testing.T) {
 
 type recordingSink struct {
 	mu   sync.Mutex
-	cmds []*zonewatchv1.Command
+	cmds []*sceneproofv1.Command
 }
 
-func (r *recordingSink) Publish(c *zonewatchv1.Command) {
+func (r *recordingSink) Publish(c *sceneproofv1.Command) {
 	r.mu.Lock()
 	r.cmds = append(r.cmds, c)
 	r.mu.Unlock()
@@ -201,7 +201,7 @@ func (r *recordingSink) count() int {
 	return len(r.cmds)
 }
 
-func (r *recordingSink) get(i int) *zonewatchv1.Command {
+func (r *recordingSink) get(i int) *sceneproofv1.Command {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.cmds[i]

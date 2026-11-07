@@ -18,6 +18,6 @@
 
    ---------------------------------------------------------------------
    Third-party components (see THIRD_PARTY_NOTICES.md for details):
-   - src/zonewatch/edge/yolox_model/: vendored from Megvii YOLOX (Apache-2.0)
+   - src/sceneproof/edge/yolox_model/: vendored from Megvii YOLOX (Apache-2.0)
    - data/videos/*: Intel IoT DevKit sample videos (CC BY 4.0),
      OpenCV vtest.avi (Apache-2.0). Downloaded by scripts/fetch_data.sh.

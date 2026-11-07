@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "zonewatch"
+name = "sceneproof"
 version = "0.1.0"
 description = "산업현장 제한구역 접근·체류 영상 사건 검토 서비스 — CV(탐지·추적·구역 판정) + VLM(장면 해석) + 엣지 게이트웨이 + 검토 콘솔"
 readme = "README.md"
@@ -44,21 +44,21 @@ dev = [
 ]
 
 [project.scripts]
-zonewatch-edge = "zonewatch.edge.cli:main"
-zonewatch-server = "zonewatch.server.cli:main"
-zonewatch-eval = "zonewatch.eval.cli:main"
+sceneproof-edge = "sceneproof.edge.cli:main"
+sceneproof-server = "sceneproof.server.cli:main"
+sceneproof-eval = "sceneproof.eval.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-zonewatch = ["py.typed", "server/prompts/*.md", "server/schemas/*.json"]
+sceneproof = ["py.typed", "server/prompts/*.md", "server/schemas/*.json"]
 
 [tool.ruff]
 line-length = 110
 target-version = "py311"
 src = ["src", "tests", "scripts"]
-extend-exclude = ["src/zonewatch/proto", "src/zonewatch/edge/yolox_model"]
+extend-exclude = ["src/sceneproof/proto", "src/sceneproof/edge/yolox_model"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]

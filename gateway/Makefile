@@ -1,8 +1,8 @@
-# ZoneWatch edge gateway (Go). Run from gateway/.
+# SceneProof edge gateway (Go). Run from gateway/.
 GO          ?= go
 VERSION     ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-BIN         := bin/zonewatch-gateway
-PKG         := ./cmd/zonewatch-gateway
+BIN         := bin/sceneproof-gateway
+PKG         := ./cmd/sceneproof-gateway
 LDFLAGS     := -s -w -X main.version=$(VERSION)
 # Never auto-download a newer toolchain: the build must match the Dockerfile's Go 1.24.
 export GOTOOLCHAIN := local
@@ -31,4 +31,4 @@ tidy:
 	$(GO) mod tidy
 
 docker:
-	docker build --build-arg VERSION=$(VERSION) -t zonewatch-gateway:$(VERSION) .
+	docker build --build-arg VERSION=$(VERSION) -t sceneproof-gateway:$(VERSION) .

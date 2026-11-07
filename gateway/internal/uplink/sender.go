@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // SenderOptions configures RunSender.
@@ -18,7 +18,7 @@ type SenderOptions struct {
 	Logger *slog.Logger
 	// OnAcked is called after the queue has removed an acknowledged event
 	// (used to schedule evidence uploads). May be nil.
-	OnAcked func(ev *zonewatchv1.Event)
+	OnAcked func(ev *sceneproofv1.Event)
 	// RPCTimeout bounds one PublishEvent (default 15s).
 	RPCTimeout time.Duration
 	// RejectRetry is how long an event the server *rejected* (non-transport
@@ -68,7 +68,7 @@ func RunSender(ctx context.Context, o SenderOptions) {
 		if err != nil {
 			return
 		}
-		client := zonewatchv1.NewIngestClient(cc)
+		client := sceneproofv1.NewIngestClient(cc)
 
 		pending := o.Queue.Pending()
 		now := time.Now()

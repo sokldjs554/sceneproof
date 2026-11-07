@@ -1,5 +1,5 @@
-from zonewatch.eval.gt import GroundTruth, GTEvent
-from zonewatch.eval.metrics import PredEvent, match_events, summarize
+from sceneproof.eval.gt import GroundTruth, GTEvent
+from sceneproof.eval.metrics import PredEvent, match_events, summarize
 
 
 def gt(events):

@@ -51,7 +51,7 @@ class Stack:
         return p
 
     def start_rtsp(self) -> None:
-        self._spawn("rtsp", [PY, "-m", "zonewatch.tools.rtsp_sim", "--dir", "data/videos", "--port", str(PORTS["rtsp"])])
+        self._spawn("rtsp", [PY, "-m", "sceneproof.tools.rtsp_sim", "--dir", "data/videos", "--port", str(PORTS["rtsp"])])
         import socket
 
         for _ in range(40):  # wait until the RTSP port accepts connections (slow under CPU load)
@@ -62,13 +62,13 @@ class Stack:
                 time.sleep(0.25)
 
     def start_server(self, extra_env: dict | None = None) -> None:
-        env = {"ZW_SERVER_DATA_DIR": str(self.work / "server"), "ZW_SERVER_GRPC_LISTEN": f"0.0.0.0:{PORTS['grpc']}",
-               "ZW_SERVER_HTTP_PORT": str(PORTS["http"]), "ZW_SERVER_VLM_PROVIDER": "mock", **(extra_env or {})}
-        self._spawn("server", [PY, "-m", "zonewatch.server.cli", "run"], env)
+        env = {"SP_SERVER_DATA_DIR": str(self.work / "server"), "SP_SERVER_GRPC_LISTEN": f"0.0.0.0:{PORTS['grpc']}",
+               "SP_SERVER_HTTP_PORT": str(PORTS["http"]), "SP_SERVER_VLM_PROVIDER": "mock", **(extra_env or {})}
+        self._spawn("server", [PY, "-m", "sceneproof.server.cli", "run"], env)
         wait_http(f"{SRV}/api/health", 30)
 
     def start_gateway(self) -> None:
-        self._spawn("gateway", [str(ROOT / "gateway/bin/zonewatch-gateway"), "--listen", f":{PORTS['gw_grpc']}",
+        self._spawn("gateway", [str(ROOT / "gateway/bin/sceneproof-gateway"), "--listen", f":{PORTS['gw_grpc']}",
                                 "--server", f"127.0.0.1:{PORTS['grpc']}", "--device-id", "edge-sc",
                                 "--queue-dir", str(self.work / "gateway"), "--evidence-root", str(self.work / "evidence"),
                                 "--http", f":{PORTS['gw_http']}", "--insecure"])
@@ -77,7 +77,7 @@ class Stack:
     def start_edge(self, cfg: dict, cameras: list[str]) -> None:
         cfg_path = self.work / "edge.yaml"
         cfg_path.write_text(yaml.safe_dump(cfg, allow_unicode=True))
-        self._spawn("edge", [PY, "-m", "zonewatch.edge.cli", "--config", str(cfg_path), "run", *[a for c in cameras for a in ("--camera", c)]])
+        self._spawn("edge", [PY, "-m", "sceneproof.edge.cli", "--config", str(cfg_path), "run", *[a for c in cameras for a in ("--camera", c)]])
 
     def stop(self, name: str, sig: int = signal.SIGTERM, wait: float = 10.0) -> None:
         p = self.procs.pop(name, None)
@@ -263,8 +263,8 @@ def _import_bundle(st: Stack, work: Path) -> int:
     bundle = ROOT / "data/runs/scratch/bundle-dev"
     if not bundle.exists():
         raise RuntimeError("dev bundle missing: run the offline dev runs first")
-    env = {"ZW_SERVER_DATA_DIR": str(work / "server")}
-    subprocess.run([PY, "-m", "zonewatch.server.cli", "import", str(bundle)], cwd=ROOT, check=True, capture_output=True,
+    env = {"SP_SERVER_DATA_DIR": str(work / "server")}
+    subprocess.run([PY, "-m", "sceneproof.server.cli", "import", str(bundle)], cwd=ROOT, check=True, capture_output=True,
                    env={**st.env, **env})
     return len(get(f"{SRV}/api/events?limit=500")["items"]) if False else 0
 
@@ -272,13 +272,13 @@ def _import_bundle(st: Stack, work: Path) -> int:
 def sc_vlm_faults(st: Stack, work: Path) -> dict:
     """Mock VLM: 3 s per call with a 1.5 s timeout and every 2nd call failing. Ingestion must stay fast."""
     _import_bundle(st, work)
-    st.start_server({"ZW_SERVER_VLM_MOCK_DELAY_S": "3", "ZW_SERVER_VLM_TIMEOUT_S": "1.5", "ZW_SERVER_VLM_MAX_ATTEMPTS": "2",
-                     "ZW_SERVER_VLM_MOCK_FAIL_EVERY": "2", "ZW_SERVER_VLM_MAX_CONCURRENCY": "1"})
+    st.start_server({"SP_SERVER_VLM_MOCK_DELAY_S": "3", "SP_SERVER_VLM_TIMEOUT_S": "1.5", "SP_SERVER_VLM_MAX_ATTEMPTS": "2",
+                     "SP_SERVER_VLM_MOCK_FAIL_EVERY": "2", "SP_SERVER_VLM_MAX_CONCURRENCY": "1"})
     # while the VLM is stuck, publish fresh events straight to the ingest port and time the ack
     import grpc
 
-    from zonewatch.proto.zonewatch.v1 import zonewatch_pb2 as pb
-    from zonewatch.proto.zonewatch.v1 import zonewatch_pb2_grpc as pbg
+    from sceneproof.proto.sceneproof.v1 import sceneproof_pb2 as pb
+    from sceneproof.proto.sceneproof.v1 import sceneproof_pb2_grpc as pbg
 
     ch = grpc.insecure_channel(f"127.0.0.1:{PORTS['grpc']}")
     stub = pbg.IngestStub(ch)
@@ -299,7 +299,7 @@ def sc_vlm_faults(st: Stack, work: Path) -> dict:
     final = get(f"{SRV}/api/status")["vlm"]["db"]
     # retry path: restart the server with a healthy mock and re-request one failed/timeout event
     st.stop("server")
-    st.start_server({"ZW_SERVER_VLM_MOCK_DELAY_S": "0.2"})
+    st.start_server({"SP_SERVER_VLM_MOCK_DELAY_S": "0.2"})
     items = get(f"{SRV}/api/events?limit=500")["items"]
     bad = [x for x in items if x["explanation"] and x["explanation"]["status"] in ("failed", "timeout", "invalid")]
     retried = None
@@ -380,8 +380,8 @@ def sc_duplicates(st: Stack, work: Path) -> dict:
     st.start_server()
     import grpc
 
-    from zonewatch.proto.zonewatch.v1 import zonewatch_pb2 as pb
-    from zonewatch.proto.zonewatch.v1 import zonewatch_pb2_grpc as pbg
+    from sceneproof.proto.sceneproof.v1 import sceneproof_pb2 as pb
+    from sceneproof.proto.sceneproof.v1 import sceneproof_pb2_grpc as pbg
 
     stub = pbg.IngestStub(grpc.insecure_channel(f"127.0.0.1:{PORTS['grpc']}"))
     eid = str(uuid.uuid4())
@@ -408,7 +408,7 @@ def sc_duplicates(st: Stack, work: Path) -> dict:
 def sc_restart(st: Stack, work: Path) -> dict:
     """Server + gateway restarted mid-run: DB state and the gateway WAL carry everything over."""
     st.start_rtsp()
-    st.start_server({"ZW_SERVER_VLM_MOCK_DELAY_S": "2.5", "ZW_SERVER_VLM_MAX_CONCURRENCY": "1"})
+    st.start_server({"SP_SERVER_VLM_MOCK_DELAY_S": "2.5", "SP_SERVER_VLM_MAX_CONCURRENCY": "1"})
     st.start_gateway()
     st.start_edge(edge_config(work, [cam("cam-rs", "one-by-one", ZONE_BENCH, 10)]), ["cam-rs"])
     observe(30, "cam-rs")
@@ -420,7 +420,7 @@ def sc_restart(st: Stack, work: Path) -> dict:
     st.stop("gateway", signal.SIGKILL)
     st.stop("server", signal.SIGKILL)
     time.sleep(3)
-    st.start_server({"ZW_SERVER_VLM_MOCK_DELAY_S": "0.2"})
+    st.start_server({"SP_SERVER_VLM_MOCK_DELAY_S": "0.2"})
     st.start_gateway()
     observe(25, "cam-rs")
     post = get(f"{SRV}/api/status")

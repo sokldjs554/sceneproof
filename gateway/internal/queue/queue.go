@@ -11,7 +11,7 @@
 // Model:
 //
 //   - An Event is a complete snapshot of a zone episode; a higher revision
-//     supersedes every lower one (see zonewatch.proto). The queue therefore
+//     supersedes every lower one (see sceneproof.proto). The queue therefore
 //     keeps at most one pending record per event_id (the newest revision) and
 //     coalesces: a newer revision replaces the pending one in place, keeping
 //     the FIFO position of the first enqueue so an episode cannot starve
@@ -41,7 +41,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
 )
 
 const (
@@ -107,7 +107,7 @@ type Stats struct {
 }
 
 type entry struct {
-	ev   *zonewatchv1.Event
+	ev   *sceneproofv1.Event
 	size int64
 	elem *list.Element
 }
@@ -200,7 +200,7 @@ func (q *Queue) recover() error {
 	good, err := ScanFile(q.path, func(typ byte, payload []byte) error {
 		switch typ {
 		case recPut:
-			ev := &zonewatchv1.Event{}
+			ev := &sceneproofv1.Event{}
 			if uerr := proto.Unmarshal(payload, ev); uerr != nil || ev.GetEventId() == "" {
 				// A checksummed record with an unparsable body is not a torn
 				// tail (the CRC matched); skip it rather than throw away the
@@ -240,7 +240,7 @@ func (q *Queue) recover() error {
 // Put stores ev (coalescing with a pending older revision) and returns once
 // its PUT record is on disk. Only after Put returns may the caller tell the
 // analyzer accepted=true.
-func (q *Queue) Put(ev *zonewatchv1.Event) (PutResult, error) {
+func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 	if ev.GetEventId() == "" {
 		return PutResult{}, ErrInvalid
 	}
@@ -276,7 +276,7 @@ func (q *Queue) Put(ev *zonewatchv1.Event) (PutResult, error) {
 }
 
 // applyPutLocked updates the in-memory index; used by Put and by recovery.
-func (q *Queue) applyPutLocked(ev *zonewatchv1.Event, size int64) {
+func (q *Queue) applyPutLocked(ev *sceneproofv1.Event, size int64) {
 	if cur, ok := q.index[ev.EventId]; ok {
 		if cur.ev.GetRevision() >= ev.GetRevision() {
 			return
@@ -351,10 +351,10 @@ func (q *Queue) evictLocked() int {
 // Pending returns the pending events in first-enqueue order (newest revision
 // of each). The returned events are shared with the queue and must be
 // treated as read-only.
-func (q *Queue) Pending() []*zonewatchv1.Event {
+func (q *Queue) Pending() []*sceneproofv1.Event {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	out := make([]*zonewatchv1.Event, 0, q.order.Len())
+	out := make([]*sceneproofv1.Event, 0, q.order.Len())
 	for el := q.order.Front(); el != nil; el = el.Next() {
 		out = append(out, el.Value.(*entry).ev)
 	}

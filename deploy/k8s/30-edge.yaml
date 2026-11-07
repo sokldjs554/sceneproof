@@ -2,7 +2,7 @@
 #   analyzer (Python) -> gateway (Go, localhost:50051) -> server (grpc)
 apiVersion: v1
 kind: ConfigMap
-metadata: { name: edge-config, namespace: zonewatch }
+metadata: { name: edge-config, namespace: sceneproof }
 data:
   edge.yaml: |
     device_id: edge-k8s-01
@@ -15,7 +15,7 @@ data:
     cameras:
       - camera_id: cam-bench
         name: "B동 작업대 (k8s RTSP)"
-        source: rtsp://rtsp-sim.zonewatch.svc.cluster.local:8554/one-by-one
+        source: rtsp://rtsp-sim.sceneproof.svc.cluster.local:8554/one-by-one
         autostart: true
         fps_hint: 10
         zones:
@@ -23,7 +23,7 @@ data:
 ---
 apiVersion: apps/v1
 kind: Deployment
-metadata: { name: edge, namespace: zonewatch, labels: { app: edge } }
+metadata: { name: edge, namespace: sceneproof, labels: { app: edge } }
 spec:
   replicas: 1
   strategy: { type: Recreate }
@@ -33,9 +33,9 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: zonewatch-gateway:local
+          image: sceneproof-gateway:local
           imagePullPolicy: IfNotPresent
-          args: ["--listen", ":50051", "--server", "server.zonewatch.svc.cluster.local:50052", "--device-id", "edge-k8s-01",
+          args: ["--listen", ":50051", "--server", "server.sceneproof.svc.cluster.local:50052", "--device-id", "edge-k8s-01",
                  "--queue-dir", "/queue", "--evidence-root", "/evidence", "--http", ":9100", "--insecure"]
           ports: [{ name: gw-http, containerPort: 9100 }, { name: gw-grpc, containerPort: 50051 }]
           readinessProbe: { httpGet: { path: /readyz, port: gw-http }, periodSeconds: 5 }
@@ -43,7 +43,7 @@ spec:
           resources: { requests: { cpu: 50m, memory: 64Mi }, limits: { cpu: 500m, memory: 256Mi } }
           volumeMounts: [{ name: evidence, mountPath: /evidence, readOnly: true }, { name: queue, mountPath: /queue }]
         - name: analyzer
-          image: zonewatch-edge:local
+          image: sceneproof-edge:local
           imagePullPolicy: IfNotPresent
           args: ["--config", "/config/edge.yaml", "run"]
           resources: { requests: { cpu: "1", memory: 768Mi }, limits: { cpu: "2", memory: 1536Mi } }
@@ -62,7 +62,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: fetch-models
-          image: zonewatch-edge:local
+          image: sceneproof-edge:local
           imagePullPolicy: IfNotPresent
           command: ["sh", "-c", "cp /app/models/yolox_tiny.onnx /models/ 2>/dev/null || python -c \"print('no baked model')\""]
           volumeMounts: [{ name: models, mountPath: /models }]

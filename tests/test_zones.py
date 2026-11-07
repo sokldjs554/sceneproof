@@ -1,6 +1,6 @@
 import numpy as np
 
-from zonewatch.edge.zones import (
+from sceneproof.edge.zones import (
     CloseReason,
     FrameMeta,
     Transition,

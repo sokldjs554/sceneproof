@@ -12,14 +12,14 @@ import (
 	"google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // ResultSink receives CommandResults for forwarding to the server.
 type ResultSink interface {
-	Push(res *zonewatchv1.CommandResult)
+	Push(res *sceneproofv1.CommandResult)
 }
 
 // Options configures the EdgeIngress server.
@@ -32,9 +32,9 @@ type Options struct {
 	Logger   *slog.Logger
 }
 
-// Server implements zonewatchv1.EdgeIngressServer.
+// Server implements sceneproofv1.EdgeIngressServer.
 type Server struct {
-	zonewatchv1.UnimplementedEdgeIngressServer
+	sceneproofv1.UnimplementedEdgeIngressServer
 	o   Options
 	log *slog.Logger
 }
@@ -48,7 +48,7 @@ func New(o Options) *Server {
 }
 
 // Register attaches the service to a gRPC server.
-func (s *Server) Register(gs *grpc.Server) { zonewatchv1.RegisterEdgeIngressServer(gs, s) }
+func (s *Server) Register(gs *grpc.Server) { sceneproofv1.RegisterEdgeIngressServer(gs, s) }
 
 // SubmitEvent durably enqueues one event snapshot.
 //
@@ -58,7 +58,7 @@ func (s *Server) Register(gs *grpc.Server) { zonewatchv1.RegisterEdgeIngressServ
 // tell the analyzer it may forget the snapshot. Errors (disk full, oversize
 // event) are returned as gRPC errors so the analyzer knows the event is NOT
 // safe to forget.
-func (s *Server) SubmitEvent(ctx context.Context, ev *zonewatchv1.Event) (*zonewatchv1.Ack, error) {
+func (s *Server) SubmitEvent(ctx context.Context, ev *sceneproofv1.Event) (*sceneproofv1.Ack, error) {
 	if ev.GetEventId() == "" {
 		return nil, grpcstatus.Error(codes.InvalidArgument, "event_id is required")
 	}
@@ -82,7 +82,7 @@ func (s *Server) SubmitEvent(ctx context.Context, ev *zonewatchv1.Event) (*zonew
 	}
 	s.log.Debug("event accepted", "event_id", ev.EventId, "revision", ev.Revision,
 		"status", ev.GetStatus().String(), "duplicate", res.Duplicate)
-	return &zonewatchv1.Ack{
+	return &sceneproofv1.Ack{
 		EventId:   ev.EventId,
 		Revision:  ev.Revision,
 		Accepted:  res.Stored,
@@ -92,17 +92,17 @@ func (s *Server) SubmitEvent(ctx context.Context, ev *zonewatchv1.Event) (*zonew
 
 // ReportStatus stores the analyzer's latest status (not queued: only the
 // newest matters for the next heartbeat).
-func (s *Server) ReportStatus(ctx context.Context, ds *zonewatchv1.DeviceStatus) (*zonewatchv1.Empty, error) {
+func (s *Server) ReportStatus(ctx context.Context, ds *sceneproofv1.DeviceStatus) (*sceneproofv1.Empty, error) {
 	if ds.DeviceId == "" {
 		ds.DeviceId = s.o.DeviceID
 	}
 	s.o.Status.SetAnalyzerStatus(ds)
-	return &zonewatchv1.Empty{}, nil
+	return &sceneproofv1.Empty{}, nil
 }
 
 // SubscribeCommands streams commands forwarded from the server until the
 // analyzer hangs up.
-func (s *Server) SubscribeCommands(req *zonewatchv1.WatchRequest, stream zonewatchv1.EdgeIngress_SubscribeCommandsServer) error {
+func (s *Server) SubscribeCommands(req *sceneproofv1.WatchRequest, stream sceneproofv1.EdgeIngress_SubscribeCommandsServer) error {
 	sub := s.o.Bus.Subscribe()
 	defer s.o.Bus.Unsubscribe(sub)
 	s.log.Info("analyzer subscribed to commands", "device_id", req.GetDeviceId(), "subscribers", s.o.Bus.Subscribers())
@@ -122,7 +122,7 @@ func (s *Server) SubscribeCommands(req *zonewatchv1.WatchRequest, stream zonewat
 }
 
 // ReportCommandResult forwards the analyzer's outcome to the server.
-func (s *Server) ReportCommandResult(ctx context.Context, res *zonewatchv1.CommandResult) (*zonewatchv1.Empty, error) {
+func (s *Server) ReportCommandResult(ctx context.Context, res *sceneproofv1.CommandResult) (*sceneproofv1.Empty, error) {
 	if res.GetCommandId() == "" {
 		return nil, grpcstatus.Error(codes.InvalidArgument, "command_id is required")
 	}
@@ -130,5 +130,5 @@ func (s *Server) ReportCommandResult(ctx context.Context, res *zonewatchv1.Comma
 		res.DeviceId = s.o.DeviceID
 	}
 	s.o.Results.Push(res)
-	return &zonewatchv1.Empty{}, nil
+	return &sceneproofv1.Empty{}, nil
 }

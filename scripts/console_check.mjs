@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ZoneWatch console smoke test (Playwright + Chromium, no extra deps).
+ * SceneProof console smoke test (Playwright + Chromium, no extra deps).
  *
  *   node scripts/console_check.mjs [outDir]
  *
@@ -19,7 +19,7 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 
 // usage: node scripts/console_check.mjs [outDir] [--static <url> | <staticUrl>]
 //   default      full read/write check against the live server (ZW_CONSOLE_URL or http://127.0.0.1:8000/)
-//   --static URL reduced read-only check against a static build (window.ZW_STATIC_BASE), e.g. http://127.0.0.1:8090/
+//   --static URL reduced read-only check against a static build (window.SP_STATIC_BASE), e.g. http://127.0.0.1:8090/
 const argv = process.argv.slice(2);
 let OUT = '/tmp/claude-0/-home-user-chartwire/d5801663-d4d9-5a80-b5d4-4f5fea308eaf/scratchpad/ui';
 let STATIC_URL = null;

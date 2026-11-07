@@ -28,7 +28,7 @@ def main() -> int:
     import onnx
     import torch
 
-    from zonewatch.edge.yolox_model import YOLOX_VARIANTS, file_sha256, load_yolox
+    from sceneproof.edge.yolox_model import YOLOX_VARIANTS, file_sha256, load_yolox
 
     model = load_yolox(args.variant, args.weights)
     default_hw = YOLOX_VARIANTS[args.variant][3]
@@ -59,7 +59,7 @@ def main() -> int:
         "onnx_sha256_12": file_sha256(out), "opset": args.opset, "input_wh": [w, h], "torch": torch.__version__,
         "onnx": onnx.__version__, "onnxruntime": ort.__version__, "export_seconds": round(export_s, 2),
         "raw_output_max_abs_diff_random_input": max_abs, "output_shape": list(got.shape),
-        "note": "output is the raw head tensor [1,N,85]; grid decoding + NMS happen in zonewatch.edge.detector",
+        "note": "output is the raw head tensor [1,N,85]; grid decoding + NMS happen in sceneproof.edge.detector",
     }
     out.with_suffix(".onnx.json").write_text(json.dumps(meta, indent=2))
     print(json.dumps(meta, indent=2))

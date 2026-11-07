@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // HeartbeatOptions configures RunHeartbeat.
@@ -22,7 +22,7 @@ type HeartbeatOptions struct {
 	// fire while a call is still in flight are simply skipped.
 	RPCTimeout time.Duration
 	// OnSent, if set, is called after every successful heartbeat (tests).
-	OnSent func(ds *zonewatchv1.DeviceStatus, ack *zonewatchv1.HeartbeatAck)
+	OnSent func(ds *sceneproofv1.DeviceStatus, ack *sceneproofv1.HeartbeatAck)
 }
 
 // RunHeartbeat sends a DeviceStatus every Interval while connected.
@@ -62,7 +62,7 @@ func RunHeartbeat(ctx context.Context, o HeartbeatOptions) {
 		}
 		ds := o.Status.DeviceStatus(time.Now())
 		rctx, cancel := context.WithTimeout(ctx, o.RPCTimeout)
-		ack, err := zonewatchv1.NewIngestClient(cc).Heartbeat(rctx, ds)
+		ack, err := sceneproofv1.NewIngestClient(cc).Heartbeat(rctx, ds)
 		cancel()
 		if err != nil {
 			if ctx.Err() != nil {

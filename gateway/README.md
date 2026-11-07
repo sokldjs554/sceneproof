@@ -1,4 +1,4 @@
-# ZoneWatch Edge Gateway (Go)
+# SceneProof Edge Gateway (Go)
 
 산업현장 제한구역 영상 사건 검토 서비스의 **디바이스 측 게이트웨이**입니다. 같은 호스트(또는 같은 Pod)에서 돌아가는 Python 분석기(analyzer)가 만든 사건 스냅샷·상태를 받아 **디스크에 안전하게 보관한 뒤** 네트워크 너머의 검토 서버(review server)로 전달하고, 반대로 서버의 명령(Command)을 분석기에 중계합니다.
 
@@ -6,7 +6,7 @@
 analyzer (Python, 디바이스) --gRPC EdgeIngress (localhost:50051)--> gateway (Go, 디바이스) --gRPC Ingest (network, server:50052)--> review server (Python)
 ```
 
-와이어 계약은 `proto/zonewatch/v1/zonewatch.proto` 하나이며, 생성 코드는 `gen/zonewatchv1/`에 있습니다(수정·재생성하지 않습니다).
+와이어 계약은 `proto/sceneproof/v1/sceneproof.proto` 하나이며, 생성 코드는 `gen/sceneproofv1/`에 있습니다(수정·재생성하지 않습니다).
 
 ---
 
@@ -30,7 +30,7 @@ analyzer (Python, 디바이스) --gRPC EdgeIngress (localhost:50051)--> gateway 
 ## 2. 코드 구성
 
 ```
-cmd/zonewatch-gateway/   main.go — 플래그/환경변수, 와이어링, 정상 종료
+cmd/sceneproof-gateway/   main.go — 플래그/환경변수, 와이어링, 정상 종료
 internal/queue/          WAL 기반 내구성 큐 (코얼레싱, 퇴출, 컴팩션, 복구)
 internal/uplink/         서버 방향: Conn(상태 머신·백오프), Sender, Heartbeat,
                          CommandWatcher, Results(명령 결과), Uploader+Ledger(증거)
@@ -123,7 +123,7 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 | **서버 다운** | 채널 상태 감시 또는 RPC `Unavailable`로 즉시 `DISCONNECTED`. 백오프로 재접속 시도(`reconnect_count` 증가, `last_error` 기록). 그동안 분석기의 `SubmitEvent`는 정상적으로 WAL에 쌓이고 `accepted=true`. 복구되면 대기 사건을 FIFO로 각 1회 전송, 명령 스트림 재수립, 하트비트 재개 |
 | **게이트웨이 재시작/크래시** | WAL 재생 → 동일한 대기 집합·순서 복원 → 죽은 레코드가 있으면 컴팩션. 원장의 `W−D` 업로드 재스케줄. 재시작 직전 "전송했지만 ack를 못 받은" 사건 1건은 재전송되며 서버가 `duplicate=true`로 흡수 |
 | **중복** | 분석기→게이트웨이: 대기 중 revision 이하이면 `duplicate=true`(쓰기 없음). 게이트웨이→서버: 서버 dedup이 최종 권위, `duplicate` ack도 큐에서 제거하고 `duplicate_acks` 집계. 업로드: 원장 + 서버 `already_present` |
-| **큐 가득 참** | 가장 오래된 사건부터 DROP(WAL에 기록되어 재시작 후에도 돌아오지 않음), `dropped_events`/`zonewatch_gateway_events_dropped_total` 증가, WARN 로그. 예산보다 큰 단일 사건은 `ResourceExhausted` 거부 |
+| **큐 가득 참** | 가장 오래된 사건부터 DROP(WAL에 기록되어 재시작 후에도 돌아오지 않음), `dropped_events`/`sceneproof_gateway_events_dropped_total` 증가, WARN 로그. 예산보다 큰 단일 사건은 `ResourceExhausted` 거부 |
 | **WAL 꼬리 손상** | 복구 시 첫 불량 레코드에서 truncate, `queue.truncated=true`가 `/status`에 표시 |
 | **디스크 쓰기 실패** | `SubmitEvent`가 `Internal` 오류 → 분석기는 스냅샷을 버리면 안 됨 |
 | **분석기 미접속** | 하트비트는 빈 `cameras`로 계속 전송. 명령은 최근 32개/60 s 버퍼 |
@@ -134,22 +134,22 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 
 ## 6. 플래그 / 환경변수
 
-모든 플래그는 `ZW_GW_<대문자, -→_>` 환경변수로 대체 가능하며 플래그가 우선합니다.
+모든 플래그는 `SP_GW_<대문자, -→_>` 환경변수로 대체 가능하며 플래그가 우선합니다.
 
 | 플래그 | 환경변수 | 기본값 | 설명 |
 |---|---|---|---|
-| `--listen` | `ZW_GW_LISTEN` | `:50051` | EdgeIngress gRPC 수신 주소 (분석기 측) |
-| `--server` | `ZW_GW_SERVER` | `127.0.0.1:50052` | 검토 서버 Ingest 주소 |
-| `--device-id` | `ZW_GW_DEVICE_ID` | `edge-01` | 디바이스 ID |
-| `--queue-dir` | `ZW_GW_QUEUE_DIR` | `./data/gateway` | WAL·원장 디렉터리 |
-| `--queue-max-bytes` | `ZW_GW_QUEUE_MAX_BYTES` | `67108864` (64 MiB) | 큐 예산(live payload 바이트) |
-| `--queue-fsync` | `ZW_GW_QUEUE_FSYNC` | `true` | PUT 뒤 fsync |
-| `--evidence-root` | `ZW_GW_EVIDENCE_ROOT` | `./data/evidence` | 분석기와 공유하는 증거 디렉터리 |
-| `--http` | `ZW_GW_HTTP` | `:9100` | 로컬 HTTP 주소(빈 문자열이면 비활성) |
-| `--heartbeat-interval` | `ZW_GW_HEARTBEAT_INTERVAL` | `2s` | 하트비트 주기 |
-| `--upload-retry-window` | `ZW_GW_UPLOAD_RETRY_WINDOW` | `10m` | 없는 증거 파일을 기다리는 시간 |
-| `--insecure` | `ZW_GW_INSECURE` | `false` | 서버와 평문 gRPC. 미지정 시 시스템 루트 CA 기반 TLS(클라이언트 인증 없음) |
-| `--log-level` | `ZW_GW_LOG_LEVEL` | `info` | `debug|info|warn|error` (JSON, stderr) |
+| `--listen` | `SP_GW_LISTEN` | `:50051` | EdgeIngress gRPC 수신 주소 (분석기 측) |
+| `--server` | `SP_GW_SERVER` | `127.0.0.1:50052` | 검토 서버 Ingest 주소 |
+| `--device-id` | `SP_GW_DEVICE_ID` | `edge-01` | 디바이스 ID |
+| `--queue-dir` | `SP_GW_QUEUE_DIR` | `./data/gateway` | WAL·원장 디렉터리 |
+| `--queue-max-bytes` | `SP_GW_QUEUE_MAX_BYTES` | `67108864` (64 MiB) | 큐 예산(live payload 바이트) |
+| `--queue-fsync` | `SP_GW_QUEUE_FSYNC` | `true` | PUT 뒤 fsync |
+| `--evidence-root` | `SP_GW_EVIDENCE_ROOT` | `./data/evidence` | 분석기와 공유하는 증거 디렉터리 |
+| `--http` | `SP_GW_HTTP` | `:9100` | 로컬 HTTP 주소(빈 문자열이면 비활성) |
+| `--heartbeat-interval` | `SP_GW_HEARTBEAT_INTERVAL` | `2s` | 하트비트 주기 |
+| `--upload-retry-window` | `SP_GW_UPLOAD_RETRY_WINDOW` | `10m` | 없는 증거 파일을 기다리는 시간 |
+| `--insecure` | `SP_GW_INSECURE` | `false` | 서버와 평문 gRPC. 미지정 시 시스템 루트 CA 기반 TLS(클라이언트 인증 없음) |
+| `--log-level` | `SP_GW_LOG_LEVEL` | `info` | `debug|info|warn|error` (JSON, stderr) |
 | `--version` | – | – | 버전 출력 후 종료 |
 
 ### 로컬 HTTP
@@ -159,7 +159,7 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 | `/healthz` | 프로세스가 살아 있으면 200 |
 | `/readyz` | 큐가 열려 있고 gRPC 리스너가 떠 있으면 200, 아니면 503 |
 | `/status` | JSON: 업링크 상태·카운터, 큐 통계, 업로드 통계, 분석기 최신 `DeviceStatus`(protojson), 버전 |
-| `/metrics` | Prometheus 텍스트: `zonewatch_gateway_queue_pending`, `_queue_bytes`, `_events_sent_total`, `_events_acked_total`, `_events_dropped_total`, `_uplink_connected`, `_uplink_reconnects_total`, `_uploads_pending`, `_uploads_done_total` 외 |
+| `/metrics` | Prometheus 텍스트: `sceneproof_gateway_queue_pending`, `_queue_bytes`, `_events_sent_total`, `_events_acked_total`, `_events_dropped_total`, `_uplink_connected`, `_uplink_reconnects_total`, `_uploads_pending`, `_uploads_done_total` 외 |
 
 ---
 
@@ -167,24 +167,24 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 
 ```bash
 cd gateway
-make build            # bin/zonewatch-gateway (ldflags -X main.version=<git describe>)
+make build            # bin/sceneproof-gateway (ldflags -X main.version=<git describe>)
 make test             # go test -race ./...
 make vet              # go vet ./...
 make fmt              # gofmt -w
 
-./bin/zonewatch-gateway --insecure --server 10.0.0.5:50052 --device-id edge-01 \
-  --queue-dir /var/lib/zonewatch/gateway --evidence-root /var/lib/zonewatch/evidence
+./bin/sceneproof-gateway --insecure --server 10.0.0.5:50052 --device-id edge-01 \
+  --queue-dir /var/lib/sceneproof/gateway --evidence-root /var/lib/sceneproof/evidence
 
 curl -s localhost:9100/status | jq .uplink
-curl -s localhost:9100/metrics | grep zonewatch_gateway_queue
+curl -s localhost:9100/metrics | grep sceneproof_gateway_queue
 ```
 
 Docker (정적 바이너리, distroless, 비루트, `EXPOSE 50051 9100`):
 
 ```bash
-docker build -f gateway/Dockerfile -t zonewatch-gateway gateway/
+docker build -f gateway/Dockerfile -t sceneproof-gateway gateway/
 docker run --rm -p 50051:50051 -p 9100:9100 -v zw-data:/data \
-  -e ZW_GW_SERVER=server:50052 -e ZW_GW_INSECURE=true zonewatch-gateway
+  -e SP_GW_SERVER=server:50052 -e SP_GW_INSECURE=true sceneproof-gateway
 ```
 
 컨테이너 안에서는 `/data/gateway`(큐)와 `/data/evidence`(증거)가 기본값이며, 증거 볼륨은 분석기 컨테이너와 같은 것을 마운트해야 합니다.

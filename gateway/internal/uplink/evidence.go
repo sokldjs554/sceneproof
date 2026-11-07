@@ -15,8 +15,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // DefaultChunkSize is the UploadEvidence chunk size (256 KiB): large enough
@@ -97,7 +97,7 @@ func NewUploader(o UploaderOptions) *Uploader {
 
 // Schedule queues every evidence file referenced by ev that the ledger does
 // not already have.
-func (u *Uploader) Schedule(ev *zonewatchv1.Event) {
+func (u *Uploader) Schedule(ev *sceneproofv1.Event) {
 	evd := ev.GetEvidence()
 	if evd == nil {
 		return
@@ -278,7 +278,7 @@ func (u *Uploader) giveUp(j *uploadJob) {
 // is fixed up front, so a file that grows during the upload (it should not;
 // see SettleTime) still yields a self-consistent (sha256, total_size) pair.
 // An empty file is sent as one empty chunk with last=true.
-func (u *Uploader) upload(ctx context.Context, cc *grpc.ClientConn, j *uploadJob, full string, size int64) (*zonewatchv1.UploadResult, string, error) {
+func (u *Uploader) upload(ctx context.Context, cc *grpc.ClientConn, j *uploadJob, full string, size int64) (*sceneproofv1.UploadResult, string, error) {
 	f, err := os.Open(full)
 	if err != nil {
 		return nil, "", err
@@ -287,7 +287,7 @@ func (u *Uploader) upload(ctx context.Context, cc *grpc.ClientConn, j *uploadJob
 
 	rctx, cancel := context.WithTimeout(ctx, u.o.RPCTimeout)
 	defer cancel()
-	stream, err := zonewatchv1.NewIngestClient(cc).UploadEvidence(rctx)
+	stream, err := sceneproofv1.NewIngestClient(cc).UploadEvidence(rctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -313,7 +313,7 @@ func (u *Uploader) upload(ctx context.Context, cc *grpc.ClientConn, j *uploadJob
 			return nil, "", fmt.Errorf("evidence file shrank while uploading (%d < %d)", offset+int64(n), size)
 		}
 		h.Write(buf[:n])
-		chunk := &zonewatchv1.EvidenceChunk{
+		chunk := &sceneproofv1.EvidenceChunk{
 			EventId: j.eventID,
 			Path:    j.path,
 			Data:    buf[:n],

@@ -5,7 +5,7 @@
 ## 1. ByteTrack — Zhang et al., "ByteTrack: Multi-Object Tracking by Associating Every Detection Box", ECCV 2022
 - 링크: https://arxiv.org/abs/2110.06864 · 코드: https://github.com/ifzhang/ByteTrack (MIT)
 - 핵심: 탐지 점수가 낮은 상자를 버리지 않고, 1차(고점수 상자 ↔ 모든 트랙) 연계 후 남은 **추적 중** 트랙을 2차(저점수 상자)로 연계한다. 가림·블러로 점수가 떨어진 순간에도 ID가 유지된다. 칼만 필터는 (cx, cy, a, h) 등속 모델, 매칭은 IoU 비용의 헝가리안.
-- 적용: `src/zonewatch/edge/tracker.py` 전체. 2단계 연계, 잠정 트랙(두 번째 프레임에서 확정), `track_buffer`(1.5초×fps) 동안 lost 유지, `fuse_score`(IoU×점수) 옵션.
+- 적용: `src/sceneproof/edge/tracker.py` 전체. 2단계 연계, 잠정 트랙(두 번째 프레임에서 확정), `track_buffer`(1.5초×fps) 동안 lost 유지, `fuse_score`(IoU×점수) 옵션.
 - 재현한 범위: 알고리즘 구조와 기본 임계값(0.5/0.1/0.8, 2차 0.5). **MOT17 수치 재현은 하지 않았습니다**(데이터 없음). 동작은 합성 궤적 테스트(가림 중 저신뢰 상자로 ID 유지 등)와 캠퍼스 영상에서 ID 분리 확인으로 검증.
 - 차이: lapjv 대신 scipy 헝가리안+비용 게이트. 카메라 모션 보정(BoT-SORT 계열) 없음.
 - 읽은 범위: (1) arXiv 초록(2110.06864, ECCV 2022 판과 동일 내용: 저점수 상자를 버리지 않고 트랙릿과의 유사도로 복원, MOT17 80.3 MOTA·77.3 IDF1·63.1 HOTA @30 FPS V100). 원 코드의 `byte_tracker.py`/`kalman_filter.py` 구조는 (2) 기억에 의존해 재구성.
@@ -13,7 +13,7 @@
 ## 2. YOLOX — Ge et al., "YOLOX: Exceeding YOLO Series in 2021", arXiv 2021
 - 링크: https://arxiv.org/abs/2107.08430 · 코드: https://github.com/Megvii-BaseDetection/YOLOX (Apache-2.0)
 - 핵심: anchor-free 헤드(그리드 셀마다 1개 예측, 중심 오프셋+log 크기), decoupled head(분류/회귀 분리), SimOTA 라벨 할당, 강한 증강(Mosaic/MixUp).
-- 적용: 모델 그래프 5개 파일을 벤더링(`src/zonewatch/edge/yolox_model/`, 추론 전용으로 손질)하고 공식 COCO 체크포인트(nano/tiny/s)를 사용. 디코딩(`(xy+grid)*stride`, `exp(wh)*stride`)과 NMS는 `detector.py`에 numpy로 재구현해 PyTorch/ONNX 양쪽이 같은 후처리를 쓴다. 사람 클래스(0)만 사용.
+- 적용: 모델 그래프 5개 파일을 벤더링(`src/sceneproof/edge/yolox_model/`, 추론 전용으로 손질)하고 공식 COCO 체크포인트(nano/tiny/s)를 사용. 디코딩(`(xy+grid)*stride`, `exp(wh)*stride`)과 NMS는 `detector.py`에 numpy로 재구현해 PyTorch/ONNX 양쪽이 같은 후처리를 쓴다. 사람 클래스(0)만 사용.
 - 재현한 범위: 추론·내보내기·수치 일치. 학습·SimOTA는 제거.
 - 읽은 범위: (1) 공식 저장소의 `yolox/models/*.py`, `exps/default/yolox_{nano,tiny,s}.py`, `yolox/exp/yolox_base.py`를 이 세션에서 직접 내려받아 읽음(벤더링 과정); arXiv 초록(2107.08430: anchor-free, decoupled head, SimOTA; YOLOX-Nano 0.91M 파라미터 25.3% AP). 본문 세부는 (2).
 
@@ -35,7 +35,7 @@
 
 ## 6. gRPC / Protocol Buffers — 공식 가이드(proto3 언어 가이드, Python asyncio API, Go 생성 코드)
 - 링크: https://protobuf.dev/programming-guides/proto3/ · https://grpc.io/docs/languages/python/ · https://grpc.io/docs/languages/go/
-- 적용: `proto/zonewatch/v1/zonewatch.proto`(단방향 unary + 서버 스트리밍 + 클라이언트 스트리밍 업로드), `grpc.aio` 서버, Go 클라이언트(연결 상태 감시·백오프는 애플리케이션 레벨).
+- 적용: `proto/sceneproof/v1/sceneproof.proto`(단방향 unary + 서버 스트리밍 + 클라이언트 스트리밍 업로드), `grpc.aio` 서버, Go 클라이언트(연결 상태 감시·백오프는 애플리케이션 레벨).
 - 읽은 범위: (1) 생성 코드와 설치 패키지, (2) 가이드 본문.
 
 ## 7. Anthropic Claude API — Vision, Structured Outputs, Pricing

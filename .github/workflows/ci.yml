@@ -34,8 +34,8 @@ jobs:
       - name: Console smoke (Playwright, replay bundle)
         run: |
           npm i -g playwright@1.47.2 && npx playwright install --with-deps chromium
-          ZW_SERVER_DATA_DIR=/tmp/zw ZW_SERVER_MODE=replay ZW_SERVER_REPLAY_BUNDLE=demo/bundle ZW_SERVER_VLM_PROVIDER=mock \
-            zonewatch-server run --port 8000 > /tmp/server.log 2>&1 &
+          SP_SERVER_DATA_DIR=/tmp/zw SP_SERVER_MODE=replay SP_SERVER_REPLAY_BUNDLE=demo/bundle SP_SERVER_VLM_PROVIDER=mock \
+            sceneproof-server run --port 8000 > /tmp/server.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
           NODE_PATH=$(npm root -g) node scripts/console_check.mjs http://127.0.0.1:8000 /tmp/ui || (cat /tmp/server.log; exit 1)
       - uses: actions/upload-artifact@v4
@@ -43,9 +43,9 @@ jobs:
         with: { name: console-screenshots, path: /tmp/ui }
       - name: Proto freshness (python)
         run: |
-          python -m grpc_tools.protoc -I proto --python_out=/tmp/gen --grpc_python_out=/tmp/gen proto/zonewatch/v1/zonewatch.proto 2>/dev/null || mkdir -p /tmp/gen
-          python -m grpc_tools.protoc -I proto --python_out=/tmp/gen --grpc_python_out=/tmp/gen proto/zonewatch/v1/zonewatch.proto
-          diff <(grep -v '^#' /tmp/gen/zonewatch/v1/zonewatch_pb2.py) <(grep -v '^#' src/zonewatch/proto/zonewatch/v1/zonewatch_pb2.py) || (echo "generated python proto is stale: run scripts/gen_proto.sh" && exit 1)
+          python -m grpc_tools.protoc -I proto --python_out=/tmp/gen --grpc_python_out=/tmp/gen proto/sceneproof/v1/sceneproof.proto 2>/dev/null || mkdir -p /tmp/gen
+          python -m grpc_tools.protoc -I proto --python_out=/tmp/gen --grpc_python_out=/tmp/gen proto/sceneproof/v1/sceneproof.proto
+          diff <(grep -v '^#' /tmp/gen/sceneproof/v1/sceneproof_pb2.py) <(grep -v '^#' src/sceneproof/proto/sceneproof/v1/sceneproof_pb2.py) || (echo "generated python proto is stale: run scripts/gen_proto.sh" && exit 1)
   go-gateway:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -72,13 +72,13 @@ jobs:
           VARIANTS="yolox_tiny" bash scripts/fetch_models.sh
       - name: Build images
         run: |
-          docker build -f deploy/docker/Dockerfile.server -t zonewatch-server:ci .
-          docker build -t zonewatch-gateway:ci gateway
-          docker build -f deploy/docker/Dockerfile.edge -t zonewatch-edge:ci .
-          docker build -f deploy/docker/Dockerfile.rtsp-sim -t zonewatch-rtsp-sim:ci .
+          docker build -f deploy/docker/Dockerfile.server -t sceneproof-server:ci .
+          docker build -t sceneproof-gateway:ci gateway
+          docker build -f deploy/docker/Dockerfile.edge -t sceneproof-edge:ci .
+          docker build -f deploy/docker/Dockerfile.rtsp-sim -t sceneproof-rtsp-sim:ci .
       - name: Smoke server image
         run: |
-          docker run -d --name srv -p 8000:8000 -e ZW_SERVER_VLM_PROVIDER=mock zonewatch-server:ci
+          docker run -d --name srv -p 8000:8000 -e SP_SERVER_VLM_PROVIDER=mock sceneproof-server:ci
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
           curl -fsS http://127.0.0.1:8000/api/status
           docker rm -f srv

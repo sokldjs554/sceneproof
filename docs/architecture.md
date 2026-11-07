@@ -6,7 +6,7 @@
 카메라(RTSP) / 샘플 영상
       │  GStreamer: rtspsrc → decodebin → appsink  (파일: filesrc, 실시간 페이싱)
       ▼
-┌───────────────── 엣지 분석기 (Python, zonewatch.edge) ─────────────────┐
+┌───────────────── 엣지 분석기 (Python, sceneproof.edge) ─────────────────┐
 │ FrameQueue(용량 4, 가장 오래된 프레임 폐기 / 오프라인은 무손실)          │
 │   → YOLOX(ONNX Runtime CPU, 사람 클래스) → ByteTrack(자체 구현)        │
 │   → ZoneMonitor(앵커=발 위치, 시간 기반 디바운스, 체류, 추적 끊김 유예)  │
@@ -24,7 +24,7 @@
 └───────────────────────────────┬───────────────────────────────────────┘
                                 │ gRPC Ingest (network) :50052
                                 ▼
-┌───────────── 검토 서버 (Python, zonewatch.server) ────────────────────┐
+┌───────────── 검토 서버 (Python, sceneproof.server) ────────────────────┐
 │ SQLite(WAL): events(멱등 upsert) · evidence_files · explanations      │
 │   · review_log · devices · commands                                   │
 │ VLM 워커(비동기, 동시성·타임아웃·재시도·예산 상한, 구조화 출력 검증)      │
@@ -78,7 +78,7 @@ Event는 항상 **완전한 스냅샷**입니다. 소비자는 `(event_id, revis
 
 ## 계약
 
-- gRPC/Protobuf: [`proto/zonewatch/v1/zonewatch.proto`](../proto/zonewatch/v1/zonewatch.proto) — 메시지 주석이 의미론을 정의합니다. Python 코드는 `src/zonewatch/proto`, Go 코드는 `gateway/gen/zonewatchv1`에 생성됩니다(`scripts/gen_proto.sh`).
-- HTTP API: [`src/zonewatch/server/api.py`](../src/zonewatch/server/api.py) (FastAPI, `/docs`에서 OpenAPI 확인).
-- VLM 출력 스키마: [`src/zonewatch/server/vlm/schema.py`](../src/zonewatch/server/vlm/schema.py) (schema_version 1).
+- gRPC/Protobuf: [`proto/sceneproof/v1/sceneproof.proto`](../proto/sceneproof/v1/sceneproof.proto) — 메시지 주석이 의미론을 정의합니다. Python 코드는 `src/sceneproof/proto`, Go 코드는 `gateway/gen/sceneproofv1`에 생성됩니다(`scripts/gen_proto.sh`).
+- HTTP API: [`src/sceneproof/server/api.py`](../src/sceneproof/server/api.py) (FastAPI, `/docs`에서 OpenAPI 확인).
+- VLM 출력 스키마: [`src/sceneproof/server/vlm/schema.py`](../src/sceneproof/server/vlm/schema.py) (schema_version 1).
 - 설정: [`configs/edge.yaml`](../configs/edge.yaml) (주석 포함).

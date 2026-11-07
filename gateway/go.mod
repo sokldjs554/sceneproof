@@ -1,4 +1,4 @@
-module github.com/sokldjs554/zonewatch/gateway
+module github.com/sokldjs554/sceneproof/gateway
 
 go 1.24.0
 

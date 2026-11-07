@@ -4,24 +4,24 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "[gen_proto] python -> src/zonewatch/proto"
+echo "[gen_proto] python -> src/sceneproof/proto"
 python -m grpc_tools.protoc -I proto \
-  --python_out=src/zonewatch/proto \
-  --grpc_python_out=src/zonewatch/proto \
-  --pyi_out=src/zonewatch/proto \
-  proto/zonewatch/v1/zonewatch.proto
-# grpc_tools emits absolute imports (zonewatch.v1....); rewrite to package-relative.
-sed -i 's/^from zonewatch\.v1 import zonewatch_pb2 as zonewatch_dot_v1_dot_zonewatch__pb2/from zonewatch.proto.zonewatch.v1 import zonewatch_pb2 as zonewatch_dot_v1_dot_zonewatch__pb2/' \
-  src/zonewatch/proto/zonewatch/v1/zonewatch_pb2_grpc.py
-touch src/zonewatch/proto/zonewatch/__init__.py src/zonewatch/proto/zonewatch/v1/__init__.py
+  --python_out=src/sceneproof/proto \
+  --grpc_python_out=src/sceneproof/proto \
+  --pyi_out=src/sceneproof/proto \
+  proto/sceneproof/v1/sceneproof.proto
+# grpc_tools emits absolute imports (sceneproof.v1....); rewrite to package-relative.
+sed -i 's/^from sceneproof\.v1 import sceneproof_pb2 as sceneproof_dot_v1_dot_sceneproof__pb2/from sceneproof.proto.sceneproof.v1 import sceneproof_pb2 as sceneproof_dot_v1_dot_sceneproof__pb2/' \
+  src/sceneproof/proto/sceneproof/v1/sceneproof_pb2_grpc.py
+touch src/sceneproof/proto/sceneproof/__init__.py src/sceneproof/proto/sceneproof/v1/__init__.py
 
-echo "[gen_proto] go -> gateway/gen/zonewatchv1"
-mkdir -p gateway/gen/zonewatchv1
+echo "[gen_proto] go -> gateway/gen/sceneproofv1"
+mkdir -p gateway/gen/sceneproofv1
 protoc -I proto \
-  --go_out=gateway/gen/zonewatchv1 --go_opt=paths=source_relative \
-  --go-grpc_out=gateway/gen/zonewatchv1 --go-grpc_opt=paths=source_relative \
-  proto/zonewatch/v1/zonewatch.proto
-# flatten zonewatch/v1/* into the package dir
-mv -f gateway/gen/zonewatchv1/zonewatch/v1/*.go gateway/gen/zonewatchv1/ 2>/dev/null || true
-rm -rf gateway/gen/zonewatchv1/zonewatch
+  --go_out=gateway/gen/sceneproofv1 --go_opt=paths=source_relative \
+  --go-grpc_out=gateway/gen/sceneproofv1 --go-grpc_opt=paths=source_relative \
+  proto/sceneproof/v1/sceneproof.proto
+# flatten sceneproof/v1/* into the package dir
+mv -f gateway/gen/sceneproofv1/sceneproof/v1/*.go gateway/gen/sceneproofv1/ 2>/dev/null || true
+rm -rf gateway/gen/sceneproofv1/sceneproof
 echo "[gen_proto] done"

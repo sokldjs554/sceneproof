@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from zonewatch.edge.config import EdgeConfig, load_config
+from sceneproof.edge.config import EdgeConfig, load_config
 
 
 def test_example_config_loads_and_hashes():

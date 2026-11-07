@@ -4,10 +4,10 @@
 
 ## D1. 탐지기: YOLOX(Apache-2.0) + 자체 ONNX 내보내기
 - 대안: Ultralytics YOLOv8/11(AGPL-3.0, 내장 추적기·export), torchvision SSDLite(BSD, 정확도 낮음), RT-DETR(무거움).
-- 이유: 상용 회사 지원용 포트폴리오에서 라이선스는 설계 판단의 일부입니다. YOLOX는 Apache-2.0이고, 모델 코드 5개 파일만 벤더링(`src/zonewatch/edge/yolox_model/`)하면 PyTorch 경로와 ONNX 경로를 **같은 전·후처리**로 비교할 수 있습니다. CPU 4코어에서 tiny가 416 입력 기준 p50 ≈ 21 ms로 30 fps 입력을 처리합니다(`docs/eval/README.md`).
+- 이유: 상용 회사 지원용 포트폴리오에서 라이선스는 설계 판단의 일부입니다. YOLOX는 Apache-2.0이고, 모델 코드 5개 파일만 벤더링(`src/sceneproof/edge/yolox_model/`)하면 PyTorch 경로와 ONNX 경로를 **같은 전·후처리**로 비교할 수 있습니다. CPU 4코어에서 tiny가 416 입력 기준 p50 ≈ 21 ms로 30 fps 입력을 처리합니다(`docs/eval/README.md`).
 - 확인: `scripts/export_onnx.py`가 내보내기 직후 무작위 입력으로 원시 출력 최대 오차(1e-5 수준)를 기록, `tests/test_detector.py::test_torch_and_onnx_backends_agree`가 실제 프레임에서 NMS 후 상자 일치를 검사.
 
-## D2. 추적기: ByteTrack 자체 구현 (`src/zonewatch/edge/tracker.py`)
+## D2. 추적기: ByteTrack 자체 구현 (`src/sceneproof/edge/tracker.py`)
 - 대안: `supervision`/`boxmot` 라이브러리, 간단한 IoU 추적.
 - 이유: 구역 체류 시간은 ID가 안정적일 때만 의미가 있습니다. ByteTrack의 핵심(저신뢰 상자를 2차 연계에 사용)은 ~250줄로 구현 가능하고, 직접 구현해야 `track_buffer`·2단계 임계값·가림 시 ID 유지 같은 동작을 테스트로 고정할 수 있습니다(`tests/test_tracker.py`: 가림 중 저신뢰 상자로 ID 유지, 버퍼 내 재출현 시 ID 복원, 교차 시 ID 구분).
 - 차이: 헝가리안(scipy)에 비용 게이트를 둔 방식이라 원 구현의 lapjv와 동률 처리에서 드물게 다를 수 있습니다.

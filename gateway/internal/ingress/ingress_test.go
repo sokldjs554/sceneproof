@@ -16,17 +16,17 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 type fakeResults struct {
 	mu  sync.Mutex
-	res []*zonewatchv1.CommandResult
+	res []*sceneproofv1.CommandResult
 }
 
-func (f *fakeResults) Push(r *zonewatchv1.CommandResult) {
+func (f *fakeResults) Push(r *sceneproofv1.CommandResult) {
 	f.mu.Lock()
 	f.res = append(f.res, r)
 	f.mu.Unlock()
@@ -38,7 +38,7 @@ type env struct {
 	reg     *status.Registry
 	bus     *Bus
 	results *fakeResults
-	client  zonewatchv1.EdgeIngressClient
+	client  sceneproofv1.EdgeIngressClient
 }
 
 func setup(t *testing.T) *env {
@@ -69,14 +69,14 @@ func setup(t *testing.T) *env {
 		gs.Stop()
 		q.Close()
 	})
-	return &env{dir: dir, q: q, reg: reg, bus: bus, results: results, client: zonewatchv1.NewEdgeIngressClient(cc)}
+	return &env{dir: dir, q: q, reg: reg, bus: bus, results: results, client: sceneproofv1.NewEdgeIngressClient(cc)}
 }
 
 func walIDs(t *testing.T, dir string) []string {
 	t.Helper()
 	var ids []string
 	_, err := queue.ScanFile(filepath.Join(dir, queue.FileName), func(typ byte, payload []byte) error {
-		ev := &zonewatchv1.Event{}
+		ev := &sceneproofv1.Event{}
 		if typ == 1 && proto.Unmarshal(payload, ev) == nil {
 			ids = append(ids, ev.EventId)
 		}
@@ -93,7 +93,7 @@ func TestSubmitEventAcceptedOnlyAfterWALWrite(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	ack, err := e.client.SubmitEvent(ctx, &zonewatchv1.Event{EventId: "ev-1", Revision: 1, CameraId: "cam"})
+	ack, err := e.client.SubmitEvent(ctx, &sceneproofv1.Event{EventId: "ev-1", Revision: 1, CameraId: "cam"})
 	if err != nil || !ack.Accepted || ack.Duplicate {
 		t.Fatalf("ack=%v err=%v", ack, err)
 	}
@@ -107,7 +107,7 @@ func TestSubmitEventAcceptedOnlyAfterWALWrite(t *testing.T) {
 	}
 
 	// Same revision again → duplicate, nothing written.
-	ack, err = e.client.SubmitEvent(ctx, &zonewatchv1.Event{EventId: "ev-1", Revision: 1})
+	ack, err = e.client.SubmitEvent(ctx, &sceneproofv1.Event{EventId: "ev-1", Revision: 1})
 	if err != nil || ack.Accepted || !ack.Duplicate {
 		t.Fatalf("dup ack=%v err=%v", ack, err)
 	}
@@ -115,7 +115,7 @@ func TestSubmitEventAcceptedOnlyAfterWALWrite(t *testing.T) {
 		t.Fatalf("duplicate wrote to wal: %v", ids)
 	}
 	// Newer revision → accepted and coalesced.
-	ack, err = e.client.SubmitEvent(ctx, &zonewatchv1.Event{EventId: "ev-1", Revision: 2})
+	ack, err = e.client.SubmitEvent(ctx, &sceneproofv1.Event{EventId: "ev-1", Revision: 2})
 	if err != nil || !ack.Accepted {
 		t.Fatalf("rev2 ack=%v err=%v", ack, err)
 	}
@@ -123,12 +123,12 @@ func TestSubmitEventAcceptedOnlyAfterWALWrite(t *testing.T) {
 		t.Fatalf("not coalesced: %v", e.q.Pending())
 	}
 	// Missing event_id → InvalidArgument.
-	if _, err := e.client.SubmitEvent(ctx, &zonewatchv1.Event{}); grpcstatus.Code(err) != codes.InvalidArgument {
+	if _, err := e.client.SubmitEvent(ctx, &sceneproofv1.Event{}); grpcstatus.Code(err) != codes.InvalidArgument {
 		t.Fatalf("err = %v", err)
 	}
 	// After the queue is closed the analyzer must get an error, not an Ack.
 	e.q.Close()
-	if _, err := e.client.SubmitEvent(ctx, &zonewatchv1.Event{EventId: "ev-2", Revision: 1}); grpcstatus.Code(err) != codes.Unavailable {
+	if _, err := e.client.SubmitEvent(ctx, &sceneproofv1.Event{EventId: "ev-2", Revision: 1}); grpcstatus.Code(err) != codes.Unavailable {
 		t.Fatalf("after close err = %v", err)
 	}
 }
@@ -137,7 +137,7 @@ func TestReportStatusStored(t *testing.T) {
 	e := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	ds := &zonewatchv1.DeviceStatus{AnalyzerRunId: "run-9", Cameras: []*zonewatchv1.CameraStatus{{CameraId: "cam-1"}}}
+	ds := &sceneproofv1.DeviceStatus{AnalyzerRunId: "run-9", Cameras: []*sceneproofv1.CameraStatus{{CameraId: "cam-1"}}}
 	if _, err := e.client.ReportStatus(ctx, ds); err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestReportStatusStored(t *testing.T) {
 		t.Fatalf("stored = %v at %v", got, at)
 	}
 	// Only the latest is kept.
-	e.client.ReportStatus(ctx, &zonewatchv1.DeviceStatus{AnalyzerRunId: "run-10"})
+	e.client.ReportStatus(ctx, &sceneproofv1.DeviceStatus{AnalyzerRunId: "run-10"})
 	got, _ = e.reg.AnalyzerStatus()
 	if got.AnalyzerRunId != "run-10" {
 		t.Fatalf("latest = %q", got.AnalyzerRunId)
@@ -163,12 +163,12 @@ func TestSubscribeCommandsForwardsAndBuffersForLateSubscriber(t *testing.T) {
 	defer cancel()
 
 	// Live subscriber receives forwarded commands.
-	stream, err := e.client.SubscribeCommands(ctx, &zonewatchv1.WatchRequest{DeviceId: "edge-test"})
+	stream, err := e.client.SubscribeCommands(ctx, &sceneproofv1.WatchRequest{DeviceId: "edge-test"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool { return e.bus.Subscribers() == 1 }, "subscriber registered")
-	e.bus.Publish(&zonewatchv1.Command{CommandId: "c1", Type: zonewatchv1.CommandType_COMMAND_TYPE_START_CAMERA})
+	e.bus.Publish(&sceneproofv1.Command{CommandId: "c1", Type: sceneproofv1.CommandType_COMMAND_TYPE_START_CAMERA})
 	cmd, err := stream.Recv()
 	if err != nil || cmd.CommandId != "c1" {
 		t.Fatalf("recv = %v %v", cmd, err)
@@ -178,11 +178,11 @@ func TestSubscribeCommandsForwardsAndBuffersForLateSubscriber(t *testing.T) {
 
 	// No subscriber: commands are buffered (bounded), a late subscriber gets them in order.
 	for i := 0; i < DefaultRecentLimit+3; i++ {
-		e.bus.Publish(&zonewatchv1.Command{CommandId: "b" + string(rune('A'+i))})
+		e.bus.Publish(&sceneproofv1.Command{CommandId: "b" + string(rune('A'+i))})
 	}
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
-	stream2, err := e.client.SubscribeCommands(ctx2, &zonewatchv1.WatchRequest{DeviceId: "edge-test"})
+	stream2, err := e.client.SubscribeCommands(ctx2, &sceneproofv1.WatchRequest{DeviceId: "edge-test"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,13 +198,13 @@ func TestSubscribeCommandsForwardsAndBuffersForLateSubscriber(t *testing.T) {
 	// A second late subscriber does not get them again (they were delivered).
 	ctx3, cancel3 := context.WithCancel(context.Background())
 	defer cancel3()
-	stream3, err := e.client.SubscribeCommands(ctx3, &zonewatchv1.WatchRequest{DeviceId: "edge-test"})
+	stream3, err := e.client.SubscribeCommands(ctx3, &sceneproofv1.WatchRequest{DeviceId: "edge-test"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool { return e.bus.Subscribers() == 2 }, "two subscribers")
-	e.bus.Publish(&zonewatchv1.Command{CommandId: "fanout"})
-	for _, s := range []zonewatchv1.EdgeIngress_SubscribeCommandsClient{stream2, stream3} {
+	e.bus.Publish(&sceneproofv1.Command{CommandId: "fanout"})
+	for _, s := range []sceneproofv1.EdgeIngress_SubscribeCommandsClient{stream2, stream3} {
 		cmd, err := s.Recv()
 		if err != nil || cmd.CommandId != "fanout" {
 			t.Fatalf("fanout recv = %v %v", cmd, err)
@@ -217,9 +217,9 @@ func TestBufferedCommandsExpire(t *testing.T) {
 	b := NewBus(log)
 	now := time.Now()
 	b.now = func() time.Time { return now }
-	b.Publish(&zonewatchv1.Command{CommandId: "old"})
+	b.Publish(&sceneproofv1.Command{CommandId: "old"})
 	now = now.Add(DefaultRecentTTL + time.Second)
-	b.Publish(&zonewatchv1.Command{CommandId: "fresh"})
+	b.Publish(&sceneproofv1.Command{CommandId: "fresh"})
 	sub := b.Subscribe()
 	select {
 	case c := <-sub.C:
@@ -240,10 +240,10 @@ func TestReportCommandResultForwarded(t *testing.T) {
 	e := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if _, err := e.client.ReportCommandResult(ctx, &zonewatchv1.CommandResult{CommandId: "c1", Ok: true}); err != nil {
+	if _, err := e.client.ReportCommandResult(ctx, &sceneproofv1.CommandResult{CommandId: "c1", Ok: true}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := e.client.ReportCommandResult(ctx, &zonewatchv1.CommandResult{}); grpcstatus.Code(err) != codes.InvalidArgument {
+	if _, err := e.client.ReportCommandResult(ctx, &sceneproofv1.CommandResult{}); grpcstatus.Code(err) != codes.InvalidArgument {
 		t.Fatalf("err = %v", err)
 	}
 	e.results.mu.Lock()

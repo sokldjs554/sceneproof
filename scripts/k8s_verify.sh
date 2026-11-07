@@ -9,17 +9,17 @@ EV="docs/evidence/k8s"
 mkdir -p "$EV"
 : > "$EV/summary.txt"
 log() { printf '%s\n' "$*" | tee -a "$EV/summary.txt"; }
-NS=zonewatch
+NS=sceneproof
 
 log "=== build images ($(git rev-parse --short HEAD)) ==="
-docker build -q -f deploy/docker/Dockerfile.server -t zonewatch-server:local . | tail -1
-docker build -q -t zonewatch-gateway:local gateway | tail -1
-docker build -q -f deploy/docker/Dockerfile.edge -t zonewatch-edge:local . | tail -1
-docker build -q -f deploy/docker/Dockerfile.rtsp-sim -t zonewatch-rtsp-sim:local . | tail -1
+docker build -q -f deploy/docker/Dockerfile.server -t sceneproof-server:local . | tail -1
+docker build -q -t sceneproof-gateway:local gateway | tail -1
+docker build -q -f deploy/docker/Dockerfile.edge -t sceneproof-edge:local . | tail -1
+docker build -q -f deploy/docker/Dockerfile.rtsp-sim -t sceneproof-rtsp-sim:local . | tail -1
 
 log "=== cluster ==="
 kind get clusters | grep -q "^${NS}$" || kind create cluster --config deploy/kind/kind-config.yaml --wait 180s
-for img in zonewatch-server zonewatch-gateway zonewatch-edge zonewatch-rtsp-sim; do kind load docker-image "$img:local" --name "$NS"; done
+for img in sceneproof-server sceneproof-gateway sceneproof-edge sceneproof-rtsp-sim; do kind load docker-image "$img:local" --name "$NS"; done
 kubectl version | tee "$EV/kubectl-version.txt"
 kubectl get nodes -o wide | tee "$EV/nodes.txt"
 

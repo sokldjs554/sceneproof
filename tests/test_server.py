@@ -5,9 +5,9 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from zonewatch.server.app import create_app
-from zonewatch.server.config import ServerSettings
-from zonewatch.server.db import Store
+from sceneproof.server.app import create_app
+from sceneproof.server.config import ServerSettings
+from sceneproof.server.db import Store
 
 
 def event(eid="ev-1", rev=1, status="EVENT_STATUS_OPEN", kind="EVENT_KIND_ZONE_ENTRY", paths=None):
@@ -46,7 +46,7 @@ def client(tmp_path):
                               console_dir=str(tmp_path / "no-console"))
     app = create_app(settings)
     with TestClient(app) as c:
-        yield c, app.state.zw
+        yield c, app.state.sp
 
 
 def _seed(state, tmp_dir, eid="ev-1", closed=True):
@@ -120,7 +120,7 @@ def test_slow_provider_times_out_and_late_result_is_discarded(tmp_path):
                               vlm_timeout_s=0.3, vlm_max_attempts=2, console_dir=str(tmp_path / "no-console"))
     app = create_app(settings)
     with TestClient(app) as c:
-        state = app.state.zw
+        state = app.state.sp
         _seed(state, None)
         for _ in range(100):
             x = c.get("/api/events/ev-1").json()["explanation"]

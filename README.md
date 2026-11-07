@@ -1,4 +1,4 @@
-# ZoneWatch — 산업현장 제한구역 접근·체류 영상 사건 검토
+# SceneProof — 산업현장 제한구역 접근·체류 영상 사건 검토
 
 **어느 카메라에서 어떤 일이 있었고, 어떤 장면을 근거로 확인이 필요하다고 판단했으며, 담당자가 어떻게 처리했는가** — 현장 관리자가 이 질문에 답할 수 있도록, CV가 사건을 만들고 VLM이 장면을 해석하고 사람이 검토하는 흐름을 하나로 연결한 서비스입니다.
 
@@ -27,19 +27,19 @@ RTSP/파일 → [엣지 분석기: GStreamer → YOLOX(ONNX Runtime) → ByteTra
 ## 바로 실행
 
 ```bash
-git clone https://github.com/sokldjs554/zonewatch.git && cd zonewatch
+git clone https://github.com/sokldjs554/sceneproof.git && cd sceneproof
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[server,dev,torch]"          # PyGObject(GStreamer)는 선택: pip install -e ".[gst]"
 bash scripts/fetch_data.sh && bash scripts/fetch_models.sh
 (cd gateway && make build)                    # Go 1.24
 
 # 터미널 1: 서버(콘솔 http://127.0.0.1:8000)   터미널 2: 게이트웨이   터미널 3: 분석기
-ZW_SERVER_VLM_PROVIDER=mock zonewatch-server run
-gateway/bin/zonewatch-gateway --listen :50051 --server 127.0.0.1:50052 --device-id edge-01 --queue-dir data/gateway --evidence-root data/evidence --http :9100 --insecure
-zonewatch-edge --config configs/edge.yaml run --camera cam-bench
+SP_SERVER_VLM_PROVIDER=mock sceneproof-server run
+gateway/bin/sceneproof-gateway --listen :50051 --server 127.0.0.1:50052 --device-id edge-01 --queue-dir data/gateway --evidence-root data/evidence --http :9100 --insecure
+sceneproof-edge --config configs/edge.yaml run --camera cam-bench
 ```
 
-콘솔에서 카메라 행의 **분석 시작**을 누르면 샘플이 실시간 속도로 분석되고 사건이 쌓입니다. 분석기 없이 결과만 보려면 `zonewatch-server run --mode replay --replay-bundle demo/bundle` (화면에 "저장된 실행 결과 재생" 표시).
+콘솔에서 카메라 행의 **분석 시작**을 누르면 샘플이 실시간 속도로 분석되고 사건이 쌓입니다. 분석기 없이 결과만 보려면 `sceneproof-server run --mode replay --replay-bundle demo/bundle` (화면에 "저장된 실행 결과 재생" 표시).
 docker compose(`docker compose up --build`)와 Kubernetes(`scripts/k8s_verify.sh`)는 [`docs/ops/runbook.md`](docs/ops/runbook.md).
 
 VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Claude, 구조화 JSON) / `openai_compat`(vLLM 등 자체 호스팅) / `transformers`(SmolVLM 로컬). 선택과 비용 상한은 runbook 참조.

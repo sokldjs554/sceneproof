@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 type recentCmd struct {
-	cmd *zonewatchv1.Command
+	cmd *sceneproofv1.Command
 	at  time.Time
 }
 
@@ -46,8 +46,8 @@ type Bus struct {
 
 // Subscription is one analyzer stream's view of the bus.
 type Subscription struct {
-	C   <-chan *zonewatchv1.Command
-	ch  chan *zonewatchv1.Command
+	C   <-chan *sceneproofv1.Command
+	ch  chan *sceneproofv1.Command
 	bus *Bus
 }
 
@@ -67,7 +67,7 @@ func NewBus(log *slog.Logger) *Bus {
 }
 
 // Publish delivers cmd to every subscriber, or buffers it when there is none.
-func (b *Bus) Publish(cmd *zonewatchv1.Command) {
+func (b *Bus) Publish(cmd *sceneproofv1.Command) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if len(b.subs) == 0 {
@@ -86,7 +86,7 @@ func (b *Bus) Publish(cmd *zonewatchv1.Command) {
 
 // deliver pushes without blocking; when the subscriber's buffer is full the
 // oldest queued command is dropped in favour of the newest.
-func (s *Subscription) deliver(cmd *zonewatchv1.Command) {
+func (s *Subscription) deliver(cmd *sceneproofv1.Command) {
 	for {
 		select {
 		case s.ch <- cmd:
@@ -114,7 +114,7 @@ func (b *Bus) pruneLocked() {
 // are placed on its channel first and the buffer is cleared: they have been
 // delivered.
 func (b *Bus) Subscribe() *Subscription {
-	s := &Subscription{ch: make(chan *zonewatchv1.Command, b.bufSize), bus: b}
+	s := &Subscription{ch: make(chan *sceneproofv1.Command, b.bufSize), bus: b}
 	s.C = s.ch
 	b.mu.Lock()
 	defer b.mu.Unlock()

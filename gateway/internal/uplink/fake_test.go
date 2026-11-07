@@ -20,9 +20,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 func testLogger() *slog.Logger {
@@ -41,17 +41,17 @@ type fakeUpload struct {
 // fakeIngest is an in-process review server: it deduplicates events by
 // (event_id, max revision) exactly like the real one is specified to.
 type fakeIngest struct {
-	zonewatchv1.UnimplementedIngestServer
+	sceneproofv1.UnimplementedIngestServer
 	mu         sync.Mutex
 	maxRev     map[string]int32
-	received   []*zonewatchv1.Event
-	heartbeats []*zonewatchv1.DeviceStatus
+	received   []*sceneproofv1.Event
+	heartbeats []*sceneproofv1.DeviceStatus
 	hbTimes    []time.Time
 	uploads    map[string]*fakeUpload
 	present    map[string]bool
-	results    []*zonewatchv1.CommandResult
+	results    []*sceneproofv1.CommandResult
 	watchers   int
-	cmds       chan *zonewatchv1.Command
+	cmds       chan *sceneproofv1.Command
 	publishErr error
 }
 
@@ -60,20 +60,20 @@ func newFakeIngest() *fakeIngest {
 		maxRev:  map[string]int32{},
 		uploads: map[string]*fakeUpload{},
 		present: map[string]bool{},
-		cmds:    make(chan *zonewatchv1.Command, 16),
+		cmds:    make(chan *sceneproofv1.Command, 16),
 	}
 }
 
 func uploadKey(eventID, path string) string { return eventID + "/" + path }
 
-func (f *fakeIngest) PublishEvent(_ context.Context, ev *zonewatchv1.Event) (*zonewatchv1.Ack, error) {
+func (f *fakeIngest) PublishEvent(_ context.Context, ev *sceneproofv1.Event) (*sceneproofv1.Ack, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.publishErr != nil {
 		return nil, f.publishErr
 	}
-	f.received = append(f.received, proto.Clone(ev).(*zonewatchv1.Event))
-	ack := &zonewatchv1.Ack{EventId: ev.EventId, Revision: ev.Revision}
+	f.received = append(f.received, proto.Clone(ev).(*sceneproofv1.Event))
+	ack := &sceneproofv1.Ack{EventId: ev.EventId, Revision: ev.Revision}
 	if cur, ok := f.maxRev[ev.EventId]; ok && cur >= ev.Revision {
 		ack.Duplicate = true
 		return ack, nil
@@ -83,13 +83,13 @@ func (f *fakeIngest) PublishEvent(_ context.Context, ev *zonewatchv1.Event) (*zo
 	return ack, nil
 }
 
-func (f *fakeIngest) UploadEvidence(stream zonewatchv1.Ingest_UploadEvidenceServer) error {
+func (f *fakeIngest) UploadEvidence(stream sceneproofv1.Ingest_UploadEvidenceServer) error {
 	var (
 		key, eventID, path string
 		buf                []byte
 		chunks             int
 		offset             int64
-		last               *zonewatchv1.EvidenceChunk
+		last               *sceneproofv1.EvidenceChunk
 	)
 	for {
 		c, err := stream.Recv()
@@ -119,27 +119,27 @@ func (f *fakeIngest) UploadEvidence(stream zonewatchv1.Ingest_UploadEvidenceServ
 	sum := sha256.Sum256(buf)
 	sha := hex.EncodeToString(sum[:])
 	if last.Sha256 != sha || last.TotalSize != int64(len(buf)) {
-		return stream.SendAndClose(&zonewatchv1.UploadResult{EventId: eventID, Path: path, Ok: false, Message: "digest/size mismatch"})
+		return stream.SendAndClose(&sceneproofv1.UploadResult{EventId: eventID, Path: path, Ok: false, Message: "digest/size mismatch"})
 	}
 	f.mu.Lock()
 	already := f.present[key]
 	f.uploads[key] = &fakeUpload{data: buf, sha: sha, total: last.TotalSize, chunks: chunks, already: already}
 	f.mu.Unlock()
 	if already {
-		return stream.SendAndClose(&zonewatchv1.UploadResult{EventId: eventID, Path: path, Ok: false, AlreadyPresent: true, Size: int64(len(buf))})
+		return stream.SendAndClose(&sceneproofv1.UploadResult{EventId: eventID, Path: path, Ok: false, AlreadyPresent: true, Size: int64(len(buf))})
 	}
-	return stream.SendAndClose(&zonewatchv1.UploadResult{EventId: eventID, Path: path, Ok: true, Size: int64(len(buf))})
+	return stream.SendAndClose(&sceneproofv1.UploadResult{EventId: eventID, Path: path, Ok: true, Size: int64(len(buf))})
 }
 
-func (f *fakeIngest) Heartbeat(_ context.Context, ds *zonewatchv1.DeviceStatus) (*zonewatchv1.HeartbeatAck, error) {
+func (f *fakeIngest) Heartbeat(_ context.Context, ds *sceneproofv1.DeviceStatus) (*sceneproofv1.HeartbeatAck, error) {
 	f.mu.Lock()
-	f.heartbeats = append(f.heartbeats, proto.Clone(ds).(*zonewatchv1.DeviceStatus))
+	f.heartbeats = append(f.heartbeats, proto.Clone(ds).(*sceneproofv1.DeviceStatus))
 	f.hbTimes = append(f.hbTimes, time.Now())
 	f.mu.Unlock()
-	return &zonewatchv1.HeartbeatAck{ServerTs: timestamppb.Now()}, nil
+	return &sceneproofv1.HeartbeatAck{ServerTs: timestamppb.Now()}, nil
 }
 
-func (f *fakeIngest) WatchCommands(_ *zonewatchv1.WatchRequest, stream zonewatchv1.Ingest_WatchCommandsServer) error {
+func (f *fakeIngest) WatchCommands(_ *sceneproofv1.WatchRequest, stream sceneproofv1.Ingest_WatchCommandsServer) error {
 	f.mu.Lock()
 	f.watchers++
 	f.mu.Unlock()
@@ -160,11 +160,11 @@ func (f *fakeIngest) WatchCommands(_ *zonewatchv1.WatchRequest, stream zonewatch
 	}
 }
 
-func (f *fakeIngest) PublishCommandResult(_ context.Context, res *zonewatchv1.CommandResult) (*zonewatchv1.Empty, error) {
+func (f *fakeIngest) PublishCommandResult(_ context.Context, res *sceneproofv1.CommandResult) (*sceneproofv1.Empty, error) {
 	f.mu.Lock()
-	f.results = append(f.results, proto.Clone(res).(*zonewatchv1.CommandResult))
+	f.results = append(f.results, proto.Clone(res).(*sceneproofv1.CommandResult))
 	f.mu.Unlock()
-	return &zonewatchv1.Empty{}, nil
+	return &sceneproofv1.Empty{}, nil
 }
 
 func (f *fakeIngest) receivedCount() int {
@@ -246,7 +246,7 @@ func newFakeServer(t *testing.T) *fakeServer {
 
 func (s *fakeServer) serve(lis net.Listener) {
 	gs := grpc.NewServer()
-	zonewatchv1.RegisterIngestServer(gs, s.svc)
+	sceneproofv1.RegisterIngestServer(gs, s.svc)
 	s.mu.Lock()
 	s.gs = gs
 	s.mu.Unlock()
@@ -327,7 +327,7 @@ func (h *harness) go_(f func()) {
 	}()
 }
 
-func (h *harness) startSender(onAcked func(*zonewatchv1.Event)) {
+func (h *harness) startSender(onAcked func(*sceneproofv1.Event)) {
 	h.go_(func() {
 		RunSender(h.ctx, SenderOptions{
 			Queue: h.q, Conn: h.conn, Status: h.reg, Logger: testLogger(),
@@ -349,6 +349,6 @@ func waitFor(t *testing.T, timeout time.Duration, cond func() bool, msg string) 
 	t.Fatalf("timeout waiting for: %s", msg)
 }
 
-func mkEvent(id string, rev int32) *zonewatchv1.Event {
-	return &zonewatchv1.Event{EventId: id, Revision: rev, DeviceId: "edge-test", CameraId: "cam-1", ZoneId: "z1"}
+func mkEvent(id string, rev int32) *sceneproofv1.Event {
+	return &sceneproofv1.Event{EventId: id, Revision: rev, DeviceId: "edge-test", CameraId: "cam-1", ZoneId: "z1"}
 }

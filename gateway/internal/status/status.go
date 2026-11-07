@@ -18,8 +18,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
 )
 
 // Uplink connection states, as strings so they read well in JSON and logs.
@@ -41,7 +41,7 @@ type Registry struct {
 	lastError   string
 	lastErrorAt time.Time
 	lastAck     time.Time
-	analyzer    *zonewatchv1.DeviceStatus
+	analyzer    *sceneproofv1.DeviceStatus
 	analyzerAt  time.Time
 	queueStats  func() queue.Stats
 
@@ -143,7 +143,7 @@ func (r *Registry) SetGRPCUp(v bool)    { r.grpcUp.Store(v) }
 
 // SetAnalyzerStatus stores the latest DeviceStatus reported by the analyzer.
 // It is not queued: only the newest report matters for a heartbeat.
-func (r *Registry) SetAnalyzerStatus(ds *zonewatchv1.DeviceStatus) {
+func (r *Registry) SetAnalyzerStatus(ds *sceneproofv1.DeviceStatus) {
 	r.mu.Lock()
 	r.analyzer = ds
 	r.analyzerAt = time.Now()
@@ -152,7 +152,7 @@ func (r *Registry) SetAnalyzerStatus(ds *zonewatchv1.DeviceStatus) {
 
 // AnalyzerStatus returns the latest analyzer report (nil if none) and when it
 // was received.
-func (r *Registry) AnalyzerStatus() (*zonewatchv1.DeviceStatus, time.Time) {
+func (r *Registry) AnalyzerStatus() (*sceneproofv1.DeviceStatus, time.Time) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.analyzer, r.analyzerAt
@@ -160,10 +160,10 @@ func (r *Registry) AnalyzerStatus() (*zonewatchv1.DeviceStatus, time.Time) {
 
 // UplinkStatus assembles the proto UplinkStatus from the counters and the
 // live queue stats.
-func (r *Registry) UplinkStatus() *zonewatchv1.UplinkStatus {
+func (r *Registry) UplinkStatus() *sceneproofv1.UplinkStatus {
 	qs := r.queue()
 	r.mu.RLock()
-	us := &zonewatchv1.UplinkStatus{
+	us := &sceneproofv1.UplinkStatus{
 		Connected:          r.connected,
 		PendingEvents:      int64(qs.Pending),
 		SentEvents:         r.sent.Load(),
@@ -189,15 +189,15 @@ func (r *Registry) UplinkStatus() *zonewatchv1.UplinkStatus {
 // cameras is produced so the server still sees the device as online.
 // ts is the gateway's send time; the freshness of analyzer data is visible
 // through cameras[].last_frame_ts.
-func (r *Registry) DeviceStatus(now time.Time) *zonewatchv1.DeviceStatus {
+func (r *Registry) DeviceStatus(now time.Time) *sceneproofv1.DeviceStatus {
 	r.mu.RLock()
 	src := r.analyzer
 	r.mu.RUnlock()
-	var ds *zonewatchv1.DeviceStatus
+	var ds *sceneproofv1.DeviceStatus
 	if src != nil {
-		ds = proto.Clone(src).(*zonewatchv1.DeviceStatus)
+		ds = proto.Clone(src).(*sceneproofv1.DeviceStatus)
 	} else {
-		ds = &zonewatchv1.DeviceStatus{}
+		ds = &sceneproofv1.DeviceStatus{}
 	}
 	if ds.DeviceId == "" {
 		ds.DeviceId = r.deviceID
@@ -332,19 +332,19 @@ func (r *Registry) writeMetrics(w http.ResponseWriter) {
 	metric := func(name, typ, help string, v int64) {
 		fmt.Fprintf(w, "# HELP %s %s\n# TYPE %s %s\n%s %d\n", name, help, name, typ, name, v)
 	}
-	fmt.Fprintf(w, "# HELP zonewatch_gateway_info Build information.\n# TYPE zonewatch_gateway_info gauge\nzonewatch_gateway_info{version=%q,device_id=%q} 1\n", r.version, r.deviceID)
-	metric("zonewatch_gateway_queue_pending", "gauge", "Events waiting in the durable queue.", int64(qs.Pending))
-	metric("zonewatch_gateway_queue_bytes", "gauge", "Live payload bytes in the durable queue.", qs.LiveBytes)
-	metric("zonewatch_gateway_queue_capacity_bytes", "gauge", "Configured queue budget in bytes.", qs.MaxBytes)
-	metric("zonewatch_gateway_queue_file_bytes", "gauge", "Size of the WAL file on disk.", qs.FileBytes)
-	metric("zonewatch_gateway_events_sent_total", "counter", "PublishEvent attempts.", r.sent.Load())
-	metric("zonewatch_gateway_events_acked_total", "counter", "Events acknowledged by the server (accepted or duplicate).", r.acked.Load())
-	metric("zonewatch_gateway_events_duplicate_acks_total", "counter", "Acks where the server already had the revision.", r.duplicateAcks.Load())
-	metric("zonewatch_gateway_events_dropped_total", "counter", "Events evicted because the queue was full (since start).", qs.Dropped)
-	metric("zonewatch_gateway_uplink_connected", "gauge", "1 when the uplink to the review server is connected.", b2i(connected))
-	metric("zonewatch_gateway_uplink_reconnects_total", "counter", "Reconnection attempts after a lost uplink.", r.reconnects.Load())
-	metric("zonewatch_gateway_uploads_pending", "gauge", "Evidence files waiting to be uploaded.", r.uploadsPending.Load())
-	metric("zonewatch_gateway_uploads_done_total", "counter", "Evidence files the server holds.", r.uploadsDone.Load())
-	metric("zonewatch_gateway_uploads_failed_total", "counter", "Evidence files given up on after the retry window.", r.uploadsFailed.Load())
-	metric("zonewatch_gateway_ready", "gauge", "1 when /readyz would return 200.", b2i(r.queueOpen.Load() && r.grpcUp.Load()))
+	fmt.Fprintf(w, "# HELP sceneproof_gateway_info Build information.\n# TYPE sceneproof_gateway_info gauge\nsceneproof_gateway_info{version=%q,device_id=%q} 1\n", r.version, r.deviceID)
+	metric("sceneproof_gateway_queue_pending", "gauge", "Events waiting in the durable queue.", int64(qs.Pending))
+	metric("sceneproof_gateway_queue_bytes", "gauge", "Live payload bytes in the durable queue.", qs.LiveBytes)
+	metric("sceneproof_gateway_queue_capacity_bytes", "gauge", "Configured queue budget in bytes.", qs.MaxBytes)
+	metric("sceneproof_gateway_queue_file_bytes", "gauge", "Size of the WAL file on disk.", qs.FileBytes)
+	metric("sceneproof_gateway_events_sent_total", "counter", "PublishEvent attempts.", r.sent.Load())
+	metric("sceneproof_gateway_events_acked_total", "counter", "Events acknowledged by the server (accepted or duplicate).", r.acked.Load())
+	metric("sceneproof_gateway_events_duplicate_acks_total", "counter", "Acks where the server already had the revision.", r.duplicateAcks.Load())
+	metric("sceneproof_gateway_events_dropped_total", "counter", "Events evicted because the queue was full (since start).", qs.Dropped)
+	metric("sceneproof_gateway_uplink_connected", "gauge", "1 when the uplink to the review server is connected.", b2i(connected))
+	metric("sceneproof_gateway_uplink_reconnects_total", "counter", "Reconnection attempts after a lost uplink.", r.reconnects.Load())
+	metric("sceneproof_gateway_uploads_pending", "gauge", "Evidence files waiting to be uploaded.", r.uploadsPending.Load())
+	metric("sceneproof_gateway_uploads_done_total", "counter", "Evidence files the server holds.", r.uploadsDone.Load())
+	metric("sceneproof_gateway_uploads_failed_total", "counter", "Evidence files given up on after the retry window.", r.uploadsFailed.Load())
+	metric("sceneproof_gateway_ready", "gauge", "1 when /readyz would return 200.", b2i(r.queueOpen.Load() && r.grpcUp.Load()))
 }

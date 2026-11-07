@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	grpcstatus "google.golang.org/grpc/status"
 
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // ConnOptions configures the uplink connection.

@@ -1,6 +1,6 @@
 import numpy as np
 
-from zonewatch.edge.tracker import ByteTracker, STrack, TrackerParams, iou_matrix, linear_assignment
+from sceneproof.edge.tracker import ByteTracker, STrack, TrackerParams, iou_matrix, linear_assignment
 
 
 def box(cx, cy, w=40, h=100):

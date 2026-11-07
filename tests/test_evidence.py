@@ -1,8 +1,8 @@
 import numpy as np
 
-from zonewatch.edge.evidence import EvidenceWriter, draw_annotations
-from zonewatch.edge.frames import Frame, FrameRing
-from zonewatch.edge.zones import CloseReason, Episode, ZoneSpec
+from sceneproof.edge.evidence import EvidenceWriter, draw_annotations
+from sceneproof.edge.frames import Frame, FrameRing
+from sceneproof.edge.zones import CloseReason, Episode, ZoneSpec
 
 
 def ring_with(n, fps=10):

@@ -1,14 +1,14 @@
 # Review server: HTTP console/API (8000) + gRPC ingest (50052). One replica; SQLite on a PVC.
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata: { name: server-data, namespace: zonewatch }
+metadata: { name: server-data, namespace: sceneproof }
 spec:
   accessModes: [ReadWriteOnce]
   resources: { requests: { storage: 2Gi } }
 ---
 apiVersion: apps/v1
 kind: Deployment
-metadata: { name: server, namespace: zonewatch, labels: { app: server } }
+metadata: { name: server, namespace: sceneproof, labels: { app: server } }
 spec:
   replicas: 1
   strategy: { type: Recreate }   # SQLite + RWO volume: never two writers
@@ -18,13 +18,13 @@ spec:
     spec:
       containers:
         - name: server
-          image: zonewatch-server:local
+          image: sceneproof-server:local
           imagePullPolicy: IfNotPresent
           args: ["run"]
           env:
-            - { name: ZW_SERVER_DATA_DIR, value: /data }
-            - { name: ZW_SERVER_VLM_PROVIDER, value: mock }
-            - { name: ZW_SERVER_GRPC_LISTEN, value: "0.0.0.0:50052" }
+            - { name: SP_SERVER_DATA_DIR, value: /data }
+            - { name: SP_SERVER_VLM_PROVIDER, value: mock }
+            - { name: SP_SERVER_GRPC_LISTEN, value: "0.0.0.0:50052" }
           ports:
             - { name: http, containerPort: 8000 }
             - { name: grpc, containerPort: 50052 }
@@ -38,7 +38,7 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-metadata: { name: server, namespace: zonewatch }
+metadata: { name: server, namespace: sceneproof }
 spec:
   selector: { app: server }
   ports:

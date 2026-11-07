@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pytest
 
-from zonewatch.edge.detector import decode_raw, grid_tables, letterbox, nms_xyxy, postprocess
+from sceneproof.edge.detector import decode_raw, grid_tables, letterbox, nms_xyxy, postprocess
 
 MODEL = "models/yolox_tiny.onnx"
 
@@ -50,7 +50,7 @@ def test_nms_keeps_best_of_overlapping():
 def test_onnx_detector_finds_people_in_sample_frame():
     import cv2
 
-    from zonewatch.edge.detector import build_detector
+    from sceneproof.edge.detector import build_detector
 
     video = "data/videos/campus-walkway.mp4"
     if not os.path.exists(video):
@@ -71,7 +71,7 @@ def test_torch_and_onnx_backends_agree():
     pytest.importorskip("torch")
     import cv2
 
-    from zonewatch.edge.detector import build_detector
+    from sceneproof.edge.detector import build_detector
 
     video = "data/videos/campus-walkway.mp4"
     if not os.path.exists(video):

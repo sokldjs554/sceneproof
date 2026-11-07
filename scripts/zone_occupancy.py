@@ -18,8 +18,8 @@ import cv2
 import numpy as np
 import yaml
 
-from zonewatch.edge.detector import build_detector
-from zonewatch.edge.zones import ZoneSpec, anchor_point
+from sceneproof.edge.detector import build_detector
+from sceneproof.edge.zones import ZoneSpec, anchor_point
 
 
 def main() -> int:

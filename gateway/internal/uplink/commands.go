@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/status"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/status"
 )
 
 // longLivedStream is how long a WatchCommands stream must have lived for
@@ -19,7 +19,7 @@ const longLivedStream = 30 * time.Second
 // CommandSink receives commands from the server (implemented by the ingress
 // command bus, which fans them out to analyzer subscribers).
 type CommandSink interface {
-	Publish(cmd *zonewatchv1.Command)
+	Publish(cmd *sceneproofv1.Command)
 }
 
 // WatcherOptions configures RunCommandWatcher.
@@ -56,7 +56,7 @@ func RunCommandWatcher(ctx context.Context, o WatcherOptions) {
 			return
 		}
 		sctx, cancel := context.WithCancel(ctx)
-		stream, err := zonewatchv1.NewIngestClient(cc).WatchCommands(sctx, &zonewatchv1.WatchRequest{DeviceId: o.DeviceID})
+		stream, err := sceneproofv1.NewIngestClient(cc).WatchCommands(sctx, &sceneproofv1.WatchRequest{DeviceId: o.DeviceID})
 		if err != nil {
 			cancel()
 			if ctx.Err() != nil {
@@ -135,7 +135,7 @@ type Results struct {
 	o    ResultsOptions
 	log  *slog.Logger
 	mu   sync.Mutex
-	q    []*zonewatchv1.CommandResult
+	q    []*sceneproofv1.CommandResult
 	wake chan struct{}
 }
 
@@ -156,7 +156,7 @@ func NewResults(o ResultsOptions) *Results {
 // Push enqueues a result. When the queue is full the oldest result is dropped
 // (and logged): newer outcomes are more relevant and the bound exists to
 // protect memory while the server is unreachable.
-func (r *Results) Push(res *zonewatchv1.CommandResult) {
+func (r *Results) Push(res *sceneproofv1.CommandResult) {
 	r.mu.Lock()
 	if len(r.q) >= r.o.Capacity {
 		dropped := r.q[0]
@@ -178,7 +178,7 @@ func (r *Results) Len() int {
 	return len(r.q)
 }
 
-func (r *Results) peek() *zonewatchv1.CommandResult {
+func (r *Results) peek() *sceneproofv1.CommandResult {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if len(r.q) == 0 {
@@ -187,7 +187,7 @@ func (r *Results) peek() *zonewatchv1.CommandResult {
 	return r.q[0]
 }
 
-func (r *Results) pop(res *zonewatchv1.CommandResult) {
+func (r *Results) pop(res *sceneproofv1.CommandResult) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if len(r.q) > 0 && r.q[0] == res {
@@ -213,7 +213,7 @@ func (r *Results) Run(ctx context.Context) {
 			return
 		}
 		rctx, cancel := context.WithTimeout(ctx, r.o.RPCTimeout)
-		_, err = zonewatchv1.NewIngestClient(cc).PublishCommandResult(rctx, res)
+		_, err = sceneproofv1.NewIngestClient(cc).PublishCommandResult(rctx, res)
 		cancel()
 		if err != nil {
 			if ctx.Err() != nil {

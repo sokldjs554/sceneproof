@@ -1,6 +1,6 @@
 import numpy as np
 
-from zonewatch.edge.frames import Frame, FrameQueue, FrameRing
+from sceneproof.edge.frames import Frame, FrameQueue, FrameRing
 
 
 def mk(i, media_s=None):

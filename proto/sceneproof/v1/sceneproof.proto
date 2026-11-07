@@ -1,0 +1,290 @@
+// SceneProof wire contract (v1).
+//
+// Two hops share one vocabulary:
+//   analyzer (Python, on the device)  --EdgeIngress-->  gateway (Go, on the device)
+//   gateway  (Go, on the device)      --Ingest-------->  review server (Python)
+//
+// Design rules
+//   * An Event is a *snapshot* of one zone episode (one track inside one zone).
+//     event_id is stable for the episode; `revision` grows on every update
+//     (entry -> dwell -> exit). Consumers keep the highest revision and treat
+//     (event_id, revision) pairs as idempotent. Because snapshots are complete,
+//     a queue may coalesce older revisions into the newest one without loss.
+//   * Timestamps: `*_ts` are wall-clock (device clock). `media_*_s` are seconds
+//     in the source media (file offset or stream-relative), used to seek video.
+//   * Evidence files are referenced by relative path and uploaded separately
+//     (UploadEvidence). The Event is accepted before evidence arrives.
+syntax = "proto3";
+
+package sceneproof.v1;
+
+option go_package = "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1;sceneproofv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Point {
+  float x = 1;  // normalized [0,1] of frame width
+  float y = 2;  // normalized [0,1] of frame height
+}
+
+message BBox {
+  float x1 = 1;  // pixels in the analyzed frame
+  float y1 = 2;
+  float x2 = 3;
+  float y2 = 4;
+}
+
+message TrackPoint {
+  google.protobuf.Timestamp ts = 1;
+  int64 frame_index = 2;
+  double media_time_s = 3;
+  BBox box = 4;
+  float score = 5;
+  bool in_zone = 6;
+}
+
+enum EventKind {
+  EVENT_KIND_UNSPECIFIED = 0;
+  EVENT_KIND_ZONE_ENTRY = 1;  // a confirmed entry into a restricted zone
+  EVENT_KIND_ZONE_DWELL = 2;  // entry escalated: stayed longer than dwell_seconds
+}
+
+enum EventStatus {
+  EVENT_STATUS_UNSPECIFIED = 0;
+  EVENT_STATUS_OPEN = 1;    // track still inside (or within grace period)
+  EVENT_STATUS_CLOSED = 2;  // track left the zone or was lost beyond grace
+}
+
+enum CloseReason {
+  CLOSE_REASON_UNSPECIFIED = 0;
+  CLOSE_REASON_EXITED = 1;      // anchor point left the polygon (debounced)
+  CLOSE_REASON_TRACK_LOST = 2;  // tracker lost the object beyond grace period
+  CLOSE_REASON_STREAM_ENDED = 3;
+  CLOSE_REASON_SHUTDOWN = 4;
+}
+
+message KeyFrame {
+  string role = 1;  // "context_before" | "entry" | "dwell" | "exit" | "context_after"
+  google.protobuf.Timestamp ts = 2;
+  int64 frame_index = 3;
+  double media_time_s = 4;
+  string path = 5;  // relative to the device evidence root, e.g. "<event_id>/entry.jpg"
+  BBox box = 6;     // box of the tracked person in this frame (may be empty for context frames)
+  int32 width = 7;
+  int32 height = 8;
+}
+
+message Evidence {
+  repeated KeyFrame key_frames = 1;
+  string clip_path = 2;         // relative path of the pre/post-roll clip (mp4); empty until written
+  double clip_start_media_s = 3;
+  double clip_end_media_s = 4;
+  double clip_fps = 5;
+  int32 clip_frames = 6;
+}
+
+message RunInfo {
+  string run_id = 1;        // one analyzer process lifetime
+  string edge_version = 2;  // package version + git sha
+  string model_name = 3;    // e.g. yolox_tiny
+  string model_version = 4; // file sha256 (short)
+  string backend = 5;       // onnxruntime-cpu | torch-cpu | onnxruntime-tensorrt ...
+  string tracker = 6;       // bytetrack@<params hash>
+  string config_hash = 7;   // sha256 of the effective camera/zone/pipeline config
+  int32 input_width = 8;
+  int32 input_height = 9;
+}
+
+message Event {
+  string event_id = 1;
+  int32 revision = 2;
+  string device_id = 3;
+  string camera_id = 4;
+  string zone_id = 5;
+  string zone_name = 6;
+  EventKind kind = 7;
+  EventStatus status = 8;
+  CloseReason close_reason = 9;
+  int32 track_id = 10;
+
+  google.protobuf.Timestamp entry_ts = 11;
+  google.protobuf.Timestamp exit_ts = 12;      // set when CLOSED
+  google.protobuf.Timestamp detected_at = 13;  // wall clock when this revision was produced
+  int64 entry_frame_index = 14;
+  int64 exit_frame_index = 15;
+  double media_entry_s = 16;
+  double media_exit_s = 17;
+  double dwell_seconds = 18;                   // so far (OPEN) or total (CLOSED)
+
+  repeated TrackPoint trajectory = 19;  // downsampled (<= ~60 points)
+  Evidence evidence = 20;
+  RunInfo run = 21;
+  repeated Point zone_polygon = 22;     // normalized polygon at detection time
+  int32 frame_width = 23;
+  int32 frame_height = 24;
+  string source = 25;                   // camera source URI (file:// or rtsp://)
+  string camera_name = 26;              // human label from the device config (so replay bundles are self-contained)
+}
+
+enum CameraState {
+  CAMERA_STATE_UNSPECIFIED = 0;
+  CAMERA_STATE_CONNECTING = 1;
+  CAMERA_STATE_STREAMING = 2;
+  CAMERA_STATE_RECONNECTING = 3;
+  CAMERA_STATE_ENDED = 4;    // file source reached EOF
+  CAMERA_STATE_STOPPED = 5;
+  CAMERA_STATE_ERROR = 6;
+}
+
+message CameraStatus {
+  string camera_id = 1;
+  string source = 2;
+  string name = 26;               // human label from the device config
+  repeated ZoneSpec zones = 27;   // active zone configuration
+  CameraState state = 3;
+  double input_fps = 4;         // frames arriving from the source
+  double processed_fps = 5;     // frames fully analyzed
+  double analysis_lag_ms = 6;   // now - capture time of the last analyzed frame
+  int32 queue_depth = 7;
+  int32 queue_capacity = 8;
+  int64 dropped_frames = 9;     // dropped by the bounded queue policy
+  int64 frames_received = 10;
+  int64 frames_processed = 11;
+  double infer_ms_p50 = 12;
+  double infer_ms_p95 = 13;
+  double stage_ms_decode = 14;
+  double stage_ms_preprocess = 15;
+  double stage_ms_infer = 16;
+  double stage_ms_postprocess = 17;
+  double stage_ms_track = 18;
+  double stage_ms_evidence = 19;
+  int32 reconnect_count = 20;
+  string last_error = 21;
+  google.protobuf.Timestamp last_frame_ts = 22;
+  int32 open_episodes = 23;
+  int64 ring_buffer_bytes = 24;
+  double media_time_s = 25;     // media position of the last analyzed frame
+}
+
+message UplinkStatus {
+  bool connected = 1;
+  int64 pending_events = 2;   // waiting in the durable queue
+  int64 sent_events = 3;
+  int64 acked_events = 4;
+  int64 dropped_events = 5;   // evicted because the queue was full
+  int64 duplicate_acks = 6;   // server said "already had it"
+  int32 reconnect_count = 7;
+  google.protobuf.Timestamp last_ack_ts = 8;
+  string last_error = 9;
+  int64 queue_bytes = 10;
+  int64 queue_capacity_bytes = 11;
+  int64 pending_uploads = 12;
+}
+
+message DeviceStatus {
+  string device_id = 1;
+  google.protobuf.Timestamp ts = 2;
+  repeated CameraStatus cameras = 3;
+  UplinkStatus uplink = 4;       // filled in by the gateway
+  string gateway_version = 5;    // filled in by the gateway
+  string analyzer_run_id = 6;
+  double cpu_percent = 7;
+  double rss_mb = 8;
+}
+
+message Ack {
+  string event_id = 1;
+  int32 revision = 2;
+  bool accepted = 3;   // stored (new or newer revision)
+  bool duplicate = 4;  // already had this or a newer revision
+  string message = 5;
+}
+
+message EvidenceChunk {
+  string event_id = 1;
+  string path = 2;      // relative path (same as KeyFrame.path / Evidence.clip_path)
+  bytes data = 3;
+  int64 offset = 4;
+  bool last = 5;
+  string sha256 = 6;    // full-file digest, sent with the last chunk
+  int64 total_size = 7;
+}
+
+message UploadResult {
+  string event_id = 1;
+  string path = 2;
+  bool ok = 3;
+  bool already_present = 4;
+  int64 size = 5;
+  string message = 6;
+}
+
+message HeartbeatAck {
+  google.protobuf.Timestamp server_ts = 1;
+}
+
+message Empty {}
+
+// ---- control plane (server -> gateway -> analyzer) ----------------------------
+// Commands are the only messages that flow *towards* the device. They let the
+// console pick a sample video / stream and start or stop analysis. Commands are
+// idempotent by command_id; the device reports the outcome through the next
+// DeviceStatus (camera state) and a CommandResult.
+
+enum CommandType {
+  COMMAND_TYPE_UNSPECIFIED = 0;
+  COMMAND_TYPE_START_CAMERA = 1;  // start analysing camera_id (optionally overriding source)
+  COMMAND_TYPE_STOP_CAMERA = 2;
+}
+
+message ZoneSpec {
+  string zone_id = 1;
+  string name = 2;
+  repeated Point polygon = 3;      // normalized
+  int32 entry_confirm_frames = 4;
+  int32 exit_confirm_frames = 5;
+  double dwell_seconds = 6;
+  double lost_grace_seconds = 7;
+}
+
+message Command {
+  string command_id = 1;
+  CommandType type = 2;
+  string device_id = 3;
+  string camera_id = 4;
+  string source = 5;               // optional override (file:// or rtsp://)
+  repeated ZoneSpec zones = 6;     // optional override
+  google.protobuf.Timestamp issued_at = 7;
+  string issued_by = 8;
+}
+
+message CommandResult {
+  string command_id = 1;
+  string device_id = 2;
+  bool ok = 3;
+  string message = 4;
+  google.protobuf.Timestamp completed_at = 5;
+}
+
+message WatchRequest {
+  string device_id = 1;
+}
+
+// analyzer -> gateway (same device, localhost)
+service EdgeIngress {
+  rpc SubmitEvent(Event) returns (Ack);
+  rpc ReportStatus(DeviceStatus) returns (Empty);
+  // analyzer keeps this stream open; the gateway forwards commands it receives from the server
+  rpc SubscribeCommands(WatchRequest) returns (stream Command);
+  rpc ReportCommandResult(CommandResult) returns (Empty);
+}
+
+// gateway -> review server (network)
+service Ingest {
+  rpc PublishEvent(Event) returns (Ack);
+  rpc UploadEvidence(stream EvidenceChunk) returns (UploadResult);
+  rpc Heartbeat(DeviceStatus) returns (HeartbeatAck);
+  // gateway keeps this stream open (re-established with backoff on failure)
+  rpc WatchCommands(WatchRequest) returns (stream Command);
+  rpc PublishCommandResult(CommandResult) returns (Empty);
+}

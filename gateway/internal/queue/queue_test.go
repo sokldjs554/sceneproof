@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
 )
 
 func testLogger() *slog.Logger {
@@ -26,8 +26,8 @@ func openTest(t *testing.T, dir string, maxBytes int64) *Queue {
 	return q
 }
 
-func mkEvent(id string, rev int32, pad int) *zonewatchv1.Event {
-	return &zonewatchv1.Event{
+func mkEvent(id string, rev int32, pad int) *sceneproofv1.Event {
+	return &sceneproofv1.Event{
 		EventId:  id,
 		Revision: rev,
 		DeviceId: "edge-01",
@@ -37,7 +37,7 @@ func mkEvent(id string, rev int32, pad int) *zonewatchv1.Event {
 	}
 }
 
-func ids(evs []*zonewatchv1.Event) []string {
+func ids(evs []*sceneproofv1.Event) []string {
 	out := make([]string, 0, len(evs))
 	for _, e := range evs {
 		out = append(out, e.EventId)
@@ -100,7 +100,7 @@ func TestPutCoalesceAckOrder(t *testing.T) {
 	if got := ids(q.Pending()); !equalStrings(got, []string{"c"}) {
 		t.Fatalf("pending = %v", got)
 	}
-	if _, err := q.Put(&zonewatchv1.Event{}); !errors.Is(err, ErrInvalid) {
+	if _, err := q.Put(&sceneproofv1.Event{}); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("empty id err = %v", err)
 	}
 	select {
@@ -274,7 +274,7 @@ func TestCompactionKeepsOnlyLiveRecords(t *testing.T) {
 	var seen []string
 	_, err := ScanFile(filepath.Join(dir, FileName), func(typ byte, payload []byte) error {
 		kinds = append(kinds, typ)
-		ev := &zonewatchv1.Event{}
+		ev := &sceneproofv1.Event{}
 		if err := proto.Unmarshal(payload, ev); err != nil {
 			return err
 		}

@@ -4,17 +4,17 @@ import (
 	"testing"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
 )
 
 func TestHeartbeatSentAtIntervalWithMergedStatus(t *testing.T) {
 	srv := newFakeServer(t)
 	h := newHarness(t, srv)
-	h.reg.SetAnalyzerStatus(&zonewatchv1.DeviceStatus{
+	h.reg.SetAnalyzerStatus(&sceneproofv1.DeviceStatus{
 		AnalyzerRunId: "run-1",
 		CpuPercent:    12.5,
-		Cameras: []*zonewatchv1.CameraStatus{{
-			CameraId: "cam-1", State: zonewatchv1.CameraState_CAMERA_STATE_STREAMING, ProcessedFps: 9.5,
+		Cameras: []*sceneproofv1.CameraStatus{{
+			CameraId: "cam-1", State: sceneproofv1.CameraState_CAMERA_STATE_STREAMING, ProcessedFps: 9.5,
 		}},
 	})
 	h.q.Put(mkEvent("pending-1", 1)) // no sender running: stays pending, visible in UplinkStatus
@@ -25,7 +25,7 @@ func TestHeartbeatSentAtIntervalWithMergedStatus(t *testing.T) {
 	waitFor(t, 5*time.Second, func() bool { return srv.svc.heartbeatCount() >= 5 }, "5 heartbeats")
 
 	srv.svc.mu.Lock()
-	hbs := append([]*zonewatchv1.DeviceStatus(nil), srv.svc.heartbeats...)
+	hbs := append([]*sceneproofv1.DeviceStatus(nil), srv.svc.heartbeats...)
 	times := append([]time.Time(nil), srv.svc.hbTimes...)
 	srv.svc.mu.Unlock()
 

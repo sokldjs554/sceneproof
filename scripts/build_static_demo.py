@@ -3,7 +3,7 @@
 
 The console normally talks to /api/*. For a static host we serve the *same JSON the API would
 return*, captured through FastAPI's TestClient from a temporary replay-mode server, under
-<out>/data/, and point the console at it with window.ZW_STATIC_BASE. Nothing is mocked: the
+<out>/data/, and point the console at it with window.SP_STATIC_BASE. Nothing is mocked: the
 JSON is the real API output for the bundle. Write actions are disabled in static mode.
 
     python scripts/build_static_demo.py --bundle demo/bundle --out site
@@ -33,10 +33,10 @@ def main() -> int:
 
     from fastapi.testclient import TestClient
 
-    from zonewatch.server.app import create_app
-    from zonewatch.server.config import ServerSettings
+    from sceneproof.server.app import create_app
+    from sceneproof.server.config import ServerSettings
 
-    tmp = Path(tempfile.mkdtemp(prefix="zw-static-"))
+    tmp = Path(tempfile.mkdtemp(prefix="sp-static-"))
     settings = ServerSettings(data_dir=str(tmp), mode="replay", vlm_provider="none", replay_bundle=str(ROOT / args.bundle),
                               videos_dir=str(ROOT / args.videos), console_dir=str(ROOT / "console"), public_url="static")
     app = create_app(settings)
@@ -68,7 +68,7 @@ def main() -> int:
         if f.is_file():
             shutil.copy(f, out / f.name)
     index = (out / "index.html").read_text()
-    inject = "<script>window.ZW_STATIC_BASE='data';</script>"
+    inject = "<script>window.SP_STATIC_BASE='data';</script>"
     index = index.replace("<head>", "<head>" + inject, 1) if "<head>" in index else inject + index
     (out / "index.html").write_text(index)
     (out / ".nojekyll").write_text("")

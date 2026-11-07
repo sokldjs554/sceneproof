@@ -1,4 +1,4 @@
-# ZoneWatch — common tasks. `make help` lists them.
+# SceneProof — common tasks. `make help` lists them.
 PY ?= .venv/bin/python
 SHELL := /bin/bash
 
@@ -23,26 +23,26 @@ proto:  ## protobuf 코드 재생성
 	bash scripts/gen_proto.sh
 
 server:  ## 검토 서버 (mock VLM) — http://127.0.0.1:8000
-	ZW_SERVER_VLM_PROVIDER=$${ZW_SERVER_VLM_PROVIDER:-mock} .venv/bin/zonewatch-server run
+	SP_SERVER_VLM_PROVIDER=$${SP_SERVER_VLM_PROVIDER:-mock} .venv/bin/sceneproof-server run
 
 gateway-run:  ## 엣지 게이트웨이
-	gateway/bin/zonewatch-gateway --listen :50051 --server 127.0.0.1:50052 --device-id edge-01 --queue-dir data/gateway --evidence-root data/evidence --http :9100 --insecure
+	gateway/bin/sceneproof-gateway --listen :50051 --server 127.0.0.1:50052 --device-id edge-01 --queue-dir data/gateway --evidence-root data/evidence --http :9100 --insecure
 
 edge:  ## 엣지 분석기 (샘플 cam-bench 실시간)
-	.venv/bin/zonewatch-edge --config configs/edge.yaml run --camera cam-bench
+	.venv/bin/sceneproof-edge --config configs/edge.yaml run --camera cam-bench
 
 rtsp-sim:  ## RTSP 카메라 시뮬레이터 (rtsp://127.0.0.1:8554/<video>)
-	$(PY) -m zonewatch.tools.rtsp_sim --dir data/videos --port 8554
+	$(PY) -m sceneproof.tools.rtsp_sim --dir data/videos --port 8554
 
 replay:  ## 분석기 없이 데모 번들 재생 서버
-	.venv/bin/zonewatch-server run --mode replay --replay-bundle demo/bundle --vlm none
+	.venv/bin/sceneproof-server run --mode replay --replay-bundle demo/bundle --vlm none
 
 eval:  ## 사건 단위 평가 (3 모델) + 보고서
-	for v in yolox_nano yolox_tiny yolox_s; do $(PY) -m zonewatch.eval.run_eval --variant $$v --out docs/eval/raw/event_eval_$$v.json; done
+	for v in yolox_nano yolox_tiny yolox_s; do $(PY) -m sceneproof.eval.run_eval --variant $$v --out docs/eval/raw/event_eval_$$v.json; done
 	$(PY) scripts/eval_report.py
 
 bench:  ## 추론 성능 벤치마크 (조용한 CPU에서)
-	$(PY) -m zonewatch.eval.bench_detector --video data/videos/campus-walkway.mp4 --frames 150 --repeats 3 --threads 4,1 --out docs/eval/raw/bench_detector.json
+	$(PY) -m sceneproof.eval.bench_detector --video data/videos/campus-walkway.mp4 --frames 150 --repeats 3 --threads 4,1 --out docs/eval/raw/bench_detector.json
 	$(PY) scripts/eval_report.py
 
 scenarios:  ## 장애 시나리오 6종

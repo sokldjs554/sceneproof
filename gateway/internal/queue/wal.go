@@ -23,7 +23,7 @@ import (
 // is what lets recovery stop cleanly at the first bad record instead of
 // guessing where the next one begins.
 const (
-	recPut  byte = 1 // payload = serialized zonewatchv1.Event
+	recPut  byte = 1 // payload = serialized sceneproofv1.Event
 	recAck  byte = 2 // payload = uint32 revision | event_id (server has this revision)
 	recDrop byte = 3 // payload = uint32 revision | event_id (evicted for capacity)
 

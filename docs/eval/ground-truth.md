@@ -1,6 +1,6 @@
 # 평가 정답(Ground Truth) — 작성 방법, 기준, 남은 검수
 
-정답 파일: `data/ground_truth/<camera_id>.yaml` (형식은 `src/zonewatch/eval/gt.py` 상단 주석).
+정답 파일: `data/ground_truth/<camera_id>.yaml` (형식은 `src/sceneproof/eval/gt.py` 상단 주석).
 
 ## 사건의 정의
 
@@ -14,7 +14,7 @@
   - `unsure`: 주석자가 판단하지 못함(현재 없음).
 - **정상 상황(negatives)**: 알림이 없어야 하는 구간의 설명(차량 통과, 구역 밖 통행 등). 수치에는 FP/h로 반영.
 
-## 매칭과 분모 (`src/zonewatch/eval/metrics.py`)
+## 매칭과 분모 (`src/sceneproof/eval/metrics.py`)
 
 - 예측과 정답은 시간 겹침으로 매칭: 겹침 ≥ min(0.5s, 짧은 쪽 길이의 절반) 또는 시작 시각 차 ≤ 1.0s. 겹침이 가장 큰 정답을 택하고, 동률이면 intrusion 우선(보수적: 중복으로 집계).
 - 한 정답에는 예측 하나만. 추가 예측은 **duplicates**(ID 스위치·추적 끊김으로 쪼개진 사건). 중복은 precision 분모에서 빼고 따로 센다.
@@ -40,7 +40,7 @@
 | store | e01/e02가 같은 인물의 연속 체류인지(42.7–47.9s), e03 가림 구간, 초록 상의 인물 | 28–65초 구간 재생 |
 | parking | e02 보행자 경계 판정, 자전거 시작·종료 ±0.5s | 44–49초 확대 재생 |
 
-검수 후 `annotation.status: reviewed`, `reviewer`를 적고 `python -m zonewatch.eval.rescore docs/eval/raw/event_eval_<variant>.json`으로 재채점하면 됩니다(분석 재실행 불필요).
+검수 후 `annotation.status: reviewed`, `reviewer`를 적고 `python -m sceneproof.eval.rescore docs/eval/raw/event_eval_<variant>.json`으로 재채점하면 됩니다(분석 재실행 불필요).
 
 ## 독립성에 대한 주의
 

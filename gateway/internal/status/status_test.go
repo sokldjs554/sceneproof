@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
-	"github.com/sokldjs554/zonewatch/gateway/internal/queue"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
+	"github.com/sokldjs554/sceneproof/gateway/internal/queue"
 )
 
 func TestEndpoints(t *testing.T) {
@@ -26,7 +26,7 @@ func TestEndpoints(t *testing.T) {
 	r.IncUploadsDone()
 	r.SetUploadsPending(4)
 	r.SetLastError(errors.New("boom"))
-	r.SetAnalyzerStatus(&zonewatchv1.DeviceStatus{AnalyzerRunId: "run-1", Cameras: []*zonewatchv1.CameraStatus{{CameraId: "cam-1"}}})
+	r.SetAnalyzerStatus(&sceneproofv1.DeviceStatus{AnalyzerRunId: "run-1", Cameras: []*sceneproofv1.CameraStatus{{CameraId: "cam-1"}}})
 	srv := httptest.NewServer(r.Handler())
 	defer srv.Close()
 
@@ -75,18 +75,18 @@ func TestEndpoints(t *testing.T) {
 		t.Fatalf("metrics = %d", code)
 	}
 	for _, want := range []string{
-		"zonewatch_gateway_queue_pending 3\n",
-		"zonewatch_gateway_queue_bytes 1234\n",
-		"zonewatch_gateway_events_sent_total 2\n",
-		"zonewatch_gateway_events_acked_total 2\n",
-		"zonewatch_gateway_events_dropped_total 2\n",
-		"zonewatch_gateway_uplink_connected 1\n",
-		"zonewatch_gateway_uplink_reconnects_total 1\n",
-		"zonewatch_gateway_uploads_pending 4\n",
-		"zonewatch_gateway_uploads_done_total 1\n",
-		"# TYPE zonewatch_gateway_queue_pending gauge\n",
-		"# TYPE zonewatch_gateway_events_sent_total counter\n",
-		`zonewatch_gateway_info{version="v1.2.3",device_id="edge-x"} 1`,
+		"sceneproof_gateway_queue_pending 3\n",
+		"sceneproof_gateway_queue_bytes 1234\n",
+		"sceneproof_gateway_events_sent_total 2\n",
+		"sceneproof_gateway_events_acked_total 2\n",
+		"sceneproof_gateway_events_dropped_total 2\n",
+		"sceneproof_gateway_uplink_connected 1\n",
+		"sceneproof_gateway_uplink_reconnects_total 1\n",
+		"sceneproof_gateway_uploads_pending 4\n",
+		"sceneproof_gateway_uploads_done_total 1\n",
+		"# TYPE sceneproof_gateway_queue_pending gauge\n",
+		"# TYPE sceneproof_gateway_events_sent_total counter\n",
+		`sceneproof_gateway_info{version="v1.2.3",device_id="edge-x"} 1`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("metrics missing %q\n%s", want, body)

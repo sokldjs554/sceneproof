@@ -1,4 +1,4 @@
-/* ZoneWatch review console — vanilla JS, no build step, no dependencies.
+/* SceneProof review console — vanilla JS, no build step, no dependencies.
  * Layout of this file:
  *   1. labels (Korean domain terms)   2. small DOM/format utils   3. API client
  *   4. state (single object)          5. polling + diffing        6. render functions (one per panel)
@@ -21,9 +21,9 @@ const L = {
 };
 const ROLES = ['context_before', 'entry', 'dwell', 'exit', 'context_after'];
 const RETRYABLE = ['failed', 'invalid', 'timeout', 'skipped'];
-// Static replay (GitHub Pages): when window.ZW_STATIC_BASE is set (e.g. 'data'), every GET reads the API's JSON
+// Static replay (GitHub Pages): when window.SP_STATIC_BASE is set (e.g. 'data'), every GET reads the API's JSON
 // from files under that base and every write is disabled. Data never changes there, so polling is slow.
-const STATIC_BASE = typeof window.ZW_STATIC_BASE === 'string' && window.ZW_STATIC_BASE.trim() ? window.ZW_STATIC_BASE.trim().replace(/\/+$/, '') : null;
+const STATIC_BASE = typeof window.SP_STATIC_BASE === 'string' && window.SP_STATIC_BASE.trim() ? window.SP_STATIC_BASE.trim().replace(/\/+$/, '') : null;
 const IS_STATIC = STATIC_BASE !== null;
 const STATIC_MSG = '정적 재생 모드에서는 변경할 수 없습니다';
 const POLL_MS = IS_STATIC ? 30000 : 2000;
@@ -931,7 +931,7 @@ function buildReviewTab(ev, full) {
   if (rv.note) out.push(h('p', { class: 'small', style: 'margin:0 0 8px' }, '메모: ', rv.note));
   if (!IS_STATIC) out.push(h('div', { class: 'actor-row' }, h('label', { for: 'actor' }, '담당자'),
     h('input', { id: 'actor', type: 'text', value: state.actor, maxlength: '80', placeholder: '이름 또는 ID',
-      oninput: (e) => { state.actor = e.target.value; try { localStorage.setItem('zw.actor', state.actor); } catch { /* ignore */ } } }),
+      oninput: (e) => { state.actor = e.target.value; try { localStorage.setItem('sp.actor', state.actor); } catch { /* ignore */ } } }),
     h('span', { class: 'muted small' }, '(이 브라우저에 저장됩니다)')));
   const acts = h('div', { class: 'review-actions' });
   // In static mode every transition button stays visible (so the flow is still readable) but disabled, with the reason as tooltip + text.
@@ -1163,7 +1163,7 @@ function onKey(e) {
 }
 function init() {
   if (IS_STATIC) document.title += ' — 정적 재생';
-  try { state.actor = localStorage.getItem('zw.actor') || '담당자'; } catch { /* storage unavailable */ }
+  try { state.actor = localStorage.getItem('sp.actor') || '담당자'; } catch { /* storage unavailable */ }
   $('#f-camera').addEventListener('change', (e) => setFilter('camera', e.target.value));
   $('#f-state').addEventListener('change', (e) => setFilter('state', e.target.value));
   $('#f-kind').addEventListener('change', (e) => setFilter('kind', e.target.value));

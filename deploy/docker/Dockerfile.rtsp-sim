@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       gstreamer1.0-rtsp gir1.2-gstreamer-1.0 gir1.2-gst-rtsp-server-1.0 python3-gi \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY src/zonewatch/tools/rtsp_sim.py ./rtsp_sim.py
+COPY src/sceneproof/tools/rtsp_sim.py ./rtsp_sim.py
 # sample videos (run scripts/fetch_data.sh first); mounted over by compose
 COPY data/videos/*.mp4 /videos/
 EXPOSE 8554

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	zonewatchv1 "github.com/sokldjs554/zonewatch/gateway/gen/zonewatchv1"
+	sceneproofv1 "github.com/sokldjs554/sceneproof/gateway/gen/sceneproofv1"
 )
 
 func writeFile(t *testing.T, root, rel string, n int) []byte {
@@ -50,11 +50,11 @@ func startUploader(h *harness, root, ledgerDir string, window time.Duration) (*U
 	return up, ledger
 }
 
-func evidenceEvent(id string, frames []string, clip string) *zonewatchv1.Event {
+func evidenceEvent(id string, frames []string, clip string) *sceneproofv1.Event {
 	ev := mkEvent(id, 2)
-	ev.Evidence = &zonewatchv1.Evidence{ClipPath: clip}
+	ev.Evidence = &sceneproofv1.Evidence{ClipPath: clip}
 	for _, p := range frames {
-		ev.Evidence.KeyFrames = append(ev.Evidence.KeyFrames, &zonewatchv1.KeyFrame{Role: "entry", Path: p})
+		ev.Evidence.KeyFrames = append(ev.Evidence.KeyFrames, &sceneproofv1.KeyFrame{Role: "entry", Path: p})
 	}
 	return ev
 }

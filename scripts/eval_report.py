@@ -26,7 +26,7 @@ def fmt(x, nd=1):
 
 def event_section() -> str:
     out = ["## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 draft)", "",
-           "매칭 규칙·분모: `docs/eval/ground-truth.md`. 실행: `python -m zonewatch.eval.run_eval --variant <v>`; 재채점: `rescore.py`.", "",
+           "매칭 규칙·분모: `docs/eval/ground-truth.md`. 실행: `python -m sceneproof.eval.run_eval --variant <v>`; 재채점: `rescore.py`.", "",
            "| 모델(ONNX, conf 0.4) | precision | recall | F1 | FP/h | TP | FP | 놓침 | 중복 | 경계·가림 겹침 | 오프라인 처리 fps(평균) |", "|---|---|---|---|---|---|---|---|---|---|---|"]
     rows = []
     for v in ("yolox_nano", "yolox_tiny", "yolox_s"):
@@ -141,14 +141,14 @@ def main() -> int:
             "목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.", ""]
     body = [event_section(), bench_section(), streams_section(), scenarios_section(), vlm_section()]
     tail = ["## 재현 절차", "", "```bash", "bash scripts/fetch_data.sh && bash scripts/fetch_models.sh",
-            "# 1 사건 평가", "for v in yolox_nano yolox_tiny yolox_s; do python -m zonewatch.eval.run_eval --variant $v --out docs/eval/raw/event_eval_$v.json; done",
-            "# 2 추론 성능 (조용한 CPU에서)", "python -m zonewatch.eval.bench_detector --video data/videos/campus-walkway.mp4 --frames 150 --repeats 3 --threads 4,1 --out docs/eval/raw/bench_detector.json",
-            "# 3 스트림 수", "python -m zonewatch.tools.rtsp_sim --dir data/videos --port 8554 &  python -m zonewatch.eval.bench_streams --streams 1,2,3,4 --out docs/eval/raw/bench_streams.json",
+            "# 1 사건 평가", "for v in yolox_nano yolox_tiny yolox_s; do python -m sceneproof.eval.run_eval --variant $v --out docs/eval/raw/event_eval_$v.json; done",
+            "# 2 추론 성능 (조용한 CPU에서)", "python -m sceneproof.eval.bench_detector --video data/videos/campus-walkway.mp4 --frames 150 --repeats 3 --threads 4,1 --out docs/eval/raw/bench_detector.json",
+            "# 3 스트림 수", "python -m sceneproof.tools.rtsp_sim --dir data/videos --port 8554 &  python -m sceneproof.eval.bench_streams --streams 1,2,3,4 --out docs/eval/raw/bench_streams.json",
             "# 4 장애 시나리오", "python scripts/failure_scenarios.py --out docs/evidence/failure-scenarios",
             "# 5 CV vs CV+VLM: 평가 영상을 서버에 재생 → 실제 VLM 제공자로 해석 → 비교",
-            "zonewatch-edge --config configs/eval.yaml offline --camera eval-campus --out /tmp/eval-bundle/events.jsonl   # (4편 반복, evidence 복사)",
-            "ZW_SERVER_VLM_PROVIDER=anthropic ZW_SERVER_DATA_DIR=data/server-eval zonewatch-server run   # 해석 완료까지 대기",
-            "python -m zonewatch.eval.vlm_eval --data-dir data/server-eval --event-eval docs/eval/raw/event_eval_yolox_tiny.json --out docs/eval/raw/vlm_eval.json",
+            "sceneproof-edge --config configs/eval.yaml offline --camera eval-campus --out /tmp/eval-bundle/events.jsonl   # (4편 반복, evidence 복사)",
+            "SP_SERVER_VLM_PROVIDER=anthropic SP_SERVER_DATA_DIR=data/server-eval sceneproof-server run   # 해석 완료까지 대기",
+            "python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --event-eval docs/eval/raw/event_eval_yolox_tiny.json --out docs/eval/raw/vlm_eval.json",
             "python scripts/eval_report.py", "```", ""]
     (ROOT / "docs/eval/README.md").write_text("\n".join(head + body + tail))
     print("docs/eval/README.md written")

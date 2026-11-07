@@ -1,7 +1,7 @@
 # Camera stand-in: RTSP server serving the sample videos baked into the image.
 apiVersion: apps/v1
 kind: Deployment
-metadata: { name: rtsp-sim, namespace: zonewatch, labels: { app: rtsp-sim } }
+metadata: { name: rtsp-sim, namespace: sceneproof, labels: { app: rtsp-sim } }
 spec:
   replicas: 1
   selector: { matchLabels: { app: rtsp-sim } }
@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: rtsp-sim
-          image: zonewatch-rtsp-sim:local
+          image: sceneproof-rtsp-sim:local
           imagePullPolicy: IfNotPresent
           ports: [{ name: rtsp, containerPort: 8554 }]
           readinessProbe: { tcpSocket: { port: rtsp }, periodSeconds: 5 }
@@ -18,7 +18,7 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-metadata: { name: rtsp-sim, namespace: zonewatch }
+metadata: { name: rtsp-sim, namespace: sceneproof }
 spec:
   selector: { app: rtsp-sim }
   ports: [{ name: rtsp, port: 8554, targetPort: rtsp }]

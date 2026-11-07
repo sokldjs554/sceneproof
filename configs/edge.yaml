@@ -1,4 +1,4 @@
-# ZoneWatch edge (analyzer) configuration — the demo/dev set.
+# SceneProof edge (analyzer) configuration — the demo/dev set.
 # Zones are normalized polygons (0..1 of frame width/height). The anchor point of a person is
 # the bottom-centre of the box (feet). Entry needs `entry_confirm_frames` consecutive in-zone
 # frames, exit needs `exit_confirm_frames` consecutive out-of-zone frames; dwell is media time.
