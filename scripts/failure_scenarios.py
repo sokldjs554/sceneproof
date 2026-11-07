@@ -149,7 +149,7 @@ def _num(v, default=0):
 def camera_snapshot(camera_id: str) -> dict | None:
     try:
         st = get(f"{SRV}/api/status")
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     for dev in st["devices"].values():
         for c in dev["status"].get("cameras", []):

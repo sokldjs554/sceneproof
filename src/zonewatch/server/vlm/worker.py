@@ -122,7 +122,7 @@ class VLMWorker:
             await asyncio.wait_for(loop.run_in_executor(None, self._run_job, job), timeout=self.s.vlm_timeout_s)
         except TimeoutError:
             self._on_timeout(job)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.exception("explanation job %s crashed", job["id"])
             self._finish(job, "failed", error=f"{type(e).__name__}: {e}"[:300])
         finally:
