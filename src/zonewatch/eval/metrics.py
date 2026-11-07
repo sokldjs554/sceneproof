@@ -1,10 +1,13 @@
 """Event-level metrics.
 
 Matching rule (documented so the numbers mean something):
-  * a predicted episode [p_start, p_end] matches a GT episode [g_start, g_end] when their temporal
-    overlap >= ``min_overlap_s`` OR the predicted start lies within ``tolerance_s`` of the GT
-    start (short events). Each GT event can be matched by at most one prediction; extra
-    predictions overlapping an already-matched GT are counted as **duplicates** (not FPs).
+  * a predicted episode [p_start, p_end] is a candidate for a GT episode [g_start, g_end] when
+    their temporal overlap >= min(``min_overlap_s``, half of the shorter episode) OR the predicted
+    start lies within ``tolerance_s`` of the GT start (short events). Among all GT events
+    (intrusions AND boundary/occluded ones) the one with the largest overlap wins; ties go to the
+    intrusion (conservative: a prediction is then a duplicate rather than hidden under 'occluded'). Each GT event
+    can be matched by at most one prediction; extra predictions overlapping an already-matched GT
+    intrusion are counted as **duplicates** (not FPs).
   * predictions that match nothing are false positives; GT positives without a match are misses.
   * precision = TP / (TP + FP), recall = TP / (TP + miss), F1 the harmonic mean.
   * false alarms per hour = FP / (video duration in hours).
@@ -55,17 +58,25 @@ def match_events(preds: list[PredEvent], gt: GroundTruth, min_overlap_s: float =
 
     def candidates(p: PredEvent, pool: dict[str, GTEvent]) -> list[tuple[float, GTEvent]]:
         out = []
+        p_dur = max(1e-6, p.end_s - p.start_s)
         for g in pool.values():
             ov = _overlap(p.start_s, p.end_s, g.start_s, g.end_s)
-            if ov >= min_overlap_s or abs(p.start_s - g.start_s) <= tolerance_s:
+            need = min(min_overlap_s, 0.5 * min(p_dur, max(1e-6, g.duration)))
+            if ov >= need or abs(p.start_s - g.start_s) <= tolerance_s:
                 out.append((ov, g))
         return sorted(out, key=lambda t: -t[0])
 
     for p in sorted(preds, key=lambda x: x.start_s):
-        cands = candidates(p, positives)
-        if cands:
+        pos = candidates(p, positives)
+        oth = candidates(p, others)
+        best_pos = pos[0][0] if pos else -1.0
+        best_oth = oth[0][0] if oth else -1.0
+        if oth and best_oth > best_pos:
+            boundary.append((p.event_id, oth[0][1].id))
+            continue
+        if pos:
             # prefer an unmatched GT; otherwise it's a duplicate of the best match
-            free = [g for _, g in cands if g.id not in matched_gt]
+            free = [g for _, g in pos if g.id not in matched_gt]
             if free:
                 g = free[0]
                 matched_gt[g.id] = p.event_id
@@ -77,11 +88,7 @@ def match_events(preds: list[PredEvent], gt: GroundTruth, min_overlap_s: float =
                 else:
                     dwell_conf["tp_dwell_wrong"] += 1
             else:
-                dup.append((p.event_id, cands[0][1].id))
-            continue
-        cands = candidates(p, others)
-        if cands:
-            boundary.append((p.event_id, cands[0][1].id))
+                dup.append((p.event_id, pos[0][1].id))
             continue
         fp.append(p.event_id)
     missed = [gid for gid in positives if gid not in matched_gt]

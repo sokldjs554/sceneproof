@@ -24,3 +24,13 @@ def test_short_event_matches_by_start_tolerance():
     g = gt([GTEvent("g1", 10.0, 10.3, "intrusion")])
     m = match_events([PredEvent("p1", 10.8, 11.5, False)], g)
     assert m.tp == [("p1", "g1")]
+
+
+def test_prefers_boundary_event_with_larger_overlap_and_containment():
+    g = gt([GTEvent("g1", 50, 75.5, "intrusion", True), GTEvent("b1", 74.7, 79.0, "boundary_pass"),
+            GTEvent("o1", 50, 65, "occluded")])
+    preds = [PredEvent("p1", 51, 75, True), PredEvent("p2", 74.9, 78.5, False),  # mostly inside b1 -> boundary, not dup
+             PredEvent("p3", 52.3, 52.6, False)]  # 0.3 s inside BOTH g1 and o1: tie -> intrusion wins -> duplicate, never FP
+    m = match_events(preds, g)
+    assert m.tp == [("p1", "g1")] and m.fp == []
+    assert m.boundary_hits == [("p2", "b1")] and m.duplicates == [("p3", "g1")]
