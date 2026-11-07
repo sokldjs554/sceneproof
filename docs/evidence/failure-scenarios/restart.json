@@ -1,0 +1,32 @@
+{
+ "pre": {
+  "events": 2,
+  "vlm": {
+   "done": 2
+  }
+ },
+ "post": {
+  "events": 3,
+  "vlm": {
+   "done": 4
+  },
+  "ingest": {
+   "events": 4,
+   "duplicates": 0,
+   "uploads": 11,
+   "upload_bytes": 520250,
+   "heartbeats": 13
+  }
+ },
+ "checks": {
+  "events_persisted": true,
+  "no_duplicate_rows": true,
+  "review_persisted": true,
+  "vlm_queue_resumed_after_restart": true,
+  "gateway_reconnected": true
+ },
+ "ok": true,
+ "seconds": 64.7,
+ "git": "6c6de58",
+ "time": "2026-11-07T08:57:04"
+}

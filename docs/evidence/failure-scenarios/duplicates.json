@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "rev": 1,
+   "accepted": true,
+   "duplicate": false,
+   "stored": 1
+  },
+  {
+   "rev": 1,
+   "accepted": false,
+   "duplicate": true,
+   "stored": 1
+  },
+  {
+   "rev": 1,
+   "accepted": false,
+   "duplicate": true,
+   "stored": 1
+  },
+  {
+   "rev": 3,
+   "accepted": true,
+   "duplicate": false,
+   "stored": 3
+  },
+  {
+   "rev": 2,
+   "accepted": false,
+   "duplicate": true,
+   "stored": 3
+  },
+  {
+   "rev": 3,
+   "accepted": false,
+   "duplicate": true,
+   "stored": 3
+  },
+  {
+   "rev": 4,
+   "accepted": true,
+   "duplicate": false,
+   "stored": 4
+  },
+  {
+   "rev": 4,
+   "accepted": false,
+   "duplicate": true,
+   "stored": 4
+  }
+ ],
+ "rows": [
+  {
+   "event_id": "7a1f6a25-6c33-49a4-a185-d3a909a6ef4b",
+   "revision": 4
+  }
+ ],
+ "checks": {
+  "first_delivery_accepted": true,
+  "repeat_same_revision_is_duplicate": true,
+  "newer_revision_accepted": true,
+  "older_revision_after_newer_ignored": true,
+  "single_row_with_max_revision": true
+ },
+ "ok": true,
+ "seconds": 1.0,
+ "git": "6c6de58",
+ "time": "2026-11-07T08:56:00"
+}

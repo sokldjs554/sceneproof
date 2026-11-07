@@ -52,7 +52,14 @@ class Stack:
 
     def start_rtsp(self) -> None:
         self._spawn("rtsp", [PY, "-m", "zonewatch.tools.rtsp_sim", "--dir", "data/videos", "--port", str(PORTS["rtsp"])])
-        time.sleep(1.5)
+        import socket
+
+        for _ in range(40):  # wait until the RTSP port accepts connections (slow under CPU load)
+            try:
+                with socket.create_connection(("127.0.0.1", PORTS["rtsp"]), timeout=0.5):
+                    return
+            except OSError:
+                time.sleep(0.25)
 
     def start_server(self, extra_env: dict | None = None) -> None:
         env = {"ZW_SERVER_DATA_DIR": str(self.work / "server"), "ZW_SERVER_GRPC_LISTEN": f"0.0.0.0:{PORTS['grpc']}",
@@ -127,17 +134,33 @@ ZONE_BENCH = [{"zone_id": "z-bench", "name": "작업대 반경 통제구역", "p
                "entry_confirm_frames": 3, "exit_confirm_frames": 4, "dwell_seconds": 5, "lost_grace_seconds": 1.5}]
 
 
+def _num(v, default=0):
+    """protobuf JSON renders int64 as strings and omits zero-valued fields."""
+    if v is None:
+        return default
+    if isinstance(v, str):
+        try:
+            return float(v) if "." in v else int(v)
+        except ValueError:
+            return default
+    return v
+
+
 def camera_snapshot(camera_id: str) -> dict | None:
     try:
         st = get(f"{SRV}/api/status")
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
     for dev in st["devices"].values():
         for c in dev["status"].get("cameras", []):
             if c["camera_id"] == camera_id:
-                return {k: c.get(k) for k in ("state", "input_fps", "processed_fps", "analysis_lag_ms", "queue_depth",
-                                              "dropped_frames", "frames_processed", "reconnect_count", "open_episodes",
-                                              "last_error", "infer_ms_p50")} | {"device_age_s": dev["age_s"]}
+                out = {k: _num(c.get(k)) for k in ("input_fps", "processed_fps", "analysis_lag_ms", "queue_depth",
+                                                   "dropped_frames", "frames_processed", "reconnect_count", "open_episodes",
+                                                   "infer_ms_p50")}
+                out["state"] = c.get("state")
+                out["last_error"] = c.get("last_error")
+                out["device_age_s"] = dev["age_s"]
+                return out
     return None
 
 
@@ -147,10 +170,19 @@ def gateway_snapshot() -> dict | None:
     except Exception:
         return None
     u = s.get("uplink", {})
-    q = s.get("queue", {})
-    return {"uplink_state": u.get("state"), "pending": q.get("pending", u.get("pending_events")), "sent": u.get("sent_events"),
-            "acked": u.get("acked_events"), "dup_acks": u.get("duplicate_acks"), "reconnects": u.get("reconnect_count"),
-            "dropped": u.get("dropped_events", q.get("dropped")), "queue_bytes": q.get("bytes"), "uploads_pending": s.get("uploads", {}).get("pending")}
+    q = s.get("queue", {}) or {}
+
+    def pick(d, *names, default=0):
+        for n in names:
+            if n in d and d[n] is not None:
+                return d[n]
+        return default
+
+    return {"uplink_state": u.get("state"), "pending": pick(q, "pending", "Pending", "live", "Live", "pending_events"),
+            "sent": u.get("sent_events"), "acked": u.get("acked_events"), "dup_acks": u.get("duplicate_acks"),
+            "reconnects": u.get("reconnect_count"), "dropped": pick(q, "dropped", "Dropped", "evicted", "Evicted"),
+            "queue_bytes": pick(q, "bytes", "Bytes", "live_bytes", "LiveBytes"), "uploads_pending": s.get("uploads", {}).get("pending"),
+            "queue_raw": q}
 
 
 def observe(seconds: float, camera_id: str | None, every: float = 1.0) -> list[dict]:
@@ -253,7 +285,7 @@ def sc_vlm_faults(st: Stack, work: Path) -> dict:
     ack_ms = []
     timeline = []
     t0 = time.time()
-    while time.time() - t0 < 25:
+    while time.time() - t0 < 60:  # 16 queued jobs x up to 2 attempts x 1.5 s timeout, concurrency 1
         eid = str(uuid.uuid4())
         ev = pb.Event(event_id=eid, revision=1, device_id="edge-sc", camera_id="cam-x", zone_id="z", kind=pb.EVENT_KIND_ZONE_ENTRY,
                       status=pb.EVENT_STATUS_OPEN)
@@ -273,9 +305,13 @@ def sc_vlm_faults(st: Stack, work: Path) -> dict:
     retried = None
     if bad:
         r = httpx.post(f"{SRV}/api/events/{bad[0]['event_id']}/explain", timeout=5).json()
-        time.sleep(3)
-        retried = get(f"{SRV}/api/events/{bad[0]['event_id']}")["explanation"]["status"]
-        retried = {"event": bad[0]["event_id"], "queued": r, "status_after_retry": retried}
+        status_after = None
+        for _ in range(60):  # the healthy server first drains the jobs re-queued at startup
+            status_after = get(f"{SRV}/api/events/{bad[0]['event_id']}")["explanation"]["status"]
+            if status_after in ("done", "failed", "invalid", "timeout"):
+                break
+            time.sleep(0.5)
+        retried = {"event": bad[0]["event_id"], "queued": r, "status_after_retry": status_after, "bad_before_retry": len(bad)}
     st.stop_all()
     checks = {
         "ingest_ack_p95_under_500ms_while_vlm_stuck": sorted(ack_ms)[int(len(ack_ms) * 0.95) - 1] < 500 if ack_ms else False,
@@ -312,10 +348,10 @@ def sc_uplink_loss(st: Stack, work: Path) -> dict:
     down = [{"t": i, "gateway": gateway_snapshot()} for i in range(15) if not time.sleep(1)]
     st.start_server()
     recovery = observe(25, "cam-up")
-    st.stop_all()
-    items = live_events()
+    items = live_events()  # collect while the server is still up
     ids = [x["event_id"] for x in items]
     status = get_safe(f"{SRV}/api/status") or {}
+    st.stop_all()
     reviewed_state = next((x["review"]["state"] for x in items if x["event_id"] == reviewed), None) if reviewed else None
     gw_last = recovery[-1]["gateway"] if recovery else None
     checks = {
@@ -443,7 +479,15 @@ def main() -> int:
         (out / f"{name}.json").write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str))
         summary[name] = {"ok": res["ok"], "checks": res["checks"], "summary": res.get("summary"), "seconds": res["seconds"]}
         print(json.dumps({name: summary[name]}, ensure_ascii=False, default=str), flush=True)
-    (out / "summary.json").write_text(json.dumps({"git": git, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "scenarios": summary},
+    # summary covers every scenario that has a result file, so partial (--only) runs don't erase older results
+    merged = {}
+    for name in SCENARIOS:
+        f = out / f"{name}.json"
+        if f.exists():
+            r = json.loads(f.read_text())
+            merged[name] = {"ok": r.get("ok", False), "checks": r.get("checks", {}), "summary": r.get("summary"),
+                            "seconds": r.get("seconds"), "git": r.get("git"), "time": r.get("time")}
+    (out / "summary.json").write_text(json.dumps({"git": git, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "scenarios": merged},
                                                  indent=1, ensure_ascii=False, default=str))
     return 0 if all(s["ok"] for s in summary.values()) else 1
 

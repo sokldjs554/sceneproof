@@ -42,9 +42,9 @@
 | 공고에서 요구하는 역량 | 프로젝트에서 보여줄 기능·설계 | 확인할 코드·실험·화면 | 검증 상태·남은 한계 |
 |---|---|---|---|
 | CV 모델과 VLM을 활용한 AI 응용 SW 개발 | YOLOX(사람 탐지)+ByteTrack(추적)+구역 상태머신으로 사건 생성, 서버 VLM 워커가 사건 전후 프레임을 해석해 구조화 설명 저장. CV와 VLM의 책임 분리(D7) | `src/zonewatch/edge/{detector,tracker,zones,pipeline}.py`, `src/zonewatch/server/vlm/*`, 콘솔 "CV 근거 / VLM 설명" 패널 | CV 경로 **실행 검증**(오프라인·실시간·RTSP). VLM은 mock 제공자로 파이프라인 **실행 검증**, 실제 모델 호출은 **사용자 승인 대기**(유료 API) / 로컬 소형 VLM은 **네트워크 허용 필요** |
-| 영상 데이터 실시간 인식·분석, 추론 성능 최적화 | GStreamer RTSP 입력, 드롭 정책이 있는 유계 큐, 단계별 지연 측정, PyTorch→ONNX 내보내기와 ONNX Runtime 그래프 최적화·스레드 비교, 모델 크기(nano/tiny/s) 비교 | `scripts/export_onnx.py`, `src/zonewatch/eval/bench_detector.py`, `docs/eval/README.md` | **실행 검증**(CPU 4코어). TensorRT/GPU는 **미검증(장비)** — 설정 경로만 |
+| 영상 데이터 실시간 인식·분석, 추론 성능 최적화 | GStreamer RTSP 입력, 드롭 정책이 있는 유계 큐, 단계별 지연 측정, PyTorch→ONNX 내보내기와 ONNX Runtime 그래프 최적화·스레드 비교, 모델 크기(nano/tiny/s) 비교, 스트림 수 1→4 스케일링 | `scripts/export_onnx.py`, `src/zonewatch/eval/bench_detector.py`, `bench_streams.py`, `docs/eval/README.md` §2–3 | **실행 검증**(CPU 4코어): tiny 추론 p50 44.6→21.6 ms(PyTorch→ORT), 변환 전후 상자 차이 0. TensorRT/GPU는 **미검증(장비)** — 설정 경로만 |
 | 엣지·서버·클라우드 배포 및 유지보수 | 엣지(분석기+Go 게이트웨이) / 서버 분리, Dockerfile 4종, docker-compose, Kubernetes 매니페스트(프로브·리소스·PVC), kind 검증 스크립트, 운영 runbook·상태 엔드포인트·메트릭 | `deploy/`, `docker-compose.yml`, `scripts/k8s_verify.sh`, `docs/ops/runbook.md`, 게이트웨이 `/metrics` | 로컬 프로세스 배포 **실행 검증**. 컨테이너 빌드·k8s는 **CI 워크플로 준비**(이 샌드박스는 컨테이너 내부 네트워크·중첩 런타임 제약으로 빌드/kind 실행 실패, 증적 `docs/evidence/k8s-local-attempt/`). 공개 데모 **설정만**(Render/Pages, 자격 증명 필요) |
-| POC → 상업 품질 제품 | 빈/로딩/오류/재시도 화면, 멱등·재시작 복구, 감사 로그, 내보내기, 실행 조건 기록, 장애 시나리오 6종 스크립트 | `scripts/failure_scenarios.py`, `docs/evidence/failure-scenarios/`, 콘솔 | **실행 검증**(시나리오 결과는 evidence 디렉터리) |
+| POC → 상업 품질 제품 | 빈/로딩/오류/재시도 화면, 멱등·재시작 복구, 감사 로그, 내보내기, 실행 조건 기록, 장애 시나리오 6종 스크립트 | `scripts/failure_scenarios.py`, `docs/evidence/failure-scenarios/`, 콘솔 | **실행 검증** — 6종 모두 PASS(`summary.json`). 시나리오가 드러낸 워커 버그 2개 수정(dev-log L9·L10) |
 | 산업 전문가·AI·백엔드 엔지니어 협업 | 역할 경계를 계약(proto/API/스키마)으로 명시, 현장 관리자용 표현과 엔지니어용 상세 분리 | `docs/architecture.md`, `proto`, 콘솔 "상세 정보" | 설계로 제시. **실제 팀 협업 경험은 이 프로젝트에 포함되지 않음**(아래 E 참조) |
 
 ### B. 자격요건 — 기술 이해도·구현
@@ -79,4 +79,5 @@
 이 프로젝트는 혼자(AI 보조) 진행했습니다. 저장소에는 커밋 이력·문서·검토 가이드·CI가 있지만 **다른 사람과 수행한 코드리뷰·이슈 관리 기록은 없습니다**. 자소서에서는 이 항목을 다른 경험(학교·이전 프로젝트)으로 채워야 하며, 이 저장소를 팀 개발 경험으로 서술하지 않습니다.
 
 ## 갱신 이력
-- 초안: 구현 중 작성. 최종 수치·검증 상태는 `docs/eval/README.md`와 `docs/handoff.md`의 완료 보고와 일치하도록 마지막에 갱신.
+- 초안: 구현 중 작성.
+- 최종: 평가·벤치마크·장애 시나리오 실행 후 갱신(수치는 `docs/eval/README.md` 자동 생성 표와 일치). VLM 실제 실행과 공개 URL·CI는 사용자 조치 후 다시 갱신 필요.

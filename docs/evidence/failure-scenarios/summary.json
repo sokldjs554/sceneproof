@@ -1,0 +1,137 @@
+{
+ "git": "6c6de58",
+ "time": "2026-11-07T13:13:10",
+ "scenarios": {
+  "overload": {
+   "ok": true,
+   "checks": {
+    "input_faster_than_processing": true,
+    "frames_dropped_by_policy": true,
+    "queue_depth_bounded": true,
+    "lag_bounded_under_2s": true,
+    "analysis_kept_running": true
+   },
+   "summary": {
+    "max_lag_ms": 201.6582489013672,
+    "median_input_fps": 30.0,
+    "median_processed_fps": 19.0,
+    "dropped_frames": 417,
+    "frames_processed": 658
+   },
+   "seconds": 53.5,
+   "git": "6c6de58",
+   "time": "2026-11-07T13:09:42"
+  },
+  "stream_loss": {
+   "ok": true,
+   "checks": {
+    "streaming_before_loss": true,
+    "reconnecting_observed": true,
+    "streaming_after_recovery": true,
+    "reconnect_count_incremented": true,
+    "frames_resumed": true
+   },
+   "summary": {
+    "rtsp_down_s": 13.8,
+    "recovered_after_s": 4.1,
+    "reconnect_count": 5,
+    "last_error_seen": [
+     "Could not open resource for reading and writing. (../gst/rtsp/gstrtspsrc.c(8442): gst_rtspsrc_retrieve_sdp (): /GstPipeline:pipeline2/GstRTSPSrc:rtspsrc2:\nFailed to connect. (Generic error))"
+    ]
+   },
+   "seconds": 71.8,
+   "git": "6c6de58",
+   "time": "2026-11-07T08:53:50"
+  },
+  "vlm_faults": {
+   "ok": true,
+   "checks": {
+    "ingest_ack_p95_under_500ms_while_vlm_stuck": true,
+    "timeouts_or_failures_recorded": true,
+    "no_job_left_running_or_queued_forever": true,
+    "retry_after_recovery_succeeds": true
+   },
+   "summary": {
+    "ack_p50_ms": 2.0,
+    "ack_p95_ms": 2.7
+   },
+   "seconds": 63.6,
+   "git": "6c6de58",
+   "time": "2026-11-07T13:12:25"
+  },
+  "uplink_loss": {
+   "ok": true,
+   "checks": {
+    "gateway_disconnected_during_hang": true,
+    "events_queued_while_down": true,
+    "reconnected_after_restart": true,
+    "queue_drained": true,
+    "no_duplicate_event_rows": true,
+    "events_survived_restart": true,
+    "review_survived_restart": true
+   },
+   "summary": {
+    "events_before": 2,
+    "events_after": 4,
+    "ingest_counters": {
+     "events": 6,
+     "duplicates": 0,
+     "uploads": 24,
+     "upload_bytes": 1131419,
+     "heartbeats": 9
+    },
+    "gateway_final": {
+     "uplink_state": "CONNECTED",
+     "pending": 0,
+     "sent": 12,
+     "acked": 11,
+     "dup_acks": 0,
+     "reconnects": 7,
+     "dropped": 0,
+     "queue_bytes": 0,
+     "uploads_pending": 0,
+     "queue_raw": {
+      "Pending": 0,
+      "LiveBytes": 0,
+      "FileBytes": 39514,
+      "MaxBytes": 67108864,
+      "Dropped": 0,
+      "Compactions": 0,
+      "Truncated": false
+     }
+    }
+   },
+   "seconds": 98.0,
+   "git": "6c6de58",
+   "time": "2026-11-07T13:07:39"
+  },
+  "duplicates": {
+   "ok": true,
+   "checks": {
+    "first_delivery_accepted": true,
+    "repeat_same_revision_is_duplicate": true,
+    "newer_revision_accepted": true,
+    "older_revision_after_newer_ignored": true,
+    "single_row_with_max_revision": true
+   },
+   "summary": null,
+   "seconds": 1.0,
+   "git": "6c6de58",
+   "time": "2026-11-07T08:56:00"
+  },
+  "restart": {
+   "ok": true,
+   "checks": {
+    "events_persisted": true,
+    "no_duplicate_rows": true,
+    "review_persisted": true,
+    "vlm_queue_resumed_after_restart": true,
+    "gateway_reconnected": true
+   },
+   "summary": null,
+   "seconds": 64.7,
+   "git": "6c6de58",
+   "time": "2026-11-07T08:57:04"
+  }
+ }
+}

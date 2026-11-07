@@ -1,0 +1,5598 @@
+{
+ "git": "6c6de58",
+ "time": "2026-11-07T08:51:44",
+ "variant": "yolox_tiny",
+ "threads": 4,
+ "cpu_count": 4,
+ "seconds": 40,
+ "results": [
+  {
+   "summary": {
+    "streams": 1,
+    "input_fps_mean_per_stream": 30.0125,
+    "processed_fps_mean_per_stream": 28.5625,
+    "processed_fps_total": 28.5625,
+    "lag_ms_p50": 76.4927864074707,
+    "lag_ms_p95": 179.75835800170898,
+    "dropped_total": 75,
+    "queue_depth_mean": 1.7,
+    "cpu_percent_mean": 381.1564102564103,
+    "rss_mb_max": 344.45703125,
+    "events": 12
+   },
+   "rows": [
+    {
+     "t": 0.0,
+     "cpu_percent": 484.3,
+     "rss_mb": 318.6171875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 30.5,
+       "lag_ms": 81.98690414428711,
+       "queue_depth": 1,
+       "dropped": 6,
+       "infer_p50": 25.48394599944004,
+       "infer_p95": 34.06325800006016
+      }
+     ]
+    },
+    {
+     "t": 1.0,
+     "cpu_percent": 366.6,
+     "rss_mb": 325.41796875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 28.0,
+       "lag_ms": 169.87872123718262,
+       "queue_depth": 4,
+       "dropped": 9,
+       "infer_p50": 25.54039099959482,
+       "infer_p95": 34.94070569940958
+      }
+     ]
+    },
+    {
+     "t": 2.0,
+     "cpu_percent": 394.8,
+     "rss_mb": 319.28515625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 28.5,
+       "lag_ms": 58.52699279785156,
+       "queue_depth": 1,
+       "dropped": 10,
+       "infer_p50": 25.41244199983339,
+       "infer_p95": 34.26194659987232
+      }
+     ]
+    },
+    {
+     "t": 3.0,
+     "cpu_percent": 383.6,
+     "rss_mb": 331.22265625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 76.48015022277832,
+       "queue_depth": 1,
+       "dropped": 10,
+       "infer_p50": 25.122096999893984,
+       "infer_p95": 34.35673944991323
+      }
+     ]
+    },
+    {
+     "t": 4.0,
+     "cpu_percent": 298.7,
+     "rss_mb": 340.109375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.5,
+       "lag_ms": 134.68575477600098,
+       "queue_depth": 3,
+       "dropped": 21,
+       "infer_p50": 25.191532999997435,
+       "infer_p95": 45.85208774988138
+      }
+     ]
+    },
+    {
+     "t": 5.0,
+     "cpu_percent": 391.7,
+     "rss_mb": 332.7578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 25.0,
+       "lag_ms": 52.99687385559082,
+       "queue_depth": 0,
+       "dropped": 21,
+       "infer_p50": 24.89710549980373,
+       "infer_p95": 45.85208774988138
+      }
+     ]
+    },
+    {
+     "t": 6.0,
+     "cpu_percent": 393.6,
+     "rss_mb": 332.80859375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 76.50542259216309,
+       "queue_depth": 1,
+       "dropped": 21,
+       "infer_p50": 25.103198000124394,
+       "infer_p95": 45.85208774988138
+      }
+     ]
+    },
+    {
+     "t": 7.0,
+     "cpu_percent": 391.4,
+     "rss_mb": 332.8359375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 30.0,
+       "lag_ms": 72.88312911987305,
+       "queue_depth": 2,
+       "dropped": 21,
+       "infer_p50": 24.825721499837528,
+       "infer_p95": 43.463270949496376
+      }
+     ]
+    },
+    {
+     "t": 8.0,
+     "cpu_percent": 390.7,
+     "rss_mb": 332.83984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 31.0,
+       "lag_ms": 38.80047798156738,
+       "queue_depth": 1,
+       "dropped": 21,
+       "infer_p50": 24.681687999873247,
+       "infer_p95": 43.463270949496376
+      }
+     ]
+    },
+    {
+     "t": 9.0,
+     "cpu_percent": 388.8,
+     "rss_mb": 332.84375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 40.74263572692871,
+       "queue_depth": 1,
+       "dropped": 21,
+       "infer_p50": 24.13770849989305,
+       "infer_p95": 42.411928649926274
+      }
+     ]
+    },
+    {
+     "t": 10.0,
+     "cpu_percent": 390.5,
+     "rss_mb": 332.96484375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.0,
+       "lag_ms": 59.38887596130371,
+       "queue_depth": 1,
+       "dropped": 21,
+       "infer_p50": 24.13770849989305,
+       "infer_p95": 43.102713249481894
+      }
+     ]
+    },
+    {
+     "t": 11.0,
+     "cpu_percent": 391.6,
+     "rss_mb": 333.25390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 35.396575927734375,
+       "queue_depth": 0,
+       "dropped": 21,
+       "infer_p50": 24.150561499936885,
+       "infer_p95": 41.099467950380145
+      }
+     ]
+    },
+    {
+     "t": 12.0,
+     "cpu_percent": 390.3,
+     "rss_mb": 333.37890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 26.851415634155273,
+       "queue_depth": 0,
+       "dropped": 21,
+       "infer_p50": 23.836042500079202,
+       "infer_p95": 38.55247035016876
+      }
+     ]
+    },
+    {
+     "t": 13.0,
+     "cpu_percent": 385.7,
+     "rss_mb": 333.66015625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 27.463674545288086,
+       "queue_depth": 0,
+       "dropped": 21,
+       "infer_p50": 24.090565999813407,
+       "infer_p95": 38.55247035016876
+      }
+     ]
+    },
+    {
+     "t": 14.0,
+     "cpu_percent": 390.5,
+     "rss_mb": 336.4296875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 29.5,
+       "lag_ms": 84.83004570007324,
+       "queue_depth": 3,
+       "dropped": 21,
+       "infer_p50": 24.090565999813407,
+       "infer_p95": 32.06063440015896
+      }
+     ]
+    },
+    {
+     "t": 15.0,
+     "cpu_percent": 397.6,
+     "rss_mb": 339.125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 28.0,
+       "lag_ms": 162.33181953430176,
+       "queue_depth": 4,
+       "dropped": 21,
+       "infer_p50": 24.567106499944202,
+       "infer_p95": 32.7900011003294
+      }
+     ]
+    },
+    {
+     "t": 16.0,
+     "cpu_percent": 389.6,
+     "rss_mb": 334.51171875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 27.529478073120117,
+       "queue_depth": 1,
+       "dropped": 22,
+       "infer_p50": 24.162796000382514,
+       "infer_p95": 32.67083835007725
+      }
+     ]
+    },
+    {
+     "t": 17.0,
+     "cpu_percent": 393.6,
+     "rss_mb": 334.5703125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 76.54690742492676,
+       "queue_depth": 1,
+       "dropped": 22,
+       "infer_p50": 24.011914500079,
+       "infer_p95": 33.5468813501393
+      }
+     ]
+    },
+    {
+     "t": 18.0,
+     "cpu_percent": 387.1,
+     "rss_mb": 334.68359375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.0,
+       "lag_ms": 72.22580909729004,
+       "queue_depth": 1,
+       "dropped": 22,
+       "infer_p50": 23.89816700042502,
+       "infer_p95": 33.59189805000824
+      }
+     ]
+    },
+    {
+     "t": 19.0,
+     "cpu_percent": 390.6,
+     "rss_mb": 334.84375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 26.151418685913086,
+       "queue_depth": 0,
+       "dropped": 22,
+       "infer_p50": 23.954430999765464,
+       "infer_p95": 33.186588099943044
+      }
+     ]
+    },
+    {
+     "t": 20.0,
+     "cpu_percent": 394.7,
+     "rss_mb": 340.21875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 29.5,
+       "lag_ms": 117.18893051147461,
+       "queue_depth": 2,
+       "dropped": 22,
+       "infer_p50": 23.754418499720487,
+       "infer_p95": 33.650057450086024
+      }
+     ]
+    },
+    {
+     "t": 21.0,
+     "cpu_percent": 390.6,
+     "rss_mb": 340.23046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 29.0,
+       "lag_ms": 94.53296661376953,
+       "queue_depth": 2,
+       "dropped": 22,
+       "infer_p50": 23.66571649963589,
+       "infer_p95": 33.72288544992443
+      }
+     ]
+    },
+    {
+     "t": 22.0,
+     "cpu_percent": 391.1,
+     "rss_mb": 332.35546875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 39.68620300292969,
+       "queue_depth": 0,
+       "dropped": 22,
+       "infer_p50": 23.613553999894066,
+       "infer_p95": 33.72288544992443
+      }
+     ]
+    },
+    {
+     "t": 23.0,
+     "cpu_percent": 394.7,
+     "rss_mb": 334.9921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.5,
+       "lag_ms": 22.669553756713867,
+       "queue_depth": 0,
+       "dropped": 22,
+       "infer_p50": 23.583377500017377,
+       "infer_p95": 33.93168730012804
+      }
+     ]
+    },
+    {
+     "t": 24.0,
+     "cpu_percent": 386.7,
+     "rss_mb": 339.109375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 36.96155548095703,
+       "queue_depth": 1,
+       "dropped": 22,
+       "infer_p50": 23.516252499575785,
+       "infer_p95": 34.28278214978491
+      }
+     ]
+    },
+    {
+     "t": 25.0,
+     "cpu_percent": 301.7,
+     "rss_mb": 344.3984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 23.5,
+       "lag_ms": 137.70246505737305,
+       "queue_depth": 3,
+       "dropped": 32,
+       "infer_p50": 23.54252849954719,
+       "infer_p95": 39.22867759938529
+      }
+     ]
+    },
+    {
+     "t": 26.0,
+     "cpu_percent": 390.6,
+     "rss_mb": 336.48828125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 25.5,
+       "lag_ms": 30.91907501220703,
+       "queue_depth": 0,
+       "dropped": 32,
+       "infer_p50": 23.424677500315738,
+       "infer_p95": 39.22867759938529
+      }
+     ]
+    },
+    {
+     "t": 27.1,
+     "cpu_percent": 390.7,
+     "rss_mb": 339.12890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 30.5,
+       "lag_ms": 119.0183162689209,
+       "queue_depth": 2,
+       "dropped": 32,
+       "infer_p50": 23.407729000609834,
+       "infer_p95": 42.68336214950072
+      }
+     ]
+    },
+    {
+     "t": 28.1,
+     "cpu_percent": 396.2,
+     "rss_mb": 339.12890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 29.5,
+       "lag_ms": 85.71529388427734,
+       "queue_depth": 2,
+       "dropped": 32,
+       "infer_p50": 23.63782699967487,
+       "infer_p95": 42.68336214950072
+      }
+     ]
+    },
+    {
+     "t": 29.1,
+     "cpu_percent": 397.6,
+     "rss_mb": 339.12890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 116.2576675415039,
+       "queue_depth": 3,
+       "dropped": 32,
+       "infer_p50": 23.805277500287048,
+       "infer_p95": 39.269898899374354
+      }
+     ]
+    },
+    {
+     "t": 30.1,
+     "cpu_percent": 395.6,
+     "rss_mb": 339.12890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 75.4997730255127,
+       "queue_depth": 2,
+       "dropped": 32,
+       "infer_p50": 23.99966900020445,
+       "infer_p95": 36.61168880030346
+      }
+     ]
+    },
+    {
+     "t": 31.1,
+     "cpu_percent": 395.6,
+     "rss_mb": 339.1328125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 31.0,
+       "lag_ms": 67.36922264099121,
+       "queue_depth": 1,
+       "dropped": 32,
+       "infer_p50": 24.1202984998381,
+       "infer_p95": 37.43924060008794
+      }
+     ]
+    },
+    {
+     "t": 32.1,
+     "cpu_percent": 390.6,
+     "rss_mb": 339.13671875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 30.5,
+       "lag_ms": 41.12100601196289,
+       "queue_depth": 1,
+       "dropped": 32,
+       "infer_p50": 24.175501999707194,
+       "infer_p95": 37.43924060008794
+      }
+     ]
+    },
+    {
+     "t": 33.1,
+     "cpu_percent": 391.9,
+     "rss_mb": 341.8125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 29.0,
+       "lag_ms": 148.41008186340332,
+       "queue_depth": 4,
+       "dropped": 32,
+       "infer_p50": 24.1202984998381,
+       "infer_p95": 39.20317315037211
+      }
+     ]
+    },
+    {
+     "t": 34.1,
+     "cpu_percent": 395.6,
+     "rss_mb": 344.44921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 25.5,
+       "lag_ms": 156.87990188598633,
+       "queue_depth": 4,
+       "dropped": 38,
+       "infer_p50": 24.412043999745947,
+       "infer_p95": 40.200628399998095
+      }
+     ]
+    },
+    {
+     "t": 35.1,
+     "cpu_percent": 394.6,
+     "rss_mb": 344.44921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 25.5,
+       "lag_ms": 179.640531539917,
+       "queue_depth": 4,
+       "dropped": 42,
+       "infer_p50": 24.576184999659745,
+       "infer_p95": 37.4372976500581
+      }
+     ]
+    },
+    {
+     "t": 36.1,
+     "cpu_percent": 392.6,
+     "rss_mb": 344.44921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 26.0,
+       "lag_ms": 181.99706077575684,
+       "queue_depth": 3,
+       "dropped": 47,
+       "infer_p50": 24.854855999819847,
+       "infer_p95": 37.59526790063319
+      }
+     ]
+    },
+    {
+     "t": 37.1,
+     "cpu_percent": 277.4,
+     "rss_mb": 344.44921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 20.5,
+       "lag_ms": 175.25362968444824,
+       "queue_depth": 3,
+       "dropped": 62,
+       "infer_p50": 25.218468999810284,
+       "infer_p95": 44.41495389992271
+      }
+     ]
+    },
+    {
+     "t": 38.1,
+     "cpu_percent": 307.2,
+     "rss_mb": 344.45703125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 17.5,
+       "lag_ms": 187.93129920959473,
+       "queue_depth": 4,
+       "dropped": 73,
+       "infer_p50": 25.718016999690008,
+       "infer_p95": 50.0895229500202
+      }
+     ]
+    },
+    {
+     "t": 39.1,
+     "cpu_percent": 382.4,
+     "rss_mb": 336.546875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.5,
+       "lag_ms": 87.32414245605469,
+       "queue_depth": 1,
+       "dropped": 75,
+       "infer_p50": 25.635731499733083,
+       "infer_p95": 51.96736614980185
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "summary": {
+    "streams": 2,
+    "input_fps_mean_per_stream": 20.0,
+    "processed_fps_mean_per_stream": 15.71875,
+    "processed_fps_total": 31.4375,
+    "lag_ms_p50": 120.66841125488281,
+    "lag_ms_p95": 203.99520397186276,
+    "dropped_total": 428,
+    "queue_depth_mean": 1.825,
+    "cpu_percent_mean": 381.6256410256411,
+    "rss_mb_max": 467.46484375,
+    "events": 20
+   },
+   "rows": [
+    {
+     "t": 0.0,
+     "cpu_percent": 0.0,
+     "rss_mb": 433.91796875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 20.5,
+       "lag_ms": 193.65859031677246,
+       "queue_depth": 4,
+       "dropped": 74,
+       "infer_p50": 38.91286599991872,
+       "infer_p95": 60.76231889956034
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 147.99952507019043,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.605005000776146,
+       "infer_p95": 78.00912799975772
+      }
+     ]
+    },
+    {
+     "t": 1.0,
+     "cpu_percent": 396.6,
+     "rss_mb": 434.8828125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 21.5,
+       "lag_ms": 175.89569091796875,
+       "queue_depth": 4,
+       "dropped": 82,
+       "infer_p50": 39.299794999351434,
+       "infer_p95": 60.43762839981352
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 67.19779968261719,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 61.66739399986909,
+       "infer_p95": 80.31776080028976
+      }
+     ]
+    },
+    {
+     "t": 2.0,
+     "cpu_percent": 394.4,
+     "rss_mb": 436.0078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 21.5,
+       "lag_ms": 176.78380012512207,
+       "queue_depth": 3,
+       "dropped": 92,
+       "infer_p50": 39.139049999903364,
+       "infer_p95": 60.360112249782105
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 58.40587615966797,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.820957500254735,
+       "infer_p95": 80.05958279986771
+      }
+     ]
+    },
+    {
+     "t": 3.0,
+     "cpu_percent": 391.5,
+     "rss_mb": 448.125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 20.5,
+       "lag_ms": 203.44781875610352,
+       "queue_depth": 4,
+       "dropped": 102,
+       "infer_p50": 39.23330199995689,
+       "infer_p95": 60.43762839981352
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 75.51145553588867,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 61.731990999760455,
+       "infer_p95": 82.61118459977295
+      }
+     ]
+    },
+    {
+     "t": 4.0,
+     "cpu_percent": 300.8,
+     "rss_mb": 449.7578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.0,
+       "lag_ms": 254.1525363922119,
+       "queue_depth": 4,
+       "dropped": 120,
+       "infer_p50": 39.803864000532485,
+       "infer_p95": 65.42763379966341
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 255.8310031890869,
+       "queue_depth": 2,
+       "dropped": 0,
+       "infer_p50": 62.17042199932621,
+       "infer_p95": 89.17189160001726
+      }
+     ]
+    },
+    {
+     "t": 5.0,
+     "cpu_percent": 386.4,
+     "rss_mb": 450.99609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 141.6642665863037,
+       "queue_depth": 3,
+       "dropped": 134,
+       "infer_p50": 40.05832700022438,
+       "infer_p95": 68.97659820015178
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 50.57191848754883,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 62.219508499310905,
+       "infer_p95": 89.19818990011663
+      }
+     ]
+    },
+    {
+     "t": 6.0,
+     "cpu_percent": 393.5,
+     "rss_mb": 451.00390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 19.0,
+       "lag_ms": 174.05438423156738,
+       "queue_depth": 3,
+       "dropped": 143,
+       "infer_p50": 39.969444000234944,
+       "infer_p95": 65.83157519971796
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 54.48126792907715,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 62.15304099941932,
+       "infer_p95": 89.16062089997467
+      }
+     ]
+    },
+    {
+     "t": 7.0,
+     "cpu_percent": 397.6,
+     "rss_mb": 451.01171875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 22.5,
+       "lag_ms": 145.1578140258789,
+       "queue_depth": 3,
+       "dropped": 149,
+       "infer_p50": 39.792061999833095,
+       "infer_p95": 64.30135169966887
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 47.1036434173584,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 61.66739399986909,
+       "infer_p95": 88.64382395004212
+      }
+     ]
+    },
+    {
+     "t": 8.0,
+     "cpu_percent": 390.6,
+     "rss_mb": 451.01953125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.5,
+       "lag_ms": 145.7960605621338,
+       "queue_depth": 3,
+       "dropped": 156,
+       "infer_p50": 39.266548499654164,
+       "infer_p95": 62.26509109942528
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 72.61061668395996,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 61.66739399986909,
+       "infer_p95": 88.07377945013285
+      }
+     ]
+    },
+    {
+     "t": 9.0,
+     "cpu_percent": 396.5,
+     "rss_mb": 451.30078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.5,
+       "lag_ms": 121.22535705566406,
+       "queue_depth": 2,
+       "dropped": 161,
+       "infer_p50": 39.16960550031945,
+       "infer_p95": 61.26935809988939
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 48.098087310791016,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 61.13212199988993,
+       "infer_p95": 87.89258760011762
+      }
+     ]
+    },
+    {
+     "t": 10.0,
+     "cpu_percent": 396.2,
+     "rss_mb": 452.95703125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 26.5,
+       "lag_ms": 149.63293075561523,
+       "queue_depth": 3,
+       "dropped": 163,
+       "infer_p50": 37.49152949967538,
+       "infer_p95": 61.26935809988939
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 71.2430477142334,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.46421900009591,
+       "infer_p95": 87.75460160009061
+      }
+     ]
+    },
+    {
+     "t": 11.0,
+     "cpu_percent": 390.6,
+     "rss_mb": 453.0546875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.0,
+       "lag_ms": 180.62257766723633,
+       "queue_depth": 4,
+       "dropped": 173,
+       "infer_p50": 37.65454350013897,
+       "infer_p95": 63.65315160051068
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 65.89007377624512,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.65684700024576,
+       "infer_p95": 86.91306804998928
+      }
+     ]
+    },
+    {
+     "t": 12.0,
+     "cpu_percent": 394.6,
+     "rss_mb": 453.3984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 22.5,
+       "lag_ms": 111.09280586242676,
+       "queue_depth": 3,
+       "dropped": 179,
+       "infer_p50": 37.60910650044025,
+       "infer_p95": 63.65315160051068
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 60.31394004821777,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.053939999761496,
+       "infer_p95": 85.99336254987972
+      }
+     ]
+    },
+    {
+     "t": 13.0,
+     "cpu_percent": 395.4,
+     "rss_mb": 453.51171875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.0,
+       "lag_ms": 135.2839469909668,
+       "queue_depth": 4,
+       "dropped": 186,
+       "infer_p50": 37.44609249997666,
+       "infer_p95": 63.44994020005288
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 52.99544334411621,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.48580399990533,
+       "infer_p95": 85.55429395000827
+      }
+     ]
+    },
+    {
+     "t": 14.0,
+     "cpu_percent": 386.4,
+     "rss_mb": 462.23046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 21.0,
+       "lag_ms": 148.37336540222168,
+       "queue_depth": 4,
+       "dropped": 197,
+       "infer_p50": 37.44609249997666,
+       "infer_p95": 63.850170399973656
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 56.244850158691406,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.31567549987449,
+       "infer_p95": 85.16862945016327
+      }
+     ]
+    },
+    {
+     "t": 15.0,
+     "cpu_percent": 327.7,
+     "rss_mb": 462.24609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 17.0,
+       "lag_ms": 150.95925331115723,
+       "queue_depth": 4,
+       "dropped": 212,
+       "infer_p50": 37.13279900011912,
+       "infer_p95": 67.27611984979377
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 41.98575019836426,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.41321849968517,
+       "infer_p95": 86.91306804998928
+      }
+     ]
+    },
+    {
+     "t": 16.1,
+     "cpu_percent": 394.4,
+     "rss_mb": 462.53125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 19.5,
+       "lag_ms": 153.41496467590332,
+       "queue_depth": 4,
+       "dropped": 219,
+       "infer_p50": 36.45897899968986,
+       "infer_p95": 67.27611984979377
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 56.120872497558594,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 58.92152800015538,
+       "infer_p95": 85.99336254987972
+      }
+     ]
+    },
+    {
+     "t": 17.1,
+     "cpu_percent": 394.5,
+     "rss_mb": 462.97265625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 22.5,
+       "lag_ms": 145.81608772277832,
+       "queue_depth": 4,
+       "dropped": 227,
+       "infer_p50": 36.26795550007955,
+       "infer_p95": 67.13674819970947
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 74.5232105255127,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.108432499670016,
+       "infer_p95": 86.77953519977561
+      }
+     ]
+    },
+    {
+     "t": 18.1,
+     "cpu_percent": 395.5,
+     "rss_mb": 463.1953125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.5,
+       "lag_ms": 127.32839584350586,
+       "queue_depth": 3,
+       "dropped": 233,
+       "infer_p50": 34.81049149968385,
+       "infer_p95": 59.33225610015143
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 65.68050384521484,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.108432499670016,
+       "infer_p95": 85.9812231998603
+      }
+     ]
+    },
+    {
+     "t": 19.1,
+     "cpu_percent": 393.1,
+     "rss_mb": 463.1953125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.5,
+       "lag_ms": 153.43379974365234,
+       "queue_depth": 3,
+       "dropped": 241,
+       "infer_p50": 34.70786249954472,
+       "infer_p95": 59.29043524970439
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 64.24641609191895,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.41321849968517,
+       "infer_p95": 85.55429395000827
+      }
+     ]
+    },
+    {
+     "t": 20.1,
+     "cpu_percent": 395.9,
+     "rss_mb": 463.3046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 23.0,
+       "lag_ms": 122.99156188964844,
+       "queue_depth": 3,
+       "dropped": 248,
+       "infer_p50": 34.70786249954472,
+       "infer_p95": 59.29043524970439
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 70.36781311035156,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.612431000459765,
+       "infer_p95": 85.1686294501633
+      }
+     ]
+    },
+    {
+     "t": 21.1,
+     "cpu_percent": 397.1,
+     "rss_mb": 463.41796875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 23.0,
+       "lag_ms": 162.38021850585938,
+       "queue_depth": 3,
+       "dropped": 255,
+       "infer_p50": 34.933100499529246,
+       "infer_p95": 59.08502045003843
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 74.48434829711914,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.150863000217214,
+       "infer_p95": 84.78681019996658
+      }
+     ]
+    },
+    {
+     "t": 22.1,
+     "cpu_percent": 389.6,
+     "rss_mb": 463.4375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.0,
+       "lag_ms": 115.89741706848145,
+       "queue_depth": 4,
+       "dropped": 263,
+       "infer_p50": 34.933100499529246,
+       "infer_p95": 59.08502045003843
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 51.63288116455078,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.690734499781684,
+       "infer_p95": 84.40541819973079
+      }
+     ]
+    },
+    {
+     "t": 23.1,
+     "cpu_percent": 392.6,
+     "rss_mb": 463.4375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 21.5,
+       "lag_ms": 181.6556453704834,
+       "queue_depth": 4,
+       "dropped": 273,
+       "infer_p50": 35.44413000008717,
+       "infer_p95": 59.33225610015143
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 71.35510444641113,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.533328999805235,
+       "infer_p95": 84.40541819973079
+      }
+     ]
+    },
+    {
+     "t": 24.1,
+     "cpu_percent": 392.6,
+     "rss_mb": 464.91796875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 20.5,
+       "lag_ms": 120.11146545410156,
+       "queue_depth": 4,
+       "dropped": 282,
+       "infer_p50": 35.59798350033816,
+       "infer_p95": 59.08627170006184
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 59.48805809020996,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.41321849968517,
+       "infer_p95": 84.40541819973079
+      }
+     ]
+    },
+    {
+     "t": 25.1,
+     "cpu_percent": 302.0,
+     "rss_mb": 464.9296875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 17.0,
+       "lag_ms": 199.8293399810791,
+       "queue_depth": 4,
+       "dropped": 299,
+       "infer_p50": 35.73046899964538,
+       "infer_p95": 61.25010409973584
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 117.01297760009766,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.478023999872676,
+       "infer_p95": 87.30725409959632
+      }
+     ]
+    },
+    {
+     "t": 26.1,
+     "cpu_percent": 393.5,
+     "rss_mb": 464.93359375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 17.5,
+       "lag_ms": 136.64937019348145,
+       "queue_depth": 4,
+       "dropped": 307,
+       "infer_p50": 36.36934950009163,
+       "infer_p95": 61.25010409973584
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 78.72605323791504,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.41321849968517,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 27.1,
+     "cpu_percent": 395.5,
+     "rss_mb": 464.93359375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.0,
+       "lag_ms": 143.4309482574463,
+       "queue_depth": 4,
+       "dropped": 314,
+       "infer_p50": 36.39233600006264,
+       "infer_p95": 61.25010409973584
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 65.63663482666016,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.25209050039848,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 28.1,
+     "cpu_percent": 393.3,
+     "rss_mb": 464.9453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.0,
+       "lag_ms": 139.29295539855957,
+       "queue_depth": 4,
+       "dropped": 319,
+       "infer_p50": 35.691382499408064,
+       "infer_p95": 60.24700729994947
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 64.97359275817871,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.35177299963834,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 29.1,
+     "cpu_percent": 397.5,
+     "rss_mb": 465.4453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.5,
+       "lag_ms": 147.25041389465332,
+       "queue_depth": 3,
+       "dropped": 326,
+       "infer_p50": 35.397052000007534,
+       "infer_p95": 54.79662569996436
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 55.856943130493164,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.61695750031504,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 30.1,
+     "cpu_percent": 396.5,
+     "rss_mb": 465.734375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 23.5,
+       "lag_ms": 149.6565341949463,
+       "queue_depth": 4,
+       "dropped": 332,
+       "infer_p50": 35.40343899976506,
+       "infer_p95": 54.79662569996436
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 72.88742065429688,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.61695750031504,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 31.1,
+     "cpu_percent": 396.3,
+     "rss_mb": 465.890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.0,
+       "lag_ms": 158.44440460205078,
+       "queue_depth": 4,
+       "dropped": 338,
+       "infer_p50": 35.58684600011475,
+       "infer_p95": 54.678246599814884
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 57.195186614990234,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.053939999761496,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 32.1,
+     "cpu_percent": 392.6,
+     "rss_mb": 466.203125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 24.0,
+       "lag_ms": 160.16602516174316,
+       "queue_depth": 3,
+       "dropped": 345,
+       "infer_p50": 35.40343899976506,
+       "infer_p95": 52.48993315003646
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 59.001922607421875,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 60.053939999761496,
+       "infer_p95": 87.51015534971884
+      }
+     ]
+    },
+    {
+     "t": 33.1,
+     "cpu_percent": 396.4,
+     "rss_mb": 466.55078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 23.0,
+       "lag_ms": 157.60159492492676,
+       "queue_depth": 4,
+       "dropped": 353,
+       "infer_p50": 35.18382650008789,
+       "infer_p95": 53.01613590013404
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 56.83135986328125,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 59.19101600011345,
+       "infer_p95": 84.2067409003903
+      }
+     ]
+    },
+    {
+     "t": 34.1,
+     "cpu_percent": 393.7,
+     "rss_mb": 466.84765625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 22.0,
+       "lag_ms": 183.30001831054688,
+       "queue_depth": 4,
+       "dropped": 363,
+       "infer_p50": 35.668549499405344,
+       "infer_p95": 53.01613590013404
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 58.29954147338867,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 58.00255600024684,
+       "infer_p95": 82.14990809988194
+      }
+     ]
+    },
+    {
+     "t": 35.1,
+     "cpu_percent": 394.7,
+     "rss_mb": 467.14453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 22.0,
+       "lag_ms": 170.27664184570312,
+       "queue_depth": 3,
+       "dropped": 370,
+       "infer_p50": 35.11903449998499,
+       "infer_p95": 53.49755030006236
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 56.21480941772461,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 57.43429300036951,
+       "infer_p95": 82.14990809988194
+      }
+     ]
+    },
+    {
+     "t": 36.1,
+     "cpu_percent": 390.1,
+     "rss_mb": 467.44921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 21.5,
+       "lag_ms": 196.11811637878418,
+       "queue_depth": 4,
+       "dropped": 380,
+       "infer_p50": 35.32214900042163,
+       "infer_p95": 54.79662569996436
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 62.45064735412598,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 57.15429700012464,
+       "infer_p95": 82.14990809988194
+      }
+     ]
+    },
+    {
+     "t": 37.1,
+     "cpu_percent": 279.1,
+     "rss_mb": 467.4609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.0,
+       "lag_ms": 214.39552307128906,
+       "queue_depth": 4,
+       "dropped": 400,
+       "infer_p50": 35.668549499405344,
+       "infer_p95": 60.563213999739695
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 169.97528076171875,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 57.814835499812034,
+       "infer_p95": 83.83366110006136
+      }
+     ]
+    },
+    {
+     "t": 38.1,
+     "cpu_percent": 304.6,
+     "rss_mb": 467.46484375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 220.9317684173584,
+       "queue_depth": 4,
+       "dropped": 419,
+       "infer_p50": 36.06108199983282,
+       "infer_p95": 82.61235580011999
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 104.37297821044922,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 58.00255600024684,
+       "infer_p95": 87.60770899971251
+      }
+     ]
+    },
+    {
+     "t": 39.1,
+     "cpu_percent": 373.5,
+     "rss_mb": 467.46484375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.0,
+       "lag_ms": 192.25072860717773,
+       "queue_depth": 4,
+       "dropped": 428,
+       "infer_p50": 35.83003500034465,
+       "infer_p95": 82.61235580011999
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.0,
+       "lag_ms": 62.69979476928711,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 58.781524999631074,
+       "infer_p95": 89.71602494993931
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "summary": {
+    "streams": 3,
+    "input_fps_mean_per_stream": 23.333333333333332,
+    "processed_fps_mean_per_stream": 12.0125,
+    "processed_fps_total": 36.037499999999994,
+    "lag_ms_p50": 185.68921089172363,
+    "lag_ms_p95": 338.02875280380243,
+    "dropped_total": 1617,
+    "queue_depth_mean": 2.7416666666666667,
+    "cpu_percent_mean": 373.5512820512821,
+    "rss_mb_max": 596.58203125,
+    "events": 46
+   },
+   "rows": [
+    {
+     "t": 0.0,
+     "cpu_percent": 0.0,
+     "rss_mb": 548.15625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 168.72119903564453,
+       "queue_depth": 4,
+       "dropped": 124,
+       "infer_p50": 57.216864000110945,
+       "infer_p95": 85.0880649999453
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 162.51611709594727,
+       "queue_depth": 1,
+       "dropped": 0,
+       "infer_p50": 78.18237650008086,
+       "infer_p95": 104.37683344994184
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 17.0,
+       "lag_ms": 193.33410263061523,
+       "queue_depth": 4,
+       "dropped": 128,
+       "infer_p50": 70.42538700079604,
+       "infer_p95": 91.47511010023663
+      }
+     ]
+    },
+    {
+     "t": 1.0,
+     "cpu_percent": 394.5,
+     "rss_mb": 549.28125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.5,
+       "lag_ms": 185.6393814086914,
+       "queue_depth": 4,
+       "dropped": 143,
+       "infer_p50": 57.78530450015751,
+       "infer_p95": 89.38167679984869
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 75.73103904724121,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 78.05678000022453,
+       "infer_p95": 104.2453005002244
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.0,
+       "lag_ms": 179.84390258789062,
+       "queue_depth": 3,
+       "dropped": 143,
+       "infer_p50": 68.68173699967883,
+       "infer_p95": 91.23585190000085
+      }
+     ]
+    },
+    {
+     "t": 2.0,
+     "cpu_percent": 396.5,
+     "rss_mb": 550.5234375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 197.9961395263672,
+       "queue_depth": 4,
+       "dropped": 157,
+       "infer_p50": 56.957188000069436,
+       "infer_p95": 87.42903660013324
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 89.9045467376709,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 78.05678000022453,
+       "infer_p95": 104.12665800049581
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.0,
+       "lag_ms": 199.91183280944824,
+       "queue_depth": 4,
+       "dropped": 159,
+       "infer_p50": 67.07554449985764,
+       "infer_p95": 91.35861275012758
+      }
+     ]
+    },
+    {
+     "t": 3.0,
+     "cpu_percent": 393.7,
+     "rss_mb": 562.27734375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 196.60139083862305,
+       "queue_depth": 4,
+       "dropped": 175,
+       "infer_p50": 57.552546999886545,
+       "infer_p95": 90.64604724972014
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 91.06826782226562,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 78.05678000022453,
+       "infer_p95": 103.57479850017626
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 187.81566619873047,
+       "queue_depth": 3,
+       "dropped": 176,
+       "infer_p50": 67.76750399967568,
+       "infer_p95": 91.55580219980948
+      }
+     ]
+    },
+    {
+     "t": 4.0,
+     "cpu_percent": 294.5,
+     "rss_mb": 564.640625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 336.8709087371826,
+       "queue_depth": 4,
+       "dropped": 196,
+       "infer_p50": 58.1613809999908,
+       "infer_p95": 95.49403299952242
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 360.0277900695801,
+       "queue_depth": 3,
+       "dropped": 0,
+       "infer_p50": 78.4706799995547,
+       "infer_p95": 112.93757485027525
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 279.9513339996338,
+       "queue_depth": 3,
+       "dropped": 199,
+       "infer_p50": 68.93512599981477,
+       "infer_p95": 96.42856239988754
+      }
+     ]
+    },
+    {
+     "t": 5.0,
+     "cpu_percent": 393.4,
+     "rss_mb": 565.078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 194.26989555358887,
+       "queue_depth": 4,
+       "dropped": 214,
+       "infer_p50": 59.60135599980276,
+       "infer_p95": 96.1490417994355
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 82.84592628479004,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 77.56750999942597,
+       "infer_p95": 109.20041449981
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 175.73952674865723,
+       "queue_depth": 3,
+       "dropped": 216,
+       "infer_p50": 69.18281949992888,
+       "infer_p95": 94.57968304959647
+      }
+     ]
+    },
+    {
+     "t": 6.0,
+     "cpu_percent": 395.0,
+     "rss_mb": 570.49609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.0,
+       "lag_ms": 165.58527946472168,
+       "queue_depth": 3,
+       "dropped": 231,
+       "infer_p50": 59.8150709993206,
+       "infer_p95": 94.72647699976733
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 81.89105987548828,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 76.28324500001327,
+       "infer_p95": 105.680981999285
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 205.54637908935547,
+       "queue_depth": 4,
+       "dropped": 232,
+       "infer_p50": 68.41221499962558,
+       "infer_p95": 93.58009379952819
+      }
+     ]
+    },
+    {
+     "t": 7.0,
+     "cpu_percent": 388.4,
+     "rss_mb": 570.49609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 206.7275047302246,
+       "queue_depth": 4,
+       "dropped": 248,
+       "infer_p50": 60.169785499965656,
+       "infer_p95": 93.1686143500883
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 57.085275650024414,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 76.23900249973303,
+       "infer_p95": 105.09840549952968
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 207.7772617340088,
+       "queue_depth": 4,
+       "dropped": 250,
+       "infer_p50": 69.38596499958294,
+       "infer_p95": 93.80348499939828
+      }
+     ]
+    },
+    {
+     "t": 8.0,
+     "cpu_percent": 391.6,
+     "rss_mb": 570.51953125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 175.12083053588867,
+       "queue_depth": 3,
+       "dropped": 263,
+       "infer_p50": 59.70821349956168,
+       "infer_p95": 91.68273354962363
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 61.73896789550781,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 76.06933799979743,
+       "infer_p95": 104.6217519997299
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.0,
+       "lag_ms": 183.32982063293457,
+       "queue_depth": 4,
+       "dropped": 267,
+       "infer_p50": 69.36691899954894,
+       "infer_p95": 93.42244179988484
+      }
+     ]
+    },
+    {
+     "t": 9.0,
+     "cpu_percent": 395.4,
+     "rss_mb": 570.51953125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.0,
+       "lag_ms": 208.55307579040527,
+       "queue_depth": 4,
+       "dropped": 277,
+       "infer_p50": 58.99689799935004,
+       "infer_p95": 90.70896849971174
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 114.26663398742676,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 76.06933799979743,
+       "infer_p95": 105.15136699950745
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 181.86473846435547,
+       "queue_depth": 4,
+       "dropped": 287,
+       "infer_p50": 69.87896500049828,
+       "infer_p95": 97.66813930000353
+      }
+     ]
+    },
+    {
+     "t": 10.0,
+     "cpu_percent": 397.2,
+     "rss_mb": 570.79296875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.5,
+       "lag_ms": 176.29599571228027,
+       "queue_depth": 4,
+       "dropped": 290,
+       "infer_p50": 58.27203000035297,
+       "infer_p95": 89.403035499663
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 64.66484069824219,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.32324750036423,
+       "infer_p95": 104.60886154974105
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.5,
+       "lag_ms": 183.14599990844727,
+       "queue_depth": 4,
+       "dropped": 303,
+       "infer_p50": 68.68173699967883,
+       "infer_p95": 96.2238631998843
+      }
+     ]
+    },
+    {
+     "t": 11.0,
+     "cpu_percent": 367.2,
+     "rss_mb": 579.08984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.0,
+       "lag_ms": 182.9078197479248,
+       "queue_depth": 4,
+       "dropped": 307,
+       "infer_p50": 58.355434000077366,
+       "infer_p95": 89.99383899972597
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 138.81349563598633,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.2474800001437,
+       "infer_p95": 107.36849249951774
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.5,
+       "lag_ms": 198.55999946594238,
+       "queue_depth": 4,
+       "dropped": 316,
+       "infer_p50": 67.7256744997976,
+       "infer_p95": 94.81152304974783
+      }
+     ]
+    },
+    {
+     "t": 12.0,
+     "cpu_percent": 372.6,
+     "rss_mb": 579.09765625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 185.73904037475586,
+       "queue_depth": 4,
+       "dropped": 326,
+       "infer_p50": 59.643592999691464,
+       "infer_p95": 93.60409225018884
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 67.77739524841309,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.06109699988883,
+       "infer_p95": 113.71340000005148
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.5,
+       "lag_ms": 182.16371536254883,
+       "queue_depth": 4,
+       "dropped": 332,
+       "infer_p50": 67.56936450028661,
+       "infer_p95": 97.24055629994835
+      }
+     ]
+    },
+    {
+     "t": 13.0,
+     "cpu_percent": 395.3,
+     "rss_mb": 579.15625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.5,
+       "lag_ms": 185.8513355255127,
+       "queue_depth": 4,
+       "dropped": 343,
+       "infer_p50": 59.29052900046372,
+       "infer_p95": 92.70427659994306
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 77.60834693908691,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.43393850007851,
+       "infer_p95": 113.1669458502074
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 153.57041358947754,
+       "queue_depth": 4,
+       "dropped": 349,
+       "infer_p50": 67.35237700013386,
+       "infer_p95": 95.77199959985589
+      }
+     ]
+    },
+    {
+     "t": 14.0,
+     "cpu_percent": 382.2,
+     "rss_mb": 579.23046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.5,
+       "lag_ms": 210.48736572265625,
+       "queue_depth": 3,
+       "dropped": 362,
+       "infer_p50": 59.643592999691464,
+       "infer_p95": 93.47859205017814
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 96.33755683898926,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.71955100027117,
+       "infer_p95": 113.71340000005148
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.5,
+       "lag_ms": 199.38135147094727,
+       "queue_depth": 4,
+       "dropped": 367,
+       "infer_p50": 67.71675199979654,
+       "infer_p95": 98.11156580017266
+      }
+     ]
+    },
+    {
+     "t": 15.1,
+     "cpu_percent": 329.5,
+     "rss_mb": 579.2578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 206.13884925842285,
+       "queue_depth": 4,
+       "dropped": 382,
+       "infer_p50": 59.946834999664134,
+       "infer_p95": 96.00627714935399
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 80.82437515258789,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.87498099999357,
+       "infer_p95": 113.1669458502074
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 179.98051643371582,
+       "queue_depth": 4,
+       "dropped": 388,
+       "infer_p50": 67.84752449993903,
+       "infer_p95": 104.18072725005908
+      }
+     ]
+    },
+    {
+     "t": 16.1,
+     "cpu_percent": 395.7,
+     "rss_mb": 579.2578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 212.57710456848145,
+       "queue_depth": 4,
+       "dropped": 399,
+       "infer_p50": 60.00138099989272,
+       "infer_p95": 96.00627714935399
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 69.52643394470215,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.56774000047517,
+       "infer_p95": 112.6967033002984
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 171.50044441223145,
+       "queue_depth": 4,
+       "dropped": 404,
+       "infer_p50": 67.45502649982882,
+       "infer_p95": 103.95934775006029
+      }
+     ]
+    },
+    {
+     "t": 17.1,
+     "cpu_percent": 391.9,
+     "rss_mb": 579.37109375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 200.2735137939453,
+       "queue_depth": 4,
+       "dropped": 415,
+       "infer_p50": 60.00138099989272,
+       "infer_p95": 96.00627714935399
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 105.67831993103027,
+       "queue_depth": 1,
+       "dropped": 0,
+       "infer_p50": 75.00272099969152,
+       "infer_p95": 112.48840999996901
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 264.3473148345947,
+       "queue_depth": 4,
+       "dropped": 421,
+       "infer_p50": 66.79656400001477,
+       "infer_p95": 103.95934775006029
+      }
+     ]
+    },
+    {
+     "t": 18.1,
+     "cpu_percent": 390.0,
+     "rss_mb": 580.44140625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 193.56226921081543,
+       "queue_depth": 4,
+       "dropped": 430,
+       "infer_p50": 60.18799850016876,
+       "infer_p95": 96.00627714935399
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 78.46522331237793,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.21504000033019,
+       "infer_p95": 112.20022749957933
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 161.75603866577148,
+       "queue_depth": 4,
+       "dropped": 437,
+       "infer_p50": 66.3565410004594,
+       "infer_p95": 106.0866974500641
+      }
+     ]
+    },
+    {
+     "t": 19.1,
+     "cpu_percent": 392.5,
+     "rss_mb": 580.55078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.5,
+       "lag_ms": 175.13585090637207,
+       "queue_depth": 3,
+       "dropped": 445,
+       "infer_p50": 60.5359374994805,
+       "infer_p95": 96.00627714935399
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 81.9549560546875,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.6552184998327,
+       "infer_p95": 111.63277249934252
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 170.35722732543945,
+       "queue_depth": 4,
+       "dropped": 454,
+       "infer_p50": 66.56232100067427,
+       "infer_p95": 106.0866974500641
+      }
+     ]
+    },
+    {
+     "t": 20.1,
+     "cpu_percent": 340.5,
+     "rss_mb": 581.484375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 217.63849258422852,
+       "queue_depth": 3,
+       "dropped": 462,
+       "infer_p50": 60.592154499317985,
+       "infer_p95": 93.47859205017814
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 96.90332412719727,
+       "queue_depth": 1,
+       "dropped": 0,
+       "infer_p50": 75.98727399999916,
+       "infer_p95": 112.22703800012823
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 276.01170539855957,
+       "queue_depth": 4,
+       "dropped": 474,
+       "infer_p50": 66.79656400001477,
+       "infer_p95": 106.61124905032013
+      }
+     ]
+    },
+    {
+     "t": 21.1,
+     "cpu_percent": 382.5,
+     "rss_mb": 581.50390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 203.3069133758545,
+       "queue_depth": 3,
+       "dropped": 479,
+       "infer_p50": 60.63205500049662,
+       "infer_p95": 95.43991129985443
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 88.92393112182617,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 76.0283059998983,
+       "infer_p95": 112.24050874989189
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 262.8920078277588,
+       "queue_depth": 4,
+       "dropped": 491,
+       "infer_p50": 66.28849850039842,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 22.1,
+     "cpu_percent": 393.3,
+     "rss_mb": 581.5078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 160.24470329284668,
+       "queue_depth": 3,
+       "dropped": 495,
+       "infer_p50": 60.938762499972654,
+       "infer_p95": 95.43991129985443
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 107.44452476501465,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.97683450012482,
+       "infer_p95": 111.17731174917937
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 219.26522254943848,
+       "queue_depth": 4,
+       "dropped": 507,
+       "infer_p50": 66.79656400001477,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 23.1,
+     "cpu_percent": 390.4,
+     "rss_mb": 581.5078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 195.74761390686035,
+       "queue_depth": 4,
+       "dropped": 511,
+       "infer_p50": 60.761165500480274,
+       "infer_p95": 93.16148774955765
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 77.83651351928711,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.83229749980092,
+       "infer_p95": 111.17731174917937
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.0,
+       "lag_ms": 181.48112297058105,
+       "queue_depth": 4,
+       "dropped": 526,
+       "infer_p50": 67.25014199992074,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 24.1,
+     "cpu_percent": 393.7,
+     "rss_mb": 582.98828125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.5,
+       "lag_ms": 196.57063484191895,
+       "queue_depth": 4,
+       "dropped": 525,
+       "infer_p50": 60.761165500480274,
+       "infer_p95": 93.16148774955765
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 149.78480339050293,
+       "queue_depth": 1,
+       "dropped": 0,
+       "infer_p50": 75.83229749980092,
+       "infer_p95": 111.86464909974347
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.0,
+       "lag_ms": 193.10474395751953,
+       "queue_depth": 4,
+       "dropped": 545,
+       "infer_p50": 67.71888850016694,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 25.1,
+     "cpu_percent": 316.6,
+     "rss_mb": 583.94921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.5,
+       "lag_ms": 223.663330078125,
+       "queue_depth": 4,
+       "dropped": 543,
+       "infer_p50": 60.938762499972654,
+       "infer_p95": 93.66407035026896
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 415.1875972747803,
+       "queue_depth": 4,
+       "dropped": 0,
+       "infer_p50": 76.13204899962511,
+       "infer_p95": 114.04729505002251
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 286.1020565032959,
+       "queue_depth": 4,
+       "dropped": 567,
+       "infer_p50": 68.15677399981723,
+       "infer_p95": 112.25590700037174
+      }
+     ]
+    },
+    {
+     "t": 26.1,
+     "cpu_percent": 393.5,
+     "rss_mb": 583.95703125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.0,
+       "lag_ms": 250.6124973297119,
+       "queue_depth": 4,
+       "dropped": 560,
+       "infer_p50": 60.88580850018843,
+       "infer_p95": 93.48844429960081
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 265.69437980651855,
+       "queue_depth": 2,
+       "dropped": 0,
+       "infer_p50": 75.9666849999121,
+       "infer_p95": 114.20134689992665
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 151.4883041381836,
+       "queue_depth": 4,
+       "dropped": 584,
+       "infer_p50": 68.37346000065736,
+       "infer_p95": 112.80812775016784
+      }
+     ]
+    },
+    {
+     "t": 27.1,
+     "cpu_percent": 328.0,
+     "rss_mb": 583.98046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 10.5,
+       "lag_ms": 277.8797149658203,
+       "queue_depth": 4,
+       "dropped": 582,
+       "infer_p50": 60.88580850018843,
+       "infer_p95": 95.4404514498492
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 399.6410369873047,
+       "queue_depth": 3,
+       "dropped": 0,
+       "infer_p50": 76.24250699973345,
+       "infer_p95": 115.90803080025582
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 13.5,
+       "lag_ms": 213.94801139831543,
+       "queue_depth": 3,
+       "dropped": 600,
+       "infer_p50": 68.02051050044611,
+       "infer_p95": 113.26240725006755
+      }
+     ]
+    },
+    {
+     "t": 28.1,
+     "cpu_percent": 394.2,
+     "rss_mb": 586.125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 10.0,
+       "lag_ms": 174.34430122375488,
+       "queue_depth": 4,
+       "dropped": 601,
+       "infer_p50": 60.758789000374236,
+       "infer_p95": 97.03150349960198
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.0,
+       "lag_ms": 107.3918342590332,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.30519550027748,
+       "infer_p95": 115.90803080025582
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 217.6504135131836,
+       "queue_depth": 4,
+       "dropped": 616,
+       "infer_p50": 67.45502649982882,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 29.1,
+     "cpu_percent": 394.5,
+     "rss_mb": 587.27734375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 12.0,
+       "lag_ms": 181.1385154724121,
+       "queue_depth": 4,
+       "dropped": 620,
+       "infer_p50": 60.938762499972654,
+       "infer_p95": 97.03150349960198
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 109.53664779663086,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.52001400017616,
+       "infer_p95": 115.90803080025582
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.0,
+       "lag_ms": 159.87181663513184,
+       "queue_depth": 4,
+       "dropped": 630,
+       "infer_p50": 67.25014199992074,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 30.1,
+     "cpu_percent": 391.5,
+     "rss_mb": 588.43359375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 11.0,
+       "lag_ms": 206.21609687805176,
+       "queue_depth": 4,
+       "dropped": 639,
+       "infer_p50": 61.33857499980877,
+       "infer_p95": 98.07410569965214
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 87.82958984375,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.34054000007018,
+       "infer_p95": 115.90803080025582
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.5,
+       "lag_ms": 166.2437915802002,
+       "queue_depth": 4,
+       "dropped": 643,
+       "infer_p50": 66.19874500029255,
+       "infer_p95": 108.22608809958184
+      }
+     ]
+    },
+    {
+     "t": 31.1,
+     "cpu_percent": 393.9,
+     "rss_mb": 589.328125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.5,
+       "lag_ms": 204.76627349853516,
+       "queue_depth": 4,
+       "dropped": 657,
+       "infer_p50": 62.13489850006226,
+       "infer_p95": 98.07410569965214
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 86.85803413391113,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.52001400017616,
+       "infer_p95": 116.57146860002285
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 15.0,
+       "lag_ms": 204.66017723083496,
+       "queue_depth": 3,
+       "dropped": 662,
+       "infer_p50": 66.04072799973437,
+       "infer_p95": 109.50577440003147
+      }
+     ]
+    },
+    {
+     "t": 32.1,
+     "cpu_percent": 393.5,
+     "rss_mb": 590.3515625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.0,
+       "lag_ms": 176.1951446533203,
+       "queue_depth": 3,
+       "dropped": 674,
+       "infer_p50": 62.51810300000216,
+       "infer_p95": 98.07410569965214
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 71.53701782226562,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.12184850020276,
+       "infer_p95": 116.57146860002285
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 155.62915802001953,
+       "queue_depth": 3,
+       "dropped": 677,
+       "infer_p50": 64.51477049995447,
+       "infer_p95": 109.50577440003147
+      }
+     ]
+    },
+    {
+     "t": 33.1,
+     "cpu_percent": 395.5,
+     "rss_mb": 591.4453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 192.16322898864746,
+       "queue_depth": 4,
+       "dropped": 691,
+       "infer_p50": 63.50370749987633,
+       "infer_p95": 98.07410569965214
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 60.39071083068848,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.70928650036512,
+       "infer_p95": 115.90803080025582
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.0,
+       "lag_ms": 174.70049858093262,
+       "queue_depth": 4,
+       "dropped": 690,
+       "infer_p50": 64.51477049995447,
+       "infer_p95": 109.50577440003147
+      }
+     ]
+    },
+    {
+     "t": 34.1,
+     "cpu_percent": 391.4,
+     "rss_mb": 592.50390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 12.0,
+       "lag_ms": 245.55730819702148,
+       "queue_depth": 4,
+       "dropped": 710,
+       "infer_p50": 64.09890650002126,
+       "infer_p95": 98.9631425996322
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 98.45328330993652,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 74.70928650036512,
+       "infer_p95": 113.72976825005026
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 16.5,
+       "lag_ms": 192.33298301696777,
+       "queue_depth": 4,
+       "dropped": 704,
+       "infer_p50": 63.91795600029582,
+       "infer_p95": 109.50577440003147
+      }
+     ]
+    },
+    {
+     "t": 35.1,
+     "cpu_percent": 327.4,
+     "rss_mb": 593.30859375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 241.55378341674805,
+       "queue_depth": 4,
+       "dropped": 732,
+       "infer_p50": 64.3150440005229,
+       "infer_p95": 103.9704684003027
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 223.70266914367676,
+       "queue_depth": 1,
+       "dropped": 0,
+       "infer_p50": 75.45041599996694,
+       "infer_p95": 114.81160424978044
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 14.0,
+       "lag_ms": 236.6945743560791,
+       "queue_depth": 4,
+       "dropped": 722,
+       "infer_p50": 64.7061640006541,
+       "infer_p95": 109.50577440003147
+      }
+     ]
+    },
+    {
+     "t": 36.1,
+     "cpu_percent": 376.7,
+     "rss_mb": 594.08984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.5,
+       "lag_ms": 191.57123565673828,
+       "queue_depth": 4,
+       "dropped": 747,
+       "infer_p50": 63.848968500224146,
+       "infer_p95": 103.9704684003027
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 84.11431312561035,
+       "queue_depth": 0,
+       "dropped": 0,
+       "infer_p50": 75.61238599964781,
+       "infer_p95": 114.81160424978044
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.5,
+       "lag_ms": 227.56671905517578,
+       "queue_depth": 4,
+       "dropped": 741,
+       "infer_p50": 65.34090799959813,
+       "infer_p95": 112.07299555062491
+      }
+     ]
+    },
+    {
+     "t": 37.1,
+     "cpu_percent": 245.6,
+     "rss_mb": 594.42578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 12.5,
+       "lag_ms": 206.37774467468262,
+       "queue_depth": 4,
+       "dropped": 768,
+       "infer_p50": 64.14893550027045,
+       "infer_p95": 104.4397822501651
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 443.78662109375,
+       "queue_depth": 4,
+       "dropped": 0,
+       "infer_p50": 76.27645850016052,
+       "infer_p95": 116.57146860002285
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 311.83314323425293,
+       "queue_depth": 3,
+       "dropped": 767,
+       "infer_p50": 65.34839099958845,
+       "infer_p95": 116.30039024953479
+      }
+     ]
+    },
+    {
+     "t": 38.1,
+     "cpu_percent": 314.1,
+     "rss_mb": 595.859375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 216.57872200012207,
+       "queue_depth": 4,
+       "dropped": 786,
+       "infer_p50": 64.28218650034978,
+       "infer_p95": 105.33499764997032
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.5,
+       "lag_ms": 519.3333625793457,
+       "queue_depth": 3,
+       "dropped": 4,
+       "infer_p50": 76.60395399989284,
+       "infer_p95": 122.13842704991298
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 255.9499740600586,
+       "queue_depth": 4,
+       "dropped": 789,
+       "infer_p50": 65.43278899971483,
+       "infer_p95": 121.02390049985848
+      }
+     ]
+    },
+    {
+     "t": 39.2,
+     "cpu_percent": 354.6,
+     "rss_mb": 596.58203125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 13.5,
+       "lag_ms": 195.57452201843262,
+       "queue_depth": 3,
+       "dropped": 802,
+       "infer_p50": 64.05854400054523,
+       "infer_p95": 104.33408259959833
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 411.2710952758789,
+       "queue_depth": 3,
+       "dropped": 6,
+       "infer_p50": 77.10847750013272,
+       "infer_p95": 126.94730979965247
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 221.5743064880371,
+       "queue_depth": 3,
+       "dropped": 809,
+       "infer_p50": 65.59925900000962,
+       "infer_p95": 119.4225781001933
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "summary": {
+    "streams": 4,
+    "input_fps_mean_per_stream": 20.0,
+    "processed_fps_mean_per_stream": 8.496875,
+    "processed_fps_total": 33.9875,
+    "lag_ms_p50": 301.07080936431885,
+    "lag_ms_p95": 559.93994474411,
+    "dropped_total": 2195,
+    "queue_depth_mean": 3.5,
+    "cpu_percent_mean": 342.2282051282051,
+    "rss_mb_max": 781.72265625,
+    "events": 126
+   },
+   "rows": [
+    {
+     "t": 0.0,
+     "cpu_percent": 235.9,
+     "rss_mb": 762.265625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 202.98075675964355,
+       "queue_depth": 4,
+       "dropped": 166,
+       "infer_p50": 85.0788609996016,
+       "infer_p95": 131.35473240054128
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 409.73591804504395,
+       "queue_depth": 4,
+       "dropped": 4,
+       "infer_p50": 98.52680450012485,
+       "infer_p95": 128.5307819498939
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 8.5,
+       "lag_ms": 213.6404514312744,
+       "queue_depth": 4,
+       "dropped": 168,
+       "infer_p50": 102.49490400019567,
+       "infer_p95": 140.9343905501828
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 345.8409309387207,
+       "queue_depth": 3,
+       "dropped": 5,
+       "infer_p50": 92.19514600044931,
+       "infer_p95": 129.25582900015797
+      }
+     ]
+    },
+    {
+     "t": 1.0,
+     "cpu_percent": 335.6,
+     "rss_mb": 765.28515625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 208.2669734954834,
+       "queue_depth": 4,
+       "dropped": 187,
+       "infer_p50": 85.0788609996016,
+       "infer_p95": 128.65516730025774
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 521.6271877288818,
+       "queue_depth": 4,
+       "dropped": 6,
+       "infer_p50": 100.27240550016359,
+       "infer_p95": 131.97005389997685
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 182.85274505615234,
+       "queue_depth": 4,
+       "dropped": 189,
+       "infer_p50": 102.68720000021858,
+       "infer_p95": 139.02452710035502
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 473.5827445983887,
+       "queue_depth": 3,
+       "dropped": 7,
+       "infer_p50": 95.02594899913674,
+       "infer_p95": 140.1669789001061
+      }
+     ]
+    },
+    {
+     "t": 2.0,
+     "cpu_percent": 342.6,
+     "rss_mb": 766.33203125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 194.50712203979492,
+       "queue_depth": 4,
+       "dropped": 208,
+       "infer_p50": 84.90136399950643,
+       "infer_p95": 127.27757824973196
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 502.41684913635254,
+       "queue_depth": 4,
+       "dropped": 8,
+       "infer_p50": 101.03999449984258,
+       "infer_p95": 134.97738745022613
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 260.4193687438965,
+       "queue_depth": 4,
+       "dropped": 211,
+       "infer_p50": 103.06192200005171,
+       "infer_p95": 140.4129877001651
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.5,
+       "processed_fps": 7.5,
+       "lag_ms": 555.2632808685303,
+       "queue_depth": 4,
+       "dropped": 10,
+       "infer_p50": 96.07834549979088,
+       "infer_p95": 148.06142199972783
+      }
+     ]
+    },
+    {
+     "t": 3.0,
+     "cpu_percent": 362.2,
+     "rss_mb": 769.39453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 248.56901168823242,
+       "queue_depth": 4,
+       "dropped": 228,
+       "infer_p50": 84.35852149978018,
+       "infer_p95": 128.4196450003492
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 481.17780685424805,
+       "queue_depth": 4,
+       "dropped": 8,
+       "infer_p50": 100.27240550016359,
+       "infer_p95": 132.24401795000628
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 257.10415840148926,
+       "queue_depth": 4,
+       "dropped": 232,
+       "infer_p50": 102.49490400019567,
+       "infer_p95": 141.53333524996015
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 9.5,
+       "processed_fps": 8.5,
+       "lag_ms": 469.18559074401855,
+       "queue_depth": 3,
+       "dropped": 11,
+       "infer_p50": 95.72369800025626,
+       "infer_p95": 145.74996799947255
+      }
+     ]
+    },
+    {
+     "t": 4.0,
+     "cpu_percent": 298.5,
+     "rss_mb": 772.1796875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 247.0855712890625,
+       "queue_depth": 4,
+       "dropped": 250,
+       "infer_p50": 88.71686850034166,
+       "infer_p95": 139.18249815019408
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 641.0562992095947,
+       "queue_depth": 4,
+       "dropped": 12,
+       "infer_p50": 101.03999449984258,
+       "infer_p95": 137.7001967500746
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 297.8830337524414,
+       "queue_depth": 4,
+       "dropped": 255,
+       "infer_p50": 104.10630800015497,
+       "infer_p95": 145.80939570050757
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 611.8564605712891,
+       "queue_depth": 4,
+       "dropped": 16,
+       "infer_p50": 97.16668199962442,
+       "infer_p95": 151.15871174957647
+      }
+     ]
+    },
+    {
+     "t": 5.0,
+     "cpu_percent": 376.4,
+     "rss_mb": 775.5390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 198.83298873901367,
+       "queue_depth": 4,
+       "dropped": 271,
+       "infer_p50": 88.56198100056645,
+       "infer_p95": 137.5888358003066
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 293.55382919311523,
+       "queue_depth": 2,
+       "dropped": 13,
+       "infer_p50": 100.33845199995994,
+       "infer_p95": 138.43160659980637
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 211.07125282287598,
+       "queue_depth": 4,
+       "dropped": 274,
+       "infer_p50": 102.49490400019567,
+       "infer_p95": 144.26601155041678
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.0,
+       "lag_ms": 495.2383041381836,
+       "queue_depth": 4,
+       "dropped": 17,
+       "infer_p50": 97.14767999957985,
+       "infer_p95": 151.5377579995402
+      }
+     ]
+    },
+    {
+     "t": 6.0,
+     "cpu_percent": 395.9,
+     "rss_mb": 781.3984375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 191.69092178344727,
+       "queue_depth": 4,
+       "dropped": 290,
+       "infer_p50": 84.90136399950643,
+       "infer_p95": 132.69061170049093
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 117.98977851867676,
+       "queue_depth": 0,
+       "dropped": 13,
+       "infer_p50": 98.81037000013748,
+       "infer_p95": 137.6476414001445
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 221.0536003112793,
+       "queue_depth": 3,
+       "dropped": 295,
+       "infer_p50": 101.53723349958454,
+       "infer_p95": 143.21791740030676
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 451.4961242675781,
+       "queue_depth": 4,
+       "dropped": 18,
+       "infer_p50": 96.67194550002023,
+       "infer_p95": 151.22762924956987
+      }
+     ]
+    },
+    {
+     "t": 7.1,
+     "cpu_percent": 318.0,
+     "rss_mb": 781.72265625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 291.7673587799072,
+       "queue_depth": 3,
+       "dropped": 315,
+       "infer_p50": 88.56198100056645,
+       "infer_p95": 144.58073599962518
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 364.73965644836426,
+       "queue_depth": 3,
+       "dropped": 13,
+       "infer_p50": 99.84990300017671,
+       "infer_p95": 141.27305049942152
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 9.0,
+       "lag_ms": 286.1180305480957,
+       "queue_depth": 3,
+       "dropped": 317,
+       "infer_p50": 101.53723349958454,
+       "infer_p95": 146.25050890044804
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 519.7968482971191,
+       "queue_depth": 4,
+       "dropped": 21,
+       "infer_p50": 97.5094639998133,
+       "infer_p95": 150.94618639977853
+      }
+     ]
+    },
+    {
+     "t": 8.1,
+     "cpu_percent": 334.0,
+     "rss_mb": 613.4453125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 282.6344966888428,
+       "queue_depth": 4,
+       "dropped": 338,
+       "infer_p50": 90.16893500029255,
+       "infer_p95": 146.35871889968257
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 443.3019161224365,
+       "queue_depth": 4,
+       "dropped": 14,
+       "infer_p50": 99.84990300017671,
+       "infer_p95": 141.91186689995448
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 304.6243190765381,
+       "queue_depth": 4,
+       "dropped": 340,
+       "infer_p50": 101.53920999982802,
+       "infer_p95": 147.60560470003836
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 568.09401512146,
+       "queue_depth": 4,
+       "dropped": 24,
+       "infer_p50": 99.08944900007555,
+       "infer_p95": 151.43438174955008
+      }
+     ]
+    },
+    {
+     "t": 9.1,
+     "cpu_percent": 312.6,
+     "rss_mb": 614.578125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 377.9568672180176,
+       "queue_depth": 4,
+       "dropped": 361,
+       "infer_p50": 90.41097050021563,
+       "infer_p95": 150.02994824994857
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 510.2124214172363,
+       "queue_depth": 4,
+       "dropped": 16,
+       "infer_p50": 100.32412400005342,
+       "infer_p95": 141.48598929959917
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 222.80526161193848,
+       "queue_depth": 3,
+       "dropped": 363,
+       "infer_p50": 102.18623799937632,
+       "infer_p95": 151.03034259982445
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.5,
+       "lag_ms": 521.7242240905762,
+       "queue_depth": 4,
+       "dropped": 28,
+       "infer_p50": 100.03034350029338,
+       "infer_p95": 152.3819396496492
+      }
+     ]
+    },
+    {
+     "t": 10.1,
+     "cpu_percent": 334.2,
+     "rss_mb": 614.87109375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 316.8981075286865,
+       "queue_depth": 4,
+       "dropped": 386,
+       "infer_p50": 91.94866400002866,
+       "infer_p95": 150.61992435025786
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 540.097713470459,
+       "queue_depth": 4,
+       "dropped": 19,
+       "infer_p50": 101.07979799977329,
+       "infer_p95": 142.82840409996422
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 211.16256713867188,
+       "queue_depth": 4,
+       "dropped": 385,
+       "infer_p50": 102.18623799937632,
+       "infer_p95": 152.67995770000198
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.5,
+       "lag_ms": 460.7508182525635,
+       "queue_depth": 3,
+       "dropped": 31,
+       "infer_p50": 101.13274149989593,
+       "infer_p95": 152.6855702497869
+      }
+     ]
+    },
+    {
+     "t": 11.1,
+     "cpu_percent": 386.9,
+     "rss_mb": 624.55078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 223.68335723876953,
+       "queue_depth": 4,
+       "dropped": 407,
+       "infer_p50": 90.58400499998243,
+       "infer_p95": 150.54284040033963
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 406.4314365386963,
+       "queue_depth": 3,
+       "dropped": 19,
+       "infer_p50": 100.32412400005342,
+       "infer_p95": 142.1850546999849
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 216.64905548095703,
+       "queue_depth": 4,
+       "dropped": 405,
+       "infer_p50": 101.53525699934107,
+       "infer_p95": 151.5108233998034
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 414.67857360839844,
+       "queue_depth": 3,
+       "dropped": 32,
+       "infer_p50": 100.00269200008916,
+       "infer_p95": 154.45968329977396
+      }
+     ]
+    },
+    {
+     "t": 12.1,
+     "cpu_percent": 295.5,
+     "rss_mb": 625.328125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 352.4632453918457,
+       "queue_depth": 4,
+       "dropped": 431,
+       "infer_p50": 91.10148299987486,
+       "infer_p95": 151.03694790059308
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 462.8298282623291,
+       "queue_depth": 4,
+       "dropped": 21,
+       "infer_p50": 100.54910199960432,
+       "infer_p95": 147.86896440054988
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 314.6944046020508,
+       "queue_depth": 4,
+       "dropped": 428,
+       "infer_p50": 101.66570850014978,
+       "infer_p95": 153.47407720037154
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 565.2222633361816,
+       "queue_depth": 4,
+       "dropped": 35,
+       "infer_p50": 100.18243200011057,
+       "infer_p95": 159.25762099959684
+      }
+     ]
+    },
+    {
+     "t": 13.1,
+     "cpu_percent": 391.4,
+     "rss_mb": 625.48828125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 204.8475742340088,
+       "queue_depth": 4,
+       "dropped": 450,
+       "infer_p50": 90.22407050042602,
+       "infer_p95": 150.7487572505397
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 163.83957862854004,
+       "queue_depth": 0,
+       "dropped": 22,
+       "infer_p50": 99.47481100016375,
+       "infer_p95": 145.30565005024974
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 207.01313018798828,
+       "queue_depth": 3,
+       "dropped": 449,
+       "infer_p50": 101.53723349958454,
+       "infer_p95": 153.81672520015854
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 469.3913459777832,
+       "queue_depth": 3,
+       "dropped": 36,
+       "infer_p50": 99.25246500006324,
+       "infer_p95": 158.7808524996035
+      }
+     ]
+    },
+    {
+     "t": 14.1,
+     "cpu_percent": 320.2,
+     "rss_mb": 629.10546875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 10.0,
+       "lag_ms": 304.2585849761963,
+       "queue_depth": 4,
+       "dropped": 471,
+       "infer_p50": 90.23793600044883,
+       "infer_p95": 151.03694790059308
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 272.82071113586426,
+       "queue_depth": 3,
+       "dropped": 22,
+       "infer_p50": 99.45617500034132,
+       "infer_p95": 148.35200360048475
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 349.0004539489746,
+       "queue_depth": 4,
+       "dropped": 473,
+       "infer_p50": 101.98922249992393,
+       "infer_p95": 156.16326705003303
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 601.6800403594971,
+       "queue_depth": 4,
+       "dropped": 39,
+       "infer_p50": 99.25246500006324,
+       "infer_p95": 162.6426333998097
+      }
+     ]
+    },
+    {
+     "t": 15.1,
+     "cpu_percent": 293.6,
+     "rss_mb": 629.125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 206.94398880004883,
+       "queue_depth": 4,
+       "dropped": 493,
+       "infer_p50": 90.41097050021563,
+       "infer_p95": 150.76716195057998
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 9.5,
+       "processed_fps": 7.0,
+       "lag_ms": 513.4024620056152,
+       "queue_depth": 3,
+       "dropped": 26,
+       "infer_p50": 100.30979600014689,
+       "infer_p95": 157.42330050015872
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.0,
+       "lag_ms": 343.80316734313965,
+       "queue_depth": 4,
+       "dropped": 498,
+       "infer_p50": 102.57117200035282,
+       "infer_p95": 163.12940860025256
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.0,
+       "lag_ms": 578.5374641418457,
+       "queue_depth": 4,
+       "dropped": 44,
+       "infer_p50": 100.18243200011057,
+       "infer_p95": 169.10515180015864
+      }
+     ]
+    },
+    {
+     "t": 16.1,
+     "cpu_percent": 340.2,
+     "rss_mb": 629.2265625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 244.4159984588623,
+       "queue_depth": 4,
+       "dropped": 515,
+       "infer_p50": 91.67941400028212,
+       "infer_p95": 151.15803735056943
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.0,
+       "lag_ms": 437.53910064697266,
+       "queue_depth": 4,
+       "dropped": 28,
+       "infer_p50": 100.33845199995994,
+       "infer_p95": 158.27843750003012
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 257.74312019348145,
+       "queue_depth": 4,
+       "dropped": 520,
+       "infer_p50": 102.68720000021858,
+       "infer_p95": 165.0748960000783
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.0,
+       "lag_ms": 480.2572727203369,
+       "queue_depth": 4,
+       "dropped": 48,
+       "infer_p50": 101.03152900046553,
+       "infer_p95": 170.08359680039575
+      }
+     ]
+    },
+    {
+     "t": 17.1,
+     "cpu_percent": 332.6,
+     "rss_mb": 629.28125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 239.73822593688965,
+       "queue_depth": 4,
+       "dropped": 537,
+       "infer_p50": 92.4093045000518,
+       "infer_p95": 151.82335785048045
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 528.5923480987549,
+       "queue_depth": 4,
+       "dropped": 29,
+       "infer_p50": 100.32412400005342,
+       "infer_p95": 157.79903574962188
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 256.9911479949951,
+       "queue_depth": 4,
+       "dropped": 542,
+       "infer_p50": 102.6291860002857,
+       "infer_p95": 163.615780450209
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 424.9434471130371,
+       "queue_depth": 3,
+       "dropped": 50,
+       "infer_p50": 101.07226400032232,
+       "infer_p95": 170.72333320052167
+      }
+     ]
+    },
+    {
+     "t": 18.1,
+     "cpu_percent": 333.5,
+     "rss_mb": 629.87890625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 250.6861686706543,
+       "queue_depth": 4,
+       "dropped": 561,
+       "infer_p50": 94.00634599933255,
+       "infer_p95": 151.35985310053002
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 501.6629695892334,
+       "queue_depth": 3,
+       "dropped": 32,
+       "infer_p50": 100.49457300010545,
+       "infer_p95": 158.44343274980017
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 237.65945434570312,
+       "queue_depth": 4,
+       "dropped": 563,
+       "infer_p50": 102.30260800017277,
+       "infer_p95": 162.1566649003398
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 514.8494243621826,
+       "queue_depth": 4,
+       "dropped": 52,
+       "infer_p50": 101.56904099949315,
+       "infer_p95": 170.37163140048503
+      }
+     ]
+    },
+    {
+     "t": 19.2,
+     "cpu_percent": 370.5,
+     "rss_mb": 629.9296875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 245.04399299621582,
+       "queue_depth": 4,
+       "dropped": 584,
+       "infer_p50": 94.69749900017632,
+       "infer_p95": 151.0773110505852
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 393.86653900146484,
+       "queue_depth": 3,
+       "dropped": 33,
+       "infer_p50": 101.07979799977329,
+       "infer_p95": 157.96013499966648
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 251.1768341064453,
+       "queue_depth": 4,
+       "dropped": 581,
+       "infer_p50": 101.53525699934107,
+       "infer_p95": 160.11678899985782
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 481.05740547180176,
+       "queue_depth": 4,
+       "dropped": 55,
+       "infer_p50": 102.96697449985004,
+       "infer_p95": 170.85066760041627
+      }
+     ]
+    },
+    {
+     "t": 20.2,
+     "cpu_percent": 339.3,
+     "rss_mb": 629.94921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 354.480504989624,
+       "queue_depth": 4,
+       "dropped": 607,
+       "infer_p50": 94.9225939993994,
+       "infer_p95": 151.60203200048272
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 504.3017864227295,
+       "queue_depth": 3,
+       "dropped": 35,
+       "infer_p50": 101.53088700008084,
+       "infer_p95": 166.49604859958328
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 225.79574584960938,
+       "queue_depth": 4,
+       "dropped": 602,
+       "infer_p50": 101.53723349958454,
+       "infer_p95": 158.5727237993978
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.0,
+       "lag_ms": 473.6933708190918,
+       "queue_depth": 4,
+       "dropped": 58,
+       "infer_p50": 103.0008790003194,
+       "infer_p95": 170.70211080053923
+      }
+     ]
+    },
+    {
+     "t": 21.2,
+     "cpu_percent": 337.8,
+     "rss_mb": 629.94921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 274.57475662231445,
+       "queue_depth": 3,
+       "dropped": 630,
+       "infer_p50": 94.9225939993994,
+       "infer_p95": 151.27912680054578
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 525.3331661224365,
+       "queue_depth": 3,
+       "dropped": 37,
+       "infer_p50": 101.53088700008084,
+       "infer_p95": 162.6576897997436
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 245.90373039245605,
+       "queue_depth": 4,
+       "dropped": 623,
+       "infer_p50": 101.05933700015157,
+       "infer_p95": 158.05774179971195
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 403.5375118255615,
+       "queue_depth": 3,
+       "dropped": 61,
+       "infer_p50": 103.97133500009659,
+       "infer_p95": 170.22761410044038
+      }
+     ]
+    },
+    {
+     "t": 22.2,
+     "cpu_percent": 395.2,
+     "rss_mb": 629.9765625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 9.5,
+       "lag_ms": 205.83224296569824,
+       "queue_depth": 4,
+       "dropped": 649,
+       "infer_p50": 94.53400799975498,
+       "infer_p95": 150.8351321506325
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 183.38727951049805,
+       "queue_depth": 0,
+       "dropped": 37,
+       "infer_p50": 100.25807750025706,
+       "infer_p95": 158.5508322498299
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 241.29462242126465,
+       "queue_depth": 4,
+       "dropped": 645,
+       "infer_p50": 100.56382499942629,
+       "infer_p95": 157.67139520012276
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 339.12158012390137,
+       "queue_depth": 2,
+       "dropped": 61,
+       "infer_p50": 102.96697449985004,
+       "infer_p95": 169.4355189501948
+      }
+     ]
+    },
+    {
+     "t": 23.2,
+     "cpu_percent": 395.5,
+     "rss_mb": 629.98046875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 12.0,
+       "lag_ms": 191.48540496826172,
+       "queue_depth": 4,
+       "dropped": 667,
+       "infer_p50": 92.4093045000518,
+       "infer_p95": 150.69354315041892
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 12.0,
+       "lag_ms": 82.60226249694824,
+       "queue_depth": 0,
+       "dropped": 37,
+       "infer_p50": 99.08819700058302,
+       "infer_p95": 158.01383474968134
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.5,
+       "lag_ms": 192.55805015563965,
+       "queue_depth": 4,
+       "dropped": 663,
+       "infer_p50": 99.95928049966096,
+       "infer_p95": 157.41198115024417
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.0,
+       "lag_ms": 244.368314743042,
+       "queue_depth": 1,
+       "dropped": 61,
+       "infer_p50": 101.56904099949315,
+       "infer_p95": 169.17829259982682
+      }
+     ]
+    },
+    {
+     "t": 24.2,
+     "cpu_percent": 397.3,
+     "rss_mb": 630.828125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.5,
+       "lag_ms": 210.69622039794922,
+       "queue_depth": 3,
+       "dropped": 687,
+       "infer_p50": 90.97116000066308,
+       "infer_p95": 150.60686500019074
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.0,
+       "lag_ms": 82.8857421875,
+       "queue_depth": 0,
+       "dropped": 37,
+       "infer_p50": 98.47684899978049,
+       "infer_p95": 157.74299839977175
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 11.0,
+       "lag_ms": 213.606595993042,
+       "queue_depth": 3,
+       "dropped": 684,
+       "infer_p50": 99.69796900031724,
+       "infer_p95": 157.26683465022688
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 86.53926849365234,
+       "queue_depth": 0,
+       "dropped": 61,
+       "infer_p50": 100.09256200009986,
+       "infer_p95": 169.1216420494129
+      }
+     ]
+    },
+    {
+     "t": 25.2,
+     "cpu_percent": 338.6,
+     "rss_mb": 635.59375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 9.0,
+       "lag_ms": 256.5350532531738,
+       "queue_depth": 4,
+       "dropped": 709,
+       "infer_p50": 91.89324199996918,
+       "infer_p95": 150.70274550043905
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.5,
+       "processed_fps": 9.0,
+       "lag_ms": 313.89403343200684,
+       "queue_depth": 3,
+       "dropped": 37,
+       "infer_p50": 98.61018799983867,
+       "infer_p95": 161.33865339975247
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 235.0940704345703,
+       "queue_depth": 4,
+       "dropped": 704,
+       "infer_p50": 99.54547500001354,
+       "infer_p95": 157.2039576001771
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.5,
+       "lag_ms": 216.11475944519043,
+       "queue_depth": 1,
+       "dropped": 61,
+       "infer_p50": 100.00269200008916,
+       "infer_p95": 168.7003275997995
+      }
+     ]
+    },
+    {
+     "t": 26.2,
+     "cpu_percent": 376.5,
+     "rss_mb": 635.75390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 8.5,
+       "lag_ms": 216.74108505249023,
+       "queue_depth": 4,
+       "dropped": 730,
+       "infer_p50": 92.25734500068938,
+       "infer_p95": 150.87549530062458
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 449.0518569946289,
+       "queue_depth": 4,
+       "dropped": 37,
+       "infer_p50": 98.36004399994636,
+       "infer_p95": 159.17923419988264
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 209.40208435058594,
+       "queue_depth": 4,
+       "dropped": 725,
+       "infer_p50": 98.50257400012197,
+       "infer_p95": 157.143504600117
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 279.7999382019043,
+       "queue_depth": 2,
+       "dropped": 61,
+       "infer_p50": 99.9768380002024,
+       "infer_p95": 168.2321426502767
+      }
+     ]
+    },
+    {
+     "t": 27.2,
+     "cpu_percent": 279.5,
+     "rss_mb": 635.765625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 344.4793224334717,
+       "queue_depth": 4,
+       "dropped": 755,
+       "infer_p50": 93.19830449976507,
+       "infer_p95": 156.2318892003987
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 576.0352611541748,
+       "queue_depth": 4,
+       "dropped": 42,
+       "infer_p50": 98.61018799983867,
+       "infer_p95": 168.41684074952354
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 313.671350479126,
+       "queue_depth": 4,
+       "dropped": 748,
+       "infer_p50": 98.38911249971716,
+       "infer_p95": 157.5855404002141
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 559.7715377807617,
+       "queue_depth": 3,
+       "dropped": 62,
+       "infer_p50": 99.9768380002024,
+       "infer_p95": 169.1937427499397
+      }
+     ]
+    },
+    {
+     "t": 28.2,
+     "cpu_percent": 353.3,
+     "rss_mb": 636.375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 218.75977516174316,
+       "queue_depth": 4,
+       "dropped": 777,
+       "infer_p50": 94.01373999980933,
+       "infer_p95": 160.18431554966813
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.0,
+       "lag_ms": 464.48254585266113,
+       "queue_depth": 4,
+       "dropped": 45,
+       "infer_p50": 98.77495850014384,
+       "infer_p95": 169.00963950033656
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 212.9039764404297,
+       "queue_depth": 4,
+       "dropped": 769,
+       "infer_p50": 98.68339000013293,
+       "infer_p95": 158.5727237993979
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 9.5,
+       "processed_fps": 7.5,
+       "lag_ms": 474.1485118865967,
+       "queue_depth": 3,
+       "dropped": 65,
+       "infer_p50": 100.18243200011057,
+       "infer_p95": 170.82944520043384
+      }
+     ]
+    },
+    {
+     "t": 29.2,
+     "cpu_percent": 395.2,
+     "rss_mb": 637.1640625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 235.1396083831787,
+       "queue_depth": 4,
+       "dropped": 800,
+       "infer_p50": 94.8806239998703,
+       "infer_p95": 161.93954300028966
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 201.2324333190918,
+       "queue_depth": 1,
+       "dropped": 46,
+       "infer_p50": 98.10647349968349,
+       "infer_p95": 169.29181999998946
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 251.89566612243652,
+       "queue_depth": 4,
+       "dropped": 788,
+       "infer_p50": 97.3752835002415,
+       "infer_p95": 158.5727237993979
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 494.0681457519531,
+       "queue_depth": 4,
+       "dropped": 67,
+       "infer_p50": 101.07226400032232,
+       "infer_p95": 170.6808884005568
+      }
+     ]
+    },
+    {
+     "t": 30.2,
+     "cpu_percent": 363.2,
+     "rss_mb": 637.19140625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 242.87748336791992,
+       "queue_depth": 4,
+       "dropped": 821,
+       "infer_p50": 95.0074094998854,
+       "infer_p95": 161.93954300028966
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 11.5,
+       "lag_ms": 166.7180061340332,
+       "queue_depth": 2,
+       "dropped": 46,
+       "infer_p50": 97.17796699987957,
+       "infer_p95": 169.29181999998946
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 10.0,
+       "lag_ms": 265.8722400665283,
+       "queue_depth": 4,
+       "dropped": 809,
+       "infer_p50": 96.76062150037978,
+       "infer_p95": 157.5855404002141
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 536.963701248169,
+       "queue_depth": 4,
+       "dropped": 69,
+       "infer_p50": 101.54835349976565,
+       "infer_p95": 170.6808884005568
+      }
+     ]
+    },
+    {
+     "t": 31.2,
+     "cpu_percent": 329.5,
+     "rss_mb": 638.94921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.5,
+       "lag_ms": 150.18630027770996,
+       "queue_depth": 4,
+       "dropped": 841,
+       "infer_p50": 96.44762900052228,
+       "infer_p95": 161.93954300028966
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 450.69360733032227,
+       "queue_depth": 4,
+       "dropped": 46,
+       "infer_p50": 98.61018799983867,
+       "infer_p95": 169.29181999998946
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 209.9449634552002,
+       "queue_depth": 3,
+       "dropped": 833,
+       "infer_p50": 97.13211299958857,
+       "infer_p95": 157.5855404002141
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 498.4617233276367,
+       "queue_depth": 4,
+       "dropped": 72,
+       "infer_p50": 102.70522099972368,
+       "infer_p95": 170.6808884005568
+      }
+     ]
+    },
+    {
+     "t": 32.2,
+     "cpu_percent": 359.5,
+     "rss_mb": 638.9609375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 9.0,
+       "lag_ms": 273.317813873291,
+       "queue_depth": 4,
+       "dropped": 864,
+       "infer_p50": 97.6118570001745,
+       "infer_p95": 161.93954300028966
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 455.8095932006836,
+       "queue_depth": 4,
+       "dropped": 46,
+       "infer_p50": 98.11836399967433,
+       "infer_p95": 169.00963950033656
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.0,
+       "lag_ms": 250.13971328735352,
+       "queue_depth": 4,
+       "dropped": 854,
+       "infer_p50": 98.20189049969485,
+       "infer_p95": 157.5855404002141
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 459.9170684814453,
+       "queue_depth": 4,
+       "dropped": 75,
+       "infer_p50": 102.82233549969533,
+       "infer_p95": 170.6808884005568
+      }
+     ]
+    },
+    {
+     "t": 33.2,
+     "cpu_percent": 337.2,
+     "rss_mb": 640.25390625,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 8.0,
+       "lag_ms": 271.4540958404541,
+       "queue_depth": 4,
+       "dropped": 887,
+       "infer_p50": 98.17061400053717,
+       "infer_p95": 163.03136375017857
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.5,
+       "lag_ms": 487.0133399963379,
+       "queue_depth": 4,
+       "dropped": 47,
+       "infer_p50": 98.9264760005426,
+       "infer_p95": 169.00963950033656
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 8.0,
+       "lag_ms": 293.7743663787842,
+       "queue_depth": 3,
+       "dropped": 877,
+       "infer_p50": 99.54977999996117,
+       "infer_p95": 157.26683465022688
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 308.14051628112793,
+       "queue_depth": 2,
+       "dropped": 76,
+       "infer_p50": 102.70522099972368,
+       "infer_p95": 171.1241552502088
+      }
+     ]
+    },
+    {
+     "t": 34.2,
+     "cpu_percent": 324.5,
+     "rss_mb": 642.52734375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 7.5,
+       "lag_ms": 255.7680606842041,
+       "queue_depth": 4,
+       "dropped": 910,
+       "infer_p50": 99.12147049954001,
+       "infer_p95": 161.93206825032576
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 453.74083518981934,
+       "queue_depth": 4,
+       "dropped": 50,
+       "infer_p50": 99.08819700058302,
+       "infer_p95": 169.29181999998946
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.5,
+       "lag_ms": 288.34033012390137,
+       "queue_depth": 4,
+       "dropped": 901,
+       "infer_p50": 99.54977999996117,
+       "infer_p95": 157.5855404002141
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 10.0,
+       "lag_ms": 333.60886573791504,
+       "queue_depth": 3,
+       "dropped": 76,
+       "infer_p50": 102.82233549969533,
+       "infer_p95": 171.1241552502088
+      }
+     ]
+    },
+    {
+     "t": 35.3,
+     "cpu_percent": 272.3,
+     "rss_mb": 642.859375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 260.45799255371094,
+       "queue_depth": 4,
+       "dropped": 934,
+       "infer_p50": 99.26943900018159,
+       "infer_p95": 163.03136375017857
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.0,
+       "lag_ms": 563.1396770477295,
+       "queue_depth": 4,
+       "dropped": 54,
+       "infer_p50": 99.7622089998913,
+       "infer_p95": 169.64232310015177
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.0,
+       "lag_ms": 276.69382095336914,
+       "queue_depth": 4,
+       "dropped": 926,
+       "infer_p50": 99.65121799996268,
+       "infer_p95": 165.3490369501015
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 508.6236000061035,
+       "queue_depth": 3,
+       "dropped": 78,
+       "infer_p50": 103.69823300015923,
+       "infer_p95": 171.1241552502088
+      }
+     ]
+    },
+    {
+     "t": 36.3,
+     "cpu_percent": 334.5,
+     "rss_mb": 643.078125,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 234.53712463378906,
+       "queue_depth": 4,
+       "dropped": 956,
+       "infer_p50": 98.17061400053717,
+       "infer_p95": 163.03136375017857
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.0,
+       "lag_ms": 509.15002822875977,
+       "queue_depth": 3,
+       "dropped": 57,
+       "infer_p50": 99.21363900002689,
+       "infer_p95": 170.66997050019387
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 218.80316734313965,
+       "queue_depth": 4,
+       "dropped": 947,
+       "infer_p50": 99.65121799996268,
+       "infer_p95": 165.3490369501015
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.5,
+       "lag_ms": 335.8466625213623,
+       "queue_depth": 3,
+       "dropped": 79,
+       "infer_p50": 103.69823300015923,
+       "infer_p95": 171.1241552502088
+      }
+     ]
+    },
+    {
+     "t": 37.3,
+     "cpu_percent": 283.2,
+     "rss_mb": 643.10546875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 7.0,
+       "lag_ms": 402.7285575866699,
+       "queue_depth": 4,
+       "dropped": 980,
+       "infer_p50": 99.82231850017342,
+       "infer_p95": 163.17604459950417
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 517.2710418701172,
+       "queue_depth": 4,
+       "dropped": 60,
+       "infer_p50": 99.21363900002689,
+       "infer_p95": 174.93377325026816
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 8.5,
+       "lag_ms": 313.8585090637207,
+       "queue_depth": 4,
+       "dropped": 971,
+       "infer_p50": 100.20834599981754,
+       "infer_p95": 170.55897620052747
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 9.0,
+       "lag_ms": 456.0546875,
+       "queue_depth": 4,
+       "dropped": 81,
+       "infer_p50": 103.69823300015923,
+       "infer_p95": 171.1241552502088
+      }
+     ]
+    },
+    {
+     "t": 38.3,
+     "cpu_percent": 287.5,
+     "rss_mb": 644.0859375,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 29.5,
+       "processed_fps": 6.0,
+       "lag_ms": 269.52242851257324,
+       "queue_depth": 3,
+       "dropped": 1005,
+       "infer_p50": 100.84429100015768,
+       "infer_p95": 163.4723861997373
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 6.5,
+       "lag_ms": 536.8838310241699,
+       "queue_depth": 3,
+       "dropped": 64,
+       "infer_p50": 100.9205344998918,
+       "infer_p95": 182.49181029968895
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.0,
+       "processed_fps": 6.5,
+       "lag_ms": 259.5689296722412,
+       "queue_depth": 4,
+       "dropped": 994,
+       "infer_p50": 100.42508249989623,
+       "infer_p95": 171.19248629965125
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 513.1242275238037,
+       "queue_depth": 4,
+       "dropped": 85,
+       "infer_p50": 104.95602950004468,
+       "infer_p95": 175.30133130030666
+      }
+     ]
+    },
+    {
+     "t": 39.3,
+     "cpu_percent": 372.9,
+     "rss_mb": 644.921875,
+     "cameras": [
+      {
+       "camera_id": "s0",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 8.0,
+       "lag_ms": 207.564115524292,
+       "queue_depth": 4,
+       "dropped": 1026,
+       "infer_p50": 100.5639639997753,
+       "infer_p95": 163.4723861997373
+      },
+      {
+       "camera_id": "s1",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 8.0,
+       "lag_ms": 411.5574359893799,
+       "queue_depth": 3,
+       "dropped": 65,
+       "infer_p50": 100.44732599999406,
+       "infer_p95": 176.49132475016822
+      },
+      {
+       "camera_id": "s2",
+       "state": 2,
+       "input_fps": 30.5,
+       "processed_fps": 7.5,
+       "lag_ms": 218.16062927246094,
+       "queue_depth": 4,
+       "dropped": 1017,
+       "infer_p50": 100.34727199990812,
+       "infer_p95": 171.19248629965125
+      },
+      {
+       "camera_id": "s3",
+       "state": 2,
+       "input_fps": 10.0,
+       "processed_fps": 7.5,
+       "lag_ms": 420.04990577697754,
+       "queue_depth": 3,
+       "dropped": 87,
+       "infer_p50": 104.4440454998039,
+       "infer_p95": 175.30133130030666
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

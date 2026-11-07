@@ -47,8 +47,9 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 ## 결과 요약 (실측; 상세는 [`docs/eval/README.md`](docs/eval/README.md))
 
 - **사건 평가(held-out 4편, 정답 draft)**: yolox_tiny(ONNX, CPU) precision 1.0 / recall 1.0 / 오탐 0건·중복 5건 — 중복은 추적 ID 전환으로 한 사건이 쪼개진 것. nano는 원거리 자전거 탑승자 2건을 놓쳐 recall 0.8. 정답은 Claude가 초안을 만든 **draft** 상태이며 사용자의 최종 검수 항목이 [`docs/eval/ground-truth.md`](docs/eval/ground-truth.md)에 있습니다.
-- **추론 성능**: PyTorch ↔ ONNX Runtime을 같은 프레임·전후처리로 3회 반복 비교, 변환 전후 상자 일치 검사 — 표는 docs/eval/README.md §2.
-- **실시간·장애 대응**: 과입력, 스트림 단절·복구, VLM 지연·실패, 장치–서버 단절, 중복 전달, 재시작 6가지를 스크립트로 재현·검증 — §4와 [`docs/evidence/failure-scenarios/`](docs/evidence/failure-scenarios/).
+- **추론 성능(4 vCPU, 3회 반복 중앙값)**: yolox_tiny 추론 p50 — PyTorch 44.6 ms → ONNX Runtime 21.6 ms(그래프 최적화 끔 32.1 ms); nano 26.8 → 8.6 ms; s 123.3 → 69.8 ms. 변환 전후 NMS 결과 상자·점수 차이 0(150프레임). 표와 반복 변동은 docs/eval/README.md §2.
+- **스트림 수 증가(tiny, 4 vCPU)**: 1스트림 28.6 fps(입력 30), 4스트림 합계 34 fps·스트림당 8.5 fps, 지연 p95 180 → 560 ms, 큐 깊이 상한(4) 유지·폐기 프레임 증가 — §3.
+- **실시간·장애 대응**: 과입력(입력 30 fps·1스레드 → 처리 19 fps, 폐기 417, 지연 최대 202 ms), 스트림 단절·복구(RTSP 14초 단절 → 4초 만에 재연결), VLM 지연·실패(수신 ack p95 2.7 ms 유지, 타임아웃·재시도·재요청), 장치–서버 단절(큐잉 → 재전송, 중복 0), 중복 전달, 재시작 — 6가지 모두 스크립트로 재현·통과. 이 과정에서 VLM 워커의 실제 버그 2개를 찾아 고침(`docs/dev-log.md` L9–L10). §4와 [`docs/evidence/failure-scenarios/`](docs/evidence/failure-scenarios/).
 - **VLM 추가 효과(CV만 vs CV+VLM)**: 같은 사건에 대해 비교하는 도구와 사람 채점 루브릭을 준비했고, 실제 모델 실행은 유료 API 승인(또는 로컬 모델 네트워크 허용) 후 진행합니다. 모의 응답은 품질 수치로 쓰지 않습니다.
 
 ## 기술 선택 (왜)

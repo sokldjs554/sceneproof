@@ -110,3 +110,34 @@ def test_displayed_timestamp_recorded_once(client):
     c.post("/api/events/ev-1/displayed", json={"client_ts": 2000.0})
     assert state.store.get_event("ev-1")["first_displayed_at"] == 1001.0
     assert c.get("/api/events/ev-1").json()["latency"]["first_display_ms"] == 1000.0
+
+
+def test_slow_provider_times_out_and_late_result_is_discarded(tmp_path):
+    """Provider takes 1.2 s, timeout 0.3 s, 2 attempts: final status must be 'timeout' and the late
+    thread results must not flip it to 'done' afterwards (regression for a real bug found by the
+    vlm_faults scenario)."""
+    settings = ServerSettings(data_dir=str(tmp_path / "srv"), mode="replay", vlm_provider="mock", vlm_mock_delay_s=1.2,
+                              vlm_timeout_s=0.3, vlm_max_attempts=2, console_dir=str(tmp_path / "no-console"))
+    app = create_app(settings)
+    with TestClient(app) as c:
+        state = app.state.zw
+        _seed(state, None)
+        for _ in range(100):
+            x = c.get("/api/events/ev-1").json()["explanation"]
+            if x and x["status"] == "timeout":
+                break
+            time.sleep(0.1)
+        assert x and x["status"] == "timeout" and x["attempts"] == 2
+        time.sleep(2.0)  # let the stale provider threads finish
+        x = c.get("/api/events/ev-1").json()["explanation"]
+        assert x["status"] == "timeout", "late result must not overwrite the timeout"
+        # the retry path after a healthy provider is simulated by forcing a new job
+        state.worker.provider.delay_s = 0.01
+        r = c.post("/api/events/ev-1/explain")
+        assert r.json()["queued"]
+        for _ in range(100):
+            x = c.get("/api/events/ev-1").json()["explanation"]
+            if x and x["status"] == "done":
+                break
+            time.sleep(0.1)
+        assert x["status"] == "done"

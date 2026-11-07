@@ -93,35 +93,40 @@ class VLMWorker:
             await asyncio.wait([self._task], timeout=5)
 
     async def _loop(self) -> None:
-        sem = asyncio.Semaphore(max(1, self.s.vlm_max_concurrency))
+        cap = max(1, self.s.vlm_max_concurrency)
         while not self._stop.is_set():
             if self.provider is None:
                 await asyncio.sleep(1.0)
                 continue
-            jobs = self.store.next_queued_explanations(limit=self.s.vlm_max_concurrency)
+            free = cap - len(self._jobs)
+            if free <= 0:
+                await asyncio.sleep(0.2)
+                continue
+            jobs = self.store.next_queued_explanations(limit=free)
             if not jobs:
                 await asyncio.sleep(0.5)
                 continue
             for job in jobs:
-                self.store.update_explanation(job["id"], status="running", started_at=time.time())
-                task = asyncio.create_task(self._run_with_sem(sem, job))
+                job["attempts"] = int(job.get("attempts", 0)) + 1  # attempt token for this run
+                # 'running' means executing right now (one task per job, bounded by cap)
+                self.store.update_explanation(job["id"], status="running", started_at=time.time(), attempts=job["attempts"])
+                task = asyncio.create_task(self._run_job_task(job))
                 self._jobs.add(task)
                 task.add_done_callback(self._jobs.discard)
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.05)
 
-    async def _run_with_sem(self, sem: asyncio.Semaphore, job: dict) -> None:
-        async with sem:
-            self._inflight += 1
-            loop = asyncio.get_running_loop()
-            try:
-                await asyncio.wait_for(loop.run_in_executor(None, self._run_job, job), timeout=self.s.vlm_timeout_s)
-            except TimeoutError:
-                self._on_timeout(job)
-            except Exception as e:
-                log.exception("explanation job %s crashed", job["id"])
-                self._finish(job, "failed", error=f"{type(e).__name__}: {e}"[:300])
-            finally:
-                self._inflight -= 1
+    async def _run_job_task(self, job: dict) -> None:
+        self._inflight += 1
+        loop = asyncio.get_running_loop()
+        try:
+            await asyncio.wait_for(loop.run_in_executor(None, self._run_job, job), timeout=self.s.vlm_timeout_s)
+        except TimeoutError:
+            self._on_timeout(job)
+        except Exception as e:  # noqa: BLE001
+            log.exception("explanation job %s crashed", job["id"])
+            self._finish(job, "failed", error=f"{type(e).__name__}: {e}"[:300])
+        finally:
+            self._inflight -= 1
 
     # ------------------------------------------------------------------ job
     def _load_frames(self, ev: dict) -> list[FrameInput]:
@@ -175,7 +180,7 @@ class VLMWorker:
         req = ExplainRequest(ev["event_id"], ctx, frames, lang="ko", max_tokens=self.s.vlm_max_tokens)
         input_meta = {"frames": [{"role": f.role, "bytes": len(f.jpeg), "w": f.width, "h": f.height} for f in frames],
                       "lang": req.lang, "annotated": self.s.vlm_use_annotated}
-        attempts = int(job.get("attempts", 0)) + 1
+        attempts = int(job.get("attempts", 1))
         t0 = time.perf_counter()
         res = self.provider.explain(req)
         total_cost = res.cost_usd
@@ -210,7 +215,7 @@ class VLMWorker:
             self.store.set_meta("vlm_spend_usd", f"{self._spent() + cost:.6f}")
 
     def _on_timeout(self, job: dict) -> None:
-        attempts = int(job.get("attempts", 0)) + 1
+        attempts = int(job.get("attempts", 1))
         if attempts < self.s.vlm_max_attempts:
             self.store.update_explanation(job["id"], status="queued", attempts=attempts,
                                           error=f"timeout after {self.s.vlm_timeout_s}s (attempt {attempts})")
@@ -218,9 +223,18 @@ class VLMWorker:
         else:
             self._finish(job, "timeout", error=f"timeout after {self.s.vlm_timeout_s}s x{attempts}", attempts=attempts)
 
+    def _is_current(self, job: dict) -> bool:
+        """A thread that outlived its timeout must not overwrite the job's state: the loop re-queued the job
+        (status 'queued') or started a newer attempt (attempts > ours)."""
+        row = self.store.q1("SELECT status, attempts FROM explanations WHERE id=?", (job["id"],))
+        return bool(row) and row["status"] == "running" and int(row["attempts"]) == int(job.get("attempts", 1))
+
     def _finish(self, job: dict, status: str, error: str = "", raw_text: str = "", latency_ms: float | None = None,
                 usage: dict | None = None, attempts: int | None = None, result: dict | None = None,
                 input_meta: dict | None = None, model: str | None = None) -> None:
+        if status != "timeout" and not self._is_current(job):
+            log.info("explanation %s attempt %s finished late (%s); result discarded", job["id"], job.get("attempts"), status)
+            return
         if status == "failed" and (attempts or 1) < self.s.vlm_max_attempts and "budget" not in error:
             self.store.update_explanation(job["id"], status="queued", attempts=attempts or 1, error=error)
             log.warning("explanation %s failed (%s); re-queued", job["id"], error)

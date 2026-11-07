@@ -1,0 +1,1476 @@
+{
+ "snapshots": [
+  {
+   "t": 0.0,
+   "camera": null,
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 0,
+    "acked": 0,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 0,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 1.0,
+   "camera": null,
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 0,
+    "acked": 0,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 0,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 2.0,
+   "camera": {
+    "input_fps": 0,
+    "processed_fps": 0,
+    "analysis_lag_ms": 0,
+    "queue_depth": 0,
+    "dropped_frames": 0,
+    "frames_processed": 0,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 0,
+    "state": "CAMERA_STATE_CONNECTING",
+    "last_error": null,
+    "device_age_s": 0.1
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 0,
+    "acked": 0,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 0,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 3.1,
+   "camera": {
+    "input_fps": 0,
+    "processed_fps": 0,
+    "analysis_lag_ms": 0,
+    "queue_depth": 0,
+    "dropped_frames": 0,
+    "frames_processed": 0,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 0,
+    "state": "CAMERA_STATE_CONNECTING",
+    "last_error": null,
+    "device_age_s": 1.1
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 0,
+    "acked": 0,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 0,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 4.1,
+   "camera": {
+    "input_fps": 29.5,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 184.7679615020752,
+    "queue_depth": 3,
+    "dropped_frames": 20,
+    "frames_processed": 35,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.421614000005775,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.1
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 0,
+    "acked": 0,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 0,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 5.1,
+   "camera": {
+    "input_fps": 29.5,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 184.7679615020752,
+    "queue_depth": 3,
+    "dropped_frames": 20,
+    "frames_processed": 35,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.421614000005775,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.1
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 1,
+    "acked": 1,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 4,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 946,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 6.1,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.5,
+    "analysis_lag_ms": 164.0782356262207,
+    "queue_depth": 4,
+    "dropped_frames": 43,
+    "frames_processed": 71,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.6453610000126,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.2
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 1,
+    "acked": 1,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 946,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 7.2,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.5,
+    "analysis_lag_ms": 164.0782356262207,
+    "queue_depth": 4,
+    "dropped_frames": 43,
+    "frames_processed": 71,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.6453610000126,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.2
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 1,
+    "acked": 1,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 946,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 8.2,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 192.138671875,
+    "queue_depth": 3,
+    "dropped_frames": 69,
+    "frames_processed": 106,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.470844500011935,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.2
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 1,
+    "acked": 1,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 946,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 9.2,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 192.138671875,
+    "queue_depth": 3,
+    "dropped_frames": 69,
+    "frames_processed": 106,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.470844500011935,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.2
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 1,
+    "acked": 1,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 946,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 10.2,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.0,
+    "analysis_lag_ms": 159.93022918701172,
+    "queue_depth": 4,
+    "dropped_frames": 95,
+    "frames_processed": 140,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.69665499999587,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.2
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 2,
+    "acked": 2,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 2,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 3636,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 11.2,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.0,
+    "analysis_lag_ms": 159.93022918701172,
+    "queue_depth": 4,
+    "dropped_frames": 95,
+    "frames_processed": 140,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.69665499999587,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.3
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 2,
+    "acked": 2,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 3636,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 12.3,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 183.34579467773438,
+    "queue_depth": 4,
+    "dropped_frames": 121,
+    "frames_processed": 174,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.82506499999795,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.3
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 2,
+    "acked": 2,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 3636,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 13.3,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 183.34579467773438,
+    "queue_depth": 4,
+    "dropped_frames": 121,
+    "frames_processed": 174,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.82506499999795,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.3
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 3,
+    "acked": 3,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 3,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 6622,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 14.3,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 201.6582489013672,
+    "queue_depth": 4,
+    "dropped_frames": 146,
+    "frames_processed": 209,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.93034499998339,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.3
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 3,
+    "acked": 3,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 6622,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 15.4,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 17.5,
+    "analysis_lag_ms": 201.6582489013672,
+    "queue_depth": 4,
+    "dropped_frames": 146,
+    "frames_processed": 209,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.93034499998339,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.4
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 4,
+    "acked": 4,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 4,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 7574,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 16.4,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.0,
+    "analysis_lag_ms": 161.8342399597168,
+    "queue_depth": 4,
+    "dropped_frames": 171,
+    "frames_processed": 244,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.870502999998735,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.4
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 4,
+    "acked": 4,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 7574,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 17.4,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.0,
+    "analysis_lag_ms": 161.8342399597168,
+    "queue_depth": 4,
+    "dropped_frames": 171,
+    "frames_processed": 244,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 50.870502999998735,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.4
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 5,
+    "acked": 5,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 2,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 9579,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 18.4,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 174.43084716796875,
+    "queue_depth": 3,
+    "dropped_frames": 194,
+    "frames_processed": 282,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.77687400000741,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.5
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 5,
+    "acked": 5,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 9579,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 19.5,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 174.43084716796875,
+    "queue_depth": 3,
+    "dropped_frames": 194,
+    "frames_processed": 282,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.77687400000741,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.5
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 5,
+    "acked": 5,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 9579,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 20.5,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.5,
+    "analysis_lag_ms": 172.70493507385254,
+    "queue_depth": 3,
+    "dropped_frames": 218,
+    "frames_processed": 318,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.801004500016234,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.5
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 3,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 21.5,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.5,
+    "analysis_lag_ms": 172.70493507385254,
+    "queue_depth": 3,
+    "dropped_frames": 218,
+    "frames_processed": 318,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.801004500016234,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.5
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 22.5,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.0,
+    "analysis_lag_ms": 179.66198921203613,
+    "queue_depth": 4,
+    "dropped_frames": 242,
+    "frames_processed": 353,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.84714700001314,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.6
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 23.6,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 18.0,
+    "analysis_lag_ms": 179.66198921203613,
+    "queue_depth": 4,
+    "dropped_frames": 242,
+    "frames_processed": 353,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.84714700001314,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.6
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 24.6,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 172.01495170593262,
+    "queue_depth": 4,
+    "dropped_frames": 264,
+    "frames_processed": 391,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.71321100001569,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.6
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 25.6,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 172.01495170593262,
+    "queue_depth": 4,
+    "dropped_frames": 264,
+    "frames_processed": 391,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.71321100001569,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.6
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 26.6,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 175.16088485717773,
+    "queue_depth": 3,
+    "dropped_frames": 286,
+    "frames_processed": 430,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.51673050002137,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.6
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 27.6,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 175.16088485717773,
+    "queue_depth": 3,
+    "dropped_frames": 286,
+    "frames_processed": 430,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 50.51673050002137,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.7
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 6,
+    "acked": 6,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 11880,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 28.7,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 168.6255931854248,
+    "queue_depth": 3,
+    "dropped_frames": 308,
+    "frames_processed": 468,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.844441999960964,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.7
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 7,
+    "acked": 7,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 4,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 12832,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 29.7,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 168.6255931854248,
+    "queue_depth": 3,
+    "dropped_frames": 308,
+    "frames_processed": 468,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 48.844441999960964,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.7
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 7,
+    "acked": 7,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 12832,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 30.7,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 171.49734497070312,
+    "queue_depth": 3,
+    "dropped_frames": 330,
+    "frames_processed": 506,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 48.12066100001289,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.7
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 8,
+    "acked": 8,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 2,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 14888,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 31.7,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 171.49734497070312,
+    "queue_depth": 3,
+    "dropped_frames": 330,
+    "frames_processed": 506,
+    "reconnect_count": 0,
+    "open_episodes": 1,
+    "infer_ms_p50": 48.12066100001289,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.8
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 8,
+    "acked": 8,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 14888,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 32.7,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 180.05609512329102,
+    "queue_depth": 3,
+    "dropped_frames": 351,
+    "frames_processed": 545,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 47.14797149998162,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.8
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 8,
+    "acked": 8,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 14888,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 33.8,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 180.05609512329102,
+    "queue_depth": 3,
+    "dropped_frames": 351,
+    "frames_processed": 545,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 47.14797149998162,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.8
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 8,
+    "acked": 8,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 14888,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 34.8,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 181.0927391052246,
+    "queue_depth": 4,
+    "dropped_frames": 372,
+    "frames_processed": 583,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 46.94708649998347,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.9
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 9,
+    "acked": 9,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 3,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 17241,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 35.9,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.5,
+    "analysis_lag_ms": 181.0927391052246,
+    "queue_depth": 4,
+    "dropped_frames": 372,
+    "frames_processed": 583,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 46.94708649998347,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.9
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 9,
+    "acked": 9,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 17241,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 36.9,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 175.51803588867188,
+    "queue_depth": 3,
+    "dropped_frames": 395,
+    "frames_processed": 621,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 46.8211550000035,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.9
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 11,
+    "acked": 11,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 8,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 19138,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 37.9,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 175.51803588867188,
+    "queue_depth": 3,
+    "dropped_frames": 395,
+    "frames_processed": 621,
+    "reconnect_count": 0,
+    "open_episodes": 0,
+    "infer_ms_p50": 46.8211550000035,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 1.9
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 12,
+    "acked": 12,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 2,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 20676,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 38.9,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 198.0588436126709,
+    "queue_depth": 4,
+    "dropped_frames": 417,
+    "frames_processed": 658,
+    "reconnect_count": 0,
+    "open_episodes": 2,
+    "infer_ms_p50": 46.66780650001101,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 0.9
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 12,
+    "acked": 12,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 20676,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  },
+  {
+   "t": 39.9,
+   "camera": {
+    "input_fps": 30.0,
+    "processed_fps": 19.0,
+    "analysis_lag_ms": 198.0588436126709,
+    "queue_depth": 4,
+    "dropped_frames": 417,
+    "frames_processed": 658,
+    "reconnect_count": 0,
+    "open_episodes": 2,
+    "infer_ms_p50": 46.66780650001101,
+    "state": "CAMERA_STATE_STREAMING",
+    "last_error": null,
+    "device_age_s": 2.0
+   },
+   "gateway": {
+    "uplink_state": "CONNECTED",
+    "pending": 0,
+    "sent": 12,
+    "acked": 12,
+    "dup_acks": 0,
+    "reconnects": 0,
+    "dropped": 0,
+    "queue_bytes": 0,
+    "uploads_pending": 0,
+    "queue_raw": {
+     "Pending": 0,
+     "LiveBytes": 0,
+     "FileBytes": 20676,
+     "MaxBytes": 67108864,
+     "Dropped": 0,
+     "Compactions": 0,
+     "Truncated": false
+    }
+   }
+  }
+ ],
+ "checks": {
+  "input_faster_than_processing": true,
+  "frames_dropped_by_policy": true,
+  "queue_depth_bounded": true,
+  "lag_bounded_under_2s": true,
+  "analysis_kept_running": true
+ },
+ "summary": {
+  "max_lag_ms": 201.6582489013672,
+  "median_input_fps": 30.0,
+  "median_processed_fps": 19.0,
+  "dropped_frames": 417,
+  "frames_processed": 658
+ },
+ "ok": true,
+ "seconds": 53.5,
+ "git": "6c6de58",
+ "time": "2026-11-07T13:09:42"
+}
