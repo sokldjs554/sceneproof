@@ -2,6 +2,8 @@
 
 **어느 카메라에서 어떤 일이 있었고, 어떤 장면을 근거로 확인이 필요하다고 판단했으며, 담당자가 어떻게 처리했는가** — 현장 관리자가 이 질문에 답할 수 있도록, CV가 사건을 만들고 VLM이 장면을 해석하고 사람이 검토하는 흐름을 하나로 연결한 서비스입니다.
 
+[![ci](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml) [![k8s-runtime](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml)
+
 > 노타 AI **[Solution] AI Software Engineer Intern (전환형)** 지원용 프로젝트입니다. 공고 항목별 대응은 [`docs/job-mapping.md`](docs/job-mapping.md)에 있습니다.
 > 샘플 영상은 공개 데이터(Intel IoT DevKit CC BY 4.0, OpenCV Apache-2.0)이며 신원 식별 기능은 없습니다.
 
