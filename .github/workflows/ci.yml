@@ -37,7 +37,7 @@ jobs:
           SP_SERVER_DATA_DIR=/tmp/zw SP_SERVER_MODE=replay SP_SERVER_REPLAY_BUNDLE=demo/bundle SP_SERVER_VLM_PROVIDER=mock \
             sceneproof-server run --port 8000 > /tmp/server.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
-          NODE_PATH=$(npm root -g) node scripts/console_check.mjs http://127.0.0.1:8000 /tmp/ui || (cat /tmp/server.log; exit 1)
+          SP_CONSOLE_URL=http://127.0.0.1:8000/ NODE_PATH=$(npm root -g) node scripts/console_check.mjs /tmp/ui || (cat /tmp/server.log; exit 1)
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: console-screenshots, path: /tmp/ui }

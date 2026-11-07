@@ -4,7 +4,7 @@
  *
  *   node scripts/console_check.mjs [outDir]
  *
- * Opens http://127.0.0.1:8000/ (override with ZW_CONSOLE_URL), waits for the event list, selects the
+ * Opens http://127.0.0.1:8000/ (override with SP_CONSOLE_URL), waits for the event list, selects the
  * first event, checks that the detail panel shows the zone name and a VLM section, walks one
  * needs_review event through 검토 시작 → 처리 완료 (resolution + note), asserts there were no
  * console errors / page errors, and saves 01_overview.png, 02_event_detail.png, 03_review_done.png
@@ -18,7 +18,7 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 
 // usage: node scripts/console_check.mjs [outDir] [--static <url> | <staticUrl>]
-//   default      full read/write check against the live server (ZW_CONSOLE_URL or http://127.0.0.1:8000/)
+//   default      full read/write check against the live server (SP_CONSOLE_URL or http://127.0.0.1:8000/)
 //   --static URL reduced read-only check against a static build (window.SP_STATIC_BASE), e.g. http://127.0.0.1:8090/
 const argv = process.argv.slice(2);
 let OUT = '/tmp/claude-0/-home-user-chartwire/d5801663-d4d9-5a80-b5d4-4f5fea308eaf/scratchpad/ui';
@@ -32,7 +32,7 @@ let STATIC_URL = null;
   if (positional[0]) OUT = positional[0];
   if (positional[1]) STATIC_URL = positional[1];
 }
-const BASE = STATIC_URL || process.env.ZW_CONSOLE_URL || 'http://127.0.0.1:8000/';
+const BASE = STATIC_URL || process.env.SP_CONSOLE_URL || 'http://127.0.0.1:8000/';
 mkdirSync(OUT, { recursive: true });
 
 const failures = [];

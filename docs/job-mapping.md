@@ -49,7 +49,7 @@
 |---|---|---|---|
 | CV 모델과 VLM을 활용한 AI 응용 SW 개발 | YOLOX(사람 탐지)+ByteTrack(추적)+구역 상태머신으로 사건 생성, 서버 VLM 워커가 사건 전후 프레임을 해석해 구조화 설명 저장. CV와 VLM의 책임 분리(D7) | `src/sceneproof/edge/{detector,tracker,zones,pipeline}.py`, `src/sceneproof/server/vlm/*`, 콘솔 "CV 근거 / VLM 설명" 패널 | CV 경로 **실행 검증**(오프라인·실시간·RTSP). VLM은 mock 제공자로 파이프라인 **실행 검증**; 로컬 SmolVLM-500M은 **실행했으나 출력 품질 부적합**(evidence/vlm-local); API 모델(Claude)은 **사용자 승인 대기**(유료) |
 | 영상 데이터 실시간 인식·분석, 추론 성능 최적화 | GStreamer RTSP 입력, 드롭 정책이 있는 유계 큐, 단계별 지연 측정, PyTorch→ONNX 내보내기와 ONNX Runtime 그래프 최적화·스레드 비교, 모델 크기(nano/tiny/s) 비교, 스트림 수 1→4 스케일링 | `scripts/export_onnx.py`, `src/sceneproof/eval/bench_detector.py`, `bench_streams.py`, `docs/eval/README.md` §2–3 | **실행 검증**(CPU 4코어): tiny 추론 p50 44.6→21.6 ms(PyTorch→ORT), 변환 전후 상자 차이 0. TensorRT/GPU는 **미검증(장비)** — 설정 경로만 |
-| 엣지·서버·클라우드 배포 및 유지보수 | 엣지(분석기+Go 게이트웨이) / 서버 분리, Dockerfile 4종, docker-compose, Kubernetes 매니페스트(프로브·리소스·PVC), kind 검증 스크립트, 운영 runbook·상태 엔드포인트·메트릭 | `deploy/`, `docker-compose.yml`, `scripts/k8s_verify.sh`, `docs/ops/runbook.md`, 게이트웨이 `/metrics` | 로컬 프로세스 배포 **실행 검증**. 컨테이너 빌드·k8s는 **CI 워크플로 준비**(이 샌드박스는 컨테이너 내부 네트워크·중첩 런타임 제약으로 빌드/kind 실행 실패, 증적 `docs/evidence/k8s-local-attempt/`). 공개 데모 **설정만**(Render/Pages, 자격 증명 필요) |
+| 엣지·서버·클라우드 배포 및 유지보수 | 엣지(분석기+Go 게이트웨이) / 서버 분리, Dockerfile 4종, docker-compose, Kubernetes 매니페스트(프로브·리소스·PVC), kind 검증 스크립트, 운영 runbook·상태 엔드포인트·메트릭 | `deploy/`, `docker-compose.yml`, `scripts/k8s_verify.sh`, `docs/ops/runbook.md`, 게이트웨이 `/metrics` | 로컬 프로세스 배포 **실행 검증**. 컨테이너 이미지 4종 빌드·스모크와 **Kubernetes(kind) 배포·서버 파드 삭제 복구·엣지 파드 삭제 복구·중복 없음 검사는 GitHub Actions에서 실행 성공**([k8s-runtime 실행](https://github.com/sokldjs554/sceneproof/actions/runs/42402112637), 증적 artifact `k8s-evidence`). 개발 샌드박스에서는 중첩 런타임 제약으로 kind/k3s 실행 실패(`docs/evidence/k8s-local-attempt/`). 공개 데모 **설정만**(Render/Pages, 사용자 설정 필요) |
 | POC → 상업 품질 제품 | 빈/로딩/오류/재시도 화면, 멱등·재시작 복구, 감사 로그, 내보내기, 실행 조건 기록, 장애 시나리오 6종 스크립트 | `scripts/failure_scenarios.py`, `docs/evidence/failure-scenarios/`, 콘솔 | **실행 검증** — 6종 모두 PASS(`summary.json`). 시나리오가 드러낸 워커 버그 2개 수정(dev-log L9·L10) |
 | 산업 전문가·AI·백엔드 엔지니어 협업 | 역할 경계를 계약(proto/API/스키마)으로 명시, 현장 관리자용 표현과 엔지니어용 상세 분리 | `docs/architecture.md`, `proto`, 콘솔 "상세 정보" | 설계로 제시. **실제 팀 협업 경험은 이 프로젝트에 포함되지 않음**(아래 E 참조) |
 
@@ -69,7 +69,7 @@
 |---|---|---|---|
 | 자료구조·알고리즘·설계 원리 | 유계 큐(폐기 vs 무손실), 시간 범위 링버퍼(pin), 상태 전이(구역·업링크), 헝가리안 매칭, 칼만 필터, WAL+CRC 복구, 병합 큐, 멱등 upsert, 동시성(스레드 경계·asyncio 워커) | `frames.py`, `zones.py`, `tracker.py`, `gateway/internal/queue`, `db.py` | **구현+테스트** |
 | CV/VLM 실험 운영 | 변형 3종×설정 반복 측정, 원시 결과 보존, 재채점 도구 | `docs/eval/raw/*.json`, `rescore.py` | **실행 검증** |
-| Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker/k8s **CI 준비**. DeepStream **미적용** |
+| Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker 빌드·k8s(kind) **CI 실행 검증**. DeepStream **미적용** |
 | 엣지(Jetson) 최적화, gRPC/RTSP/MQTT 연동 | gRPC 양방향 계약(사건·근거 업로드·하트비트·명령), RTSP 입력·재연결, MQTT는 미채택(이유 기록) | `proto`, `gateway/`, `docs/design/decisions.md` | gRPC/RTSP **실행 검증**. Jetson **미검증(장비)**. MQTT **미적용** |
 | C/Go | Go 게이트웨이(내구 큐·업링크·업로드·상태) | `gateway/` | **구현+테스트+실행 검증** |
 
@@ -86,4 +86,4 @@
 
 ## 갱신 이력
 - 초안: 구현 중 작성.
-- 최종: 평가·벤치마크·장애 시나리오 실행 후 갱신(수치는 `docs/eval/README.md` 자동 생성 표와 일치). VLM 실제 실행과 공개 URL·CI는 사용자 조치 후 다시 갱신 필요.
+- 최종: 평가·벤치마크·장애 시나리오 실행 후 갱신(수치는 `docs/eval/README.md` 자동 생성 표와 일치). 저장소 `sokldjs554/sceneproof` 푸시 후 CI(k8s 포함) 결과 반영. VLM(API) 실행과 공개 URL은 사용자 조치 후 갱신 필요.
