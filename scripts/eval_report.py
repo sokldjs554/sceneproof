@@ -135,7 +135,15 @@ def vlm_section() -> str:
            f"- CV만: 모든 사건이 '확인 필요' ({d['cv_only']['events_needing_review']}건; 그중 정답 침입 {d['cv_only']['true_intrusions_flagged']}, CV 오탐 {d['cv_only']['cv_false_alarms_flagged']})",
            f"- CV+VLM: 정답 침입을 '확인 필요'로 유지 {d['cv_plus_vlm']['true_intrusions_kept_as_needs_attention']}, CV 오탐을 '정상 가능성 높음'으로 표시 {d['cv_plus_vlm']['cv_false_alarms_marked_likely_benign']}",
            f"- assessment × CV 결과: `{json.dumps(d['cv_plus_vlm']['assessment_by_cv_outcome'], ensure_ascii=False)}`",
-           f"- 사람 채점 루브릭: `{d['human_rubric_csv']}` (채점 전)", ""]
+           f"- 사람 채점 루브릭: `{d['human_rubric_csv']}` (채점 전)"]
+    a = d["cv_plus_vlm"]["assessment_by_cv_outcome"]
+    tp = a.get("tp", {})
+    tp_total = sum(tp.values())
+    tp_benign = tp.get("likely_benign", 0)
+    if tp_total:
+        out.append(f"- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 {tp_benign}/{tp_total}건이 사람 눈에 띄지 않았을 것입니다. "
+                   "그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.")
+    out.append("")
     return "\n".join(out)
 
 

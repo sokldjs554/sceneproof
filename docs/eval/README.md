@@ -127,6 +127,7 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 - CV+VLM: 정답 침입을 '확인 필요'로 유지 4/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
 - assessment × CV 결과: `{"duplicate": {"needs_attention": 3, "unclear": 1, "likely_benign": 1}, "tp": {"needs_attention": 4, "likely_benign": 3, "unclear": 3}, "boundary": {"unclear": 1, "likely_benign": 2}, "fp": {"needs_attention": 1}}`
 - 사람 채점 루브릭: `docs/eval/raw/vlm_eval-rubric.csv` (채점 전)
+- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 3/10건이 사람 눈에 띄지 않았을 것입니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.
 
 ## 재현 절차
 

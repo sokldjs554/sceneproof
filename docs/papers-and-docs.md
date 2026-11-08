@@ -41,7 +41,8 @@
 ## 7. Anthropic Claude API — Vision, Structured Outputs, Pricing
 - 링크: https://platform.claude.com/docs/en/build-with-claude/vision · https://platform.claude.com/docs/en/build-with-claude/structured-outputs
 - 적용: `server/vlm/anthropic_provider.py` — 이미지 base64 블록 + `output_config.format=json_schema`(모든 속성 required, additionalProperties false), 시스템 프롬프트 캐시 블록, `stop_reason=="refusal"` 처리, 토큰 사용량→추정 비용→예산 상한.
-- 읽은 범위: (1) 이 세션에 제공된 Claude API 스킬 문서(Python README, structured outputs 예시, 가격표 2026-10 기준)를 읽고 작성. **실제 호출은 사용자 승인 전까지 실행하지 않았습니다.**
+- 읽은 범위: (1) 이 세션에 제공된 Claude API 스킬 문서(Python README, structured outputs 예시, 가격표 2026-10 기준)를 읽고 작성. (2) 실제 호출: 사용자 승인(상한 $5) 후 GitHub Actions `vlm-eval`에서 Claude Opus 5.5로 평가 19건·데모 15건 해석(https://github.com/sokldjs554/sceneproof/actions/runs/42460838313).
+- 적용하며 확인한 사실: Opus 5.5는 thinking을 끌 수 없고 thinking 토큰이 `max_tokens`에 포함된다(1024에서 JSON이 잘림 → 하한 4096, dev-log L12); `output_config.format=json_schema`(strict)로 34건 모두 스키마 위반 0; 시스템 프롬프트 `cache_control`은 두 번째 호출부터 `cache_read_input_tokens`(≈1.3k/건)로 집계됨; 해석 1건 지연 p50 ≈ 20초(동시성 2).
 
 ## 8. SmolVLM — Marafioti et al., "SmolVLM: Redefining small and efficient multimodal models", 2025 · vLLM 멀티모달 지원
 - 링크: https://arxiv.org/abs/2504.05299 · https://huggingface.co/HuggingFaceTB/SmolVLM-500M-Instruct · https://docs.vllm.ai/en/latest/models/supported_models.html (Multimodal)

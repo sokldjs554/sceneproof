@@ -1,0 +1,81 @@
+{
+ "time": "2026-11-08T08:06:58",
+ "provider": "anthropic",
+ "model": "claude-opus-5-5",
+ "prompt_version": "v1.2-ko",
+ "matching": {
+  "source": "data/runs/eval-bundle-yolox_tiny/events.jsonl vs data/ground_truth (min_overlap=0.5s, tolerance=1.0s)",
+  "events": 19,
+  "matched": 19,
+  "unmatched": 0,
+  "by_cv_outcome": {
+   "tp": 10,
+   "fp": 1,
+   "duplicate": 5,
+   "boundary": 3,
+   "unmatched": 0
+  },
+  "gt_intrusions_missed_by_cv": 0
+ },
+ "events": 19,
+ "explanations_by_status": {
+  "done": 19
+ },
+ "latency_ms": {
+  "p50": 19764.068278000024,
+  "p95": 27651.162490300027,
+  "n": 19
+ },
+ "estimated_cost_usd": 1.0091,
+ "cv_only": {
+  "policy": "every event shown as needs_attention (확인 필요)",
+  "events_needing_review": 19,
+  "true_intrusions_flagged": 10,
+  "cv_false_alarms_flagged": 1
+ },
+ "cv_plus_vlm": {
+  "assessment_by_cv_outcome": {
+   "duplicate": {
+    "needs_attention": 3,
+    "unclear": 1,
+    "likely_benign": 1
+   },
+   "tp": {
+    "needs_attention": 4,
+    "likely_benign": 3,
+    "unclear": 3
+   },
+   "boundary": {
+    "unclear": 1,
+    "likely_benign": 2
+   },
+   "fp": {
+    "needs_attention": 1
+   }
+  },
+  "zone_relation_by_cv_outcome": {
+   "duplicate": {
+    "clearly_inside": 2,
+    "near_boundary": 3
+   },
+   "tp": {
+    "clearly_inside": 6,
+    "near_boundary": 4
+   },
+   "boundary": {
+    "near_boundary": 3
+   },
+   "fp": {
+    "clearly_inside": 1
+   }
+  },
+  "true_intrusions_kept_as_needs_attention": "4/10",
+  "cv_false_alarms_marked_likely_benign": "0/1",
+  "assessed_events": 19
+ },
+ "human_rubric_csv": "docs/eval/raw/vlm_eval-rubric.csv",
+ "notes": [
+  "assessment is categorical; no confidence numbers are produced or evaluated",
+  "a VLM 'likely_benign' on a GT intrusion is a miss that CV-only would not have made: report it, do not hide it"
+ ]
+}

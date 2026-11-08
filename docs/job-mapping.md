@@ -47,7 +47,7 @@
 
 | 공고에서 요구하는 역량 | 프로젝트에서 보여줄 기능·설계 | 확인할 코드·실험·화면 | 검증 상태·남은 한계 |
 |---|---|---|---|
-| CV 모델과 VLM을 활용한 AI 응용 SW 개발 | YOLOX(사람 탐지)+ByteTrack(추적)+구역 상태머신으로 사건 생성, 서버 VLM 워커가 사건 전후 프레임을 해석해 구조화 설명 저장. CV와 VLM의 책임 분리(D7) | `src/sceneproof/edge/{detector,tracker,zones,pipeline}.py`, `src/sceneproof/server/vlm/*`, 콘솔 "CV 근거 / VLM 설명" 패널 | CV 경로 **실행 검증**(오프라인·실시간·RTSP). VLM은 mock 제공자로 파이프라인 **실행 검증**; 로컬 SmolVLM-500M은 **실행했으나 출력 품질 부적합**(evidence/vlm-local); API 모델(Claude)은 **사용자 승인 대기**(유료) |
+| CV 모델과 VLM을 활용한 AI 응용 SW 개발 | YOLOX(사람 탐지)+ByteTrack(추적)+구역 상태머신으로 사건 생성, 서버 VLM 워커가 사건 전후 프레임을 해석해 구조화 설명 저장. CV와 VLM의 책임 분리(D7) | `src/sceneproof/edge/{detector,tracker,zones,pipeline}.py`, `src/sceneproof/server/vlm/*`, 콘솔 "CV 근거 / VLM 설명" 패널 | CV 경로 **실행 검증**(오프라인·실시간·RTSP). VLM은 mock 제공자로 파이프라인 **실행 검증**; 로컬 SmolVLM-500M은 **실행했으나 출력 품질 부적합**(evidence/vlm-local); API 모델(Claude Opus 5.5)은 **CI에서 실행 검증**(`vlm-eval` 워크플로: 평가 19건·데모 15건 해석, 스키마 위반 0, 총 비용 약 $3) |
 | 영상 데이터 실시간 인식·분석, 추론 성능 최적화 | GStreamer RTSP 입력, 드롭 정책이 있는 유계 큐, 단계별 지연 측정, PyTorch→ONNX 내보내기와 ONNX Runtime 그래프 최적화·스레드 비교, 모델 크기(nano/tiny/s) 비교, 스트림 수 1→4 스케일링 | `scripts/export_onnx.py`, `src/sceneproof/eval/bench_detector.py`, `bench_streams.py`, `docs/eval/README.md` §2–3 | **실행 검증**(CPU 4코어): tiny 추론 p50 44.6→21.6 ms(PyTorch→ORT), 변환 전후 상자 차이 0. TensorRT/GPU는 **미검증(장비)** — 설정 경로만 |
 | 엣지·서버·클라우드 배포 및 유지보수 | 엣지(분석기+Go 게이트웨이) / 서버 분리, Dockerfile 4종, docker-compose, Kubernetes 매니페스트(프로브·리소스·PVC), kind 검증 스크립트, 운영 runbook·상태 엔드포인트·메트릭 | `deploy/`, `docker-compose.yml`, `scripts/k8s_verify.sh`, `docs/ops/runbook.md`, 게이트웨이 `/metrics` | 로컬 프로세스 배포 **실행 검증**. 컨테이너 이미지 4종 빌드·스모크와 **Kubernetes(kind) 배포·서버 파드 삭제 복구·엣지 파드 삭제 복구·중복 없음 검사는 GitHub Actions에서 실행 성공**([k8s-runtime 실행](https://github.com/sokldjs554/sceneproof/actions/runs/42402112637), 증적 artifact `k8s-evidence`). 개발 샌드박스에서는 중첩 런타임 제약으로 kind/k3s 실행 실패(`docs/evidence/k8s-local-attempt/`). 공개 데모 **설정만**(Render/Pages, 사용자 설정 필요) |
 | POC → 상업 품질 제품 | 빈/로딩/오류/재시도 화면, 멱등·재시작 복구, 감사 로그, 내보내기, 실행 조건 기록, 장애 시나리오 6종 스크립트 | `scripts/failure_scenarios.py`, `docs/evidence/failure-scenarios/`, 콘솔 | **실행 검증** — 6종 모두 PASS(`summary.json`). 시나리오가 드러낸 워커 버그 2개 수정(dev-log L9·L10) |
@@ -59,7 +59,7 @@
 |---|---|---|---|
 | AI Native 개발(설계 고도화·리팩토링) | 계약 우선 설계 후 에이전트 위임(Go 게이트웨이·콘솔), 발견한 실패와 수정 전후를 기록 | `docs/dev-log.md`(L1–L8, 리팩토링 절), 커밋 로그 | **문서화 완료** |
 | CS/AI 전공 동등 역량, 모델+SW 공학 이해 | 모델 실행·최적화(탐지기 백엔드 추상화)와 시스템 설계(큐·WAL·상태머신·멱등) 양쪽 코드 | 전체 | — |
-| CV/VLM 이론·구현 이해, 정량·정성 검증 | 사건 단위 P/R/F1·FP/h·중복·놓침, 시작·종료 오차, PyTorch↔ONNX 수치 일치, VLM 구조화 출력 검증, 오탐 분석(경계 통과·가림 라벨), 사람 채점 루브릭 | `docs/eval/README.md`, `docs/eval/ground-truth.md`, `src/sceneproof/eval/*` | CV 지표 **실행 검증**(정답은 draft, 사용자 검수 필요). VLM 정성 평가는 **API 승인 후 실행**(로컬 500M 모델은 부적합으로 기록) |
+| CV/VLM 이론·구현 이해, 정량·정성 검증 | 사건 단위 P/R/F1·FP/h·중복·놓침, 시작·종료 오차, PyTorch↔ONNX 수치 일치, VLM 구조화 출력 검증, 오탐 분석(경계 통과·가림 라벨), 사람 채점 루브릭 | `docs/eval/README.md`, `docs/eval/ground-truth.md`, `src/sceneproof/eval/*` | CV 지표 **실행 검증**(정답은 draft, 사용자 검수 필요). CV만 vs CV+VLM **CI에서 실행 검증**(Claude Opus 5.5, 19건: 정답 침입 10건 중 '확인 필요' 유지 4건 → assessment 정의 미흡을 발견, `docs/eval/vlm-findings.md`). 사람 채점 루브릭은 **사용자 채점 필요** |
 | Python·Linux, PyTorch/ONNX/TensorRT/vLLM 이해 | PyTorch 추론·내보내기, ONNX Runtime 서빙·최적화 비교, TensorRT EP 설정 경로, vLLM용 OpenAI 호환 VLM 클라이언트 | `detector.py`, `export_onnx.py`, `vlm/openai_compat.py`, `docs/papers-and-docs.md` §3·§8 | PyTorch/ONNX **실행 검증**. TensorRT·vLLM **미검증(장비)** |
 | 영문 문서·논문 읽고 재현·응용 | ByteTrack·YOLOX 재현 범위와 차이, GStreamer/ORT/gRPC/Claude 문서 적용 | `docs/papers-and-docs.md` | 원문 재다운로드는 네트워크 차단으로 못함 — 읽은 범위 명시 |
 
@@ -68,7 +68,7 @@
 | 공고 항목 | 프로젝트에서 보여줄 것 | 확인할 곳 | 검증 상태·한계 |
 |---|---|---|---|
 | 자료구조·알고리즘·설계 원리 | 유계 큐(폐기 vs 무손실), 시간 범위 링버퍼(pin), 상태 전이(구역·업링크), 헝가리안 매칭, 칼만 필터, WAL+CRC 복구, 병합 큐, 멱등 upsert, 동시성(스레드 경계·asyncio 워커) | `frames.py`, `zones.py`, `tracker.py`, `gateway/internal/queue`, `db.py` | **구현+테스트** |
-| CV/VLM 실험 운영 | 변형 3종×설정 반복 측정, 원시 결과 보존, 재채점 도구 | `docs/eval/raw/*.json`, `rescore.py` | **실행 검증** |
+| CV/VLM 실험 운영 | 변형 3종×설정 반복 측정, 원시 결과 보존, 재채점 도구, VLM 프롬프트 버전(v1.2-ko)을 해석마다 저장하고 실행별 결과 파일 보존(`vlm_eval_v1.2-ko.json`), 유료 실행은 CI 워크플로에서 예산 상한과 함께 | `docs/eval/raw/*.json`, `rescore.py`, `.github/workflows/vlm-eval.yml` | **실행 검증** |
 | Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker 빌드·k8s(kind) **CI 실행 검증**. DeepStream **미적용** |
 | 엣지(Jetson) 최적화, gRPC/RTSP/MQTT 연동 | gRPC 양방향 계약(사건·근거 업로드·하트비트·명령), RTSP 입력·재연결, MQTT는 미채택(이유 기록) | `proto`, `gateway/`, `docs/design/decisions.md` | gRPC/RTSP **실행 검증**. Jetson **미검증(장비)**. MQTT **미적용** |
 | C/Go | Go 게이트웨이(내구 큐·업링크·업로드·상태) | `gateway/` | **구현+테스트+실행 검증** |

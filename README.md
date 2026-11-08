@@ -9,6 +9,8 @@
 
 ![콘솔 첫 화면](docs/images/01_overview.png)
 
+위 화면은 실시간 모드(mock 제공자)입니다. Claude Opus 5.5가 실제로 생성한 해석이 표시된 재생 모드 화면은 [`docs/images/replay-vlm/03_event_vlm.png`](docs/images/replay-vlm/03_event_vlm.png).
+
 ## 무엇을 하는가
 
 1. 샘플 영상 또는 RTSP 스트림을 고른다 (콘솔 → 장치로 명령 전달).
@@ -52,7 +54,7 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 - **추론 성능(4 vCPU, 3회 반복 중앙값)**: yolox_tiny 추론 p50 — PyTorch 44.6 ms → ONNX Runtime 21.6 ms(그래프 최적화 끔 32.1 ms); nano 26.8 → 8.6 ms; s 123.3 → 69.8 ms. 변환 전후 NMS 결과 상자·점수 차이 0(150프레임). 표와 반복 변동은 docs/eval/README.md §2.
 - **스트림 수 증가(tiny, 4 vCPU)**: 1스트림 28.6 fps(입력 30), 4스트림 합계 34 fps·스트림당 8.5 fps, 지연 p95 180 → 560 ms, 큐 깊이 상한(4) 유지·폐기 프레임 증가 — §3.
 - **실시간·장애 대응**: 과입력(입력 30 fps·1스레드 → 처리 19 fps, 폐기 417, 지연 최대 202 ms), 스트림 단절·복구(RTSP 14초 단절 → 4초 만에 재연결), VLM 지연·실패(수신 ack p95 2.7 ms 유지, 타임아웃·재시도·재요청), 장치–서버 단절(큐잉 → 재전송, 중복 0), 중복 전달, 재시작 — 6가지 모두 스크립트로 재현·통과. 이 과정에서 VLM 워커의 실제 버그 2개를 찾아 고침(`docs/dev-log.md` L9–L10). §4와 [`docs/evidence/failure-scenarios/`](docs/evidence/failure-scenarios/).
-- **VLM 추가 효과(CV만 vs CV+VLM)**: 같은 사건에 대해 비교하는 도구와 사람 채점 루브릭을 준비했고, 실제 모델 실행은 유료 API 승인(또는 로컬 모델 네트워크 허용) 후 진행합니다. 모의 응답은 품질 수치로 쓰지 않습니다.
+- **CV만 vs CV+VLM(Claude Opus 5.5, held-out 19건, CI 실행)**: 해석 19/19 완료(스키마 위반 0, p50 19.8초, 비용 $1.01). CV 결과와 대조하면 정답 침입 10건 중 VLM이 '확인 필요'로 유지한 것은 4건, 3건은 '정상 가능성 높음', 3건은 '불확실'. CV 오탐 1건은 VLM이 걸러내지 못했고 오히려 '구역 안'으로 봤습니다(정답 초안 재검수 대상). 경계 통과 3건은 2건 '정상 가능성 높음'·1건 '불확실'로 구분. **결론: 현재 프롬프트(v1.2)의 assessment는 '위험 판단'으로 해석되어 기하학적 침입 정답과 어긋납니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(D7).** 사람 채점 루브릭은 미채점. 사례·개선안은 [`docs/eval/vlm-findings.md`](docs/eval/vlm-findings.md), 원시 결과는 `docs/eval/raw/vlm_eval*.json`.
 
 ## 기술 선택 (왜)
 

@@ -40,6 +40,9 @@
 | store | e01/e02가 같은 인물의 연속 체류인지(42.7–47.9s), e03 가림 구간, 초록 상의 인물 | 28–65초 구간 재생 |
 | parking | e02 보행자 경계 판정, 자전거 시작·종료 ±0.5s | 44–49초 확대 재생 |
 
+- **(VLM 실행에서 드러난 항목)** `eval-parking`의 CV 오탐(FP)으로 채점된 사건 `1d48e2c7-7d0d-5956-9c37-b1ddde0f82db`: Claude는 "출입금지 구역 안에 자전거와 함께 있는 사람 1명"이 보인다고 기술했습니다(`zone_relation=clearly_inside`). 정답 초안이 이 구간을 침입으로 적지 않은 것이 맞는지 영상으로 확인하세요(비사람 이동체·자전거 탑승자 처리 기준 포함).
+- **(VLM 실행에서 드러난 항목)** `eval-store` 구역(통로 안쪽 재고 구역)은 고객이 드나드는 매장 통로 위에 그려져 있어, 모델이 '구역 안'은 인정하면서도 `likely_benign`으로 판단했습니다. 이 구역의 의미(직원 전용인지)와 정답 라벨 `intrusion`의 정의가 일치하는지 결정해 주세요.
+
 검수 후 `annotation.status: reviewed`, `reviewer`를 적고 `python -m sceneproof.eval.rescore docs/eval/raw/event_eval_<variant>.json`으로 재채점하면 됩니다(분석 재실행 불필요).
 
 ## 독립성에 대한 주의
