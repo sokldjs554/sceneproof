@@ -52,6 +52,18 @@
 - protobuf JSON은 int64를 문자열로, 0 값은 생략해 직렬화한다 → `dropped_frames > 0` 비교가 TypeError. 정규화 함수 추가.
 - 서버를 내린 뒤 API를 조회해 결과가 비어 보였던 문제(수집 순서), RTSP 시뮬레이터 포트가 열리기 전에 분석기를 띄운 문제(포트 대기) 수정. 하네스 버그와 시스템 버그를 구분해 기록.
 
+## L12. Claude 호출이 `stop_reason=max_tokens`로 잘림 (CI vlm-eval #3에서 발견)
+- 문제: 키 인증은 통과했는데 첫 실제 해석이 출력 1024토큰에서 끊겨 JSON이 비어 있었다(`no JSON object found`).
+- 원인: Claude Opus 5.5는 thinking을 끌 수 없고 thinking 토큰이 `max_tokens`에 포함된다. 제공자가 `max(req.max_tokens, 1024)`로 상한을 잡아 thinking만으로 예산이 소진됐다.
+- 수정: 제공자 하한 4096(`MIN_MAX_TOKENS`), 설정 기본값 `vlm_max_tokens=4096`, `vlm_effort` 노출. 실제 호출의 출력은 건당 평균 약 2천 토큰(thinking 포함)이었다. 비용 추정에 캐시 쓰기·읽기 토큰도 포함하도록 고침.
+- 같이 발견: 잘못된 API 키는 유료 호출 전에 걸러야 한다 → 워크플로 스모크 단계에서 키 유형·공백 검사와 무료 `GET /v1/models` 인증 확인을 먼저 수행.
+
+## L13. CV 결과와 VLM 해석의 조인이 전부 'unmatched' (CI vlm-eval #4에서 발견)
+- 문제: 해석 19건이 모두 완료됐는데 `정답 침입 유지 0/0`처럼 비교 지표가 비어 있었다.
+- 원인: 사건 ID는 `(카메라, 구역, 트랙, 진입 프레임)`의 uuid5라서 같은 영상이라도 기기(CPU 부동소수 차이 → 탐지·트랙 ID 변화)가 다르면 달라진다. `vlm_eval.py`가 샌드박스에서 만든 이전 `event_eval_*.json`의 ID로 조인해 CI 실행과 하나도 맞지 않았다.
+- 수정: 서버에 재생한 **같은 실행의** `events.jsonl`을 정답 YAML과 직접 매칭(`--events-jsonl`, 매칭 규칙은 사건 평가와 동일)하고, 결과 JSON에 `matching` 블록(매칭/미매칭 수, CV 결과별 분포)을 기록. 전부 미매칭이면 경고를 출력. 로컬 재생 테스트(eval-campus, mock 제공자)에서 5/5 매칭 확인 후 CI 재실행.
+- 교훈: "결정적 ID"는 같은 입력·같은 수치 결과를 전제로 한다. 실행 간 비교는 ID가 아니라 시간 구간 매칭으로 해야 한다.
+
 ## 리팩토링
 - 탐지기 전·후처리를 백엔드와 분리(`detector.py`): PyTorch/ONNX 비교가 공정해지고 TensorRT EP 추가가 설정 한 줄로 가능.
 - 사건 변환·싱크 분리(`events.py`): 오프라인(JSONL)과 라이브(gRPC)가 같은 Event를 만든다 → 평가·재생·라이브가 같은 데이터 형식.

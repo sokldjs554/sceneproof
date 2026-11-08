@@ -13,3 +13,7 @@
 | demo.webm | 위 흐름을 녹화한 짧은 시연 영상 (Playwright 녹화) |
 
 `node scripts/capture_demo.mjs <server-url> docs/images` 로 재생성합니다. 콘솔 오류: 0건
+
+## 실제 VLM 해석이 포함된 재생 모드 캡처: [`replay-vlm/`](replay-vlm/)
+
+`demo/bundle`(Claude Opus 5.5가 생성한 해석 포함)을 재생 모드 서버로 띄워 GitHub Actions `vlm-eval` 워크플로가 캡처한 화면입니다. 위 캡처는 실시간 모드(mock 제공자)이고, 실제 해석 문장은 `replay-vlm/03_event_vlm.png`에서 볼 수 있습니다.
