@@ -49,7 +49,26 @@ jobs:
           VARIANTS="${{ inputs.variant }}" bash scripts/fetch_models.sh
       - name: Smoke — one real explanation (fail fast on API/schema problems)
         run: |
-          test -n "$ANTHROPIC_API_KEY" || { echo "ANTHROPIC_API_KEY secret missing"; exit 1; }
+          # --- key diagnostics (never prints the key itself) ---
+          test -n "$ANTHROPIC_API_KEY" || { echo "::error::ANTHROPIC_API_KEY secret missing (Settings > Secrets and variables > Actions)"; exit 1; }
+          KEY="$(printf %s "$ANTHROPIC_API_KEY" | tr -d '[:space:]')"
+          if [ "${#KEY}" -ne "${#ANTHROPIC_API_KEY}" ]; then
+            echo "::warning::secret contains leading/trailing whitespace (${#ANTHROPIC_API_KEY} -> ${#KEY} chars); using the trimmed value"
+            echo "ANTHROPIC_API_KEY=$KEY" >> "$GITHUB_ENV"; export ANTHROPIC_API_KEY="$KEY"
+          fi
+          case "$KEY" in
+            sk-ant-api*)   echo "key type: standard API key (sk-ant-api...), length ${#KEY}";;
+            sk-ant-admin*) echo "::error::this is an Admin API key (sk-ant-admin...). Admin keys cannot call the Messages API; create a normal API key in console.anthropic.com > API keys"; exit 1;;
+            sk-ant-oat*)   echo "::error::this is an OAuth/session token, not an API key"; exit 1;;
+            *)             echo "::warning::unrecognized key prefix '${KEY:0:6}...' (length ${#KEY}); expected sk-ant-api...";;
+          esac
+          code=$(curl -sS -o /tmp/models.json -w '%{http_code}' https://api.anthropic.com/v1/models \
+                   -H "x-api-key: $KEY" -H "anthropic-version: 2023-06-01" || echo 000)
+          if [ "$code" != "200" ]; then
+            echo "::error::GET /v1/models returned HTTP $code — the key is rejected before any paid call. Re-create the key in console.anthropic.com and re-save the ANTHROPIC_API_KEY secret."
+            cat /tmp/models.json; echo; exit 1
+          fi
+          echo "auth check OK (HTTP 200); models visible: $(python -c 'import json;print(len(json.load(open("/tmp/models.json"))["data"]))')"
           python - <<'PY'
           import json, time
           from sceneproof.server.vlm.anthropic_provider import AnthropicProvider
