@@ -7,17 +7,28 @@ RAW="$ROOT/data/videos/raw"
 OUT="$ROOT/data/videos"
 mkdir -p "$RAW" "$OUT"
 
-INTEL_BASE="https://github.com/intel-iot-devkit/sample-videos/raw/master"
+# dl <dest> <url> [<fallback-url>...]: retry each URL, then try the next host. raw.githubusercontent.com serves the
+# file directly; the github.com/<repo>/raw/ redirect endpoint returned 504 for 30 s straight in CI (vlm-eval #6/#7).
+dl() {
+  local dest="$1"; shift
+  local u
+  for u in "$@"; do
+    if curl -fsSL --retry 4 --retry-all-errors --retry-delay 3 -o "$dest.part" "$u"; then mv "$dest.part" "$dest"; return 0; fi
+    echo "  [fetch] failed: $u — trying next source" >&2
+  done
+  rm -f "$dest.part"; echo "[fetch] all sources failed for $(basename "$dest")" >&2; return 22
+}
+INTEL_REPO="intel-iot-devkit/sample-videos"
 INTEL_VIDEOS=(worker-zone-detection people-detection one-by-one-person-detection person-bicycle-car-detection store-aisle-detection)
 for v in "${INTEL_VIDEOS[@]}"; do
   if [ ! -s "$RAW/$v.mp4" ]; then
     echo "[fetch] $v.mp4"
-    curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$RAW/$v.mp4" "$INTEL_BASE/$v.mp4"
+    dl "$RAW/$v.mp4" "https://raw.githubusercontent.com/$INTEL_REPO/master/$v.mp4" "https://github.com/$INTEL_REPO/raw/master/$v.mp4"
   fi
 done
 if [ ! -s "$RAW/vtest.avi" ]; then
   echo "[fetch] vtest.avi (OpenCV samples)"
-  curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$RAW/vtest.avi" "https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data/vtest.avi"
+  dl "$RAW/vtest.avi" "https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data/vtest.avi" "https://github.com/opencv/opencv/raw/4.x/samples/data/vtest.avi"
 fi
 
 # Working copies: H.264 (browser-playable, RTSP passthrough-friendly), constant frame rate,
