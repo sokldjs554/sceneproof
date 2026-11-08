@@ -43,6 +43,6 @@ done
 kill $SRV; wait $SRV 2>/dev/null || true
 
 echo "[4/4] metrics + report"
-python -m sceneproof.eval.vlm_eval --data-dir "$DATA_DIR" --event-eval "docs/eval/raw/event_eval_${VARIANT}.json" --out docs/eval/raw/vlm_eval.json
+python -m sceneproof.eval.vlm_eval --data-dir "$DATA_DIR" --events-jsonl "$BUNDLE/events.jsonl" --gt data/ground_truth --out docs/eval/raw/vlm_eval.json
 python scripts/eval_report.py
 echo "done. rubric: docs/eval/raw/vlm_eval-rubric.csv"

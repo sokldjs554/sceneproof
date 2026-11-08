@@ -455,10 +455,15 @@ function renderVlm() {
   renderIfChanged(root, JSON.stringify(v), () => {
     const out = [];
     if (v.provider === 'mock') out.push(h('div', { class: 'warn-chip', title: '모의(mock) 제공자는 프레임을 해석하지 않고 응답 형식만 흉내 냅니다' }, '⚠ VLM 모의 응답(mock): 실제 해석 아님'));
+    const stored = (v.sources || []).filter((s) => s.provider && s.provider !== 'none');
+    const replay = state.status.mode === 'replay';
     if (IS_STATIC) out.push(h('div', { class: 'warn-chip' }, '정적 재생: 저장된 해석만 표시하며 새 해석은 생성되지 않습니다'));
+    else if ((!v.provider || v.provider === 'none') && replay && stored.length) out.push(h('div', { class: 'info-chip' }, '재생 모드: 번들에 저장된 해석을 표시합니다 (새 해석은 생성되지 않음)'));
     else if (!v.provider || v.provider === 'none') out.push(h('div', { class: 'warn-chip' }, '⚠ VLM 비활성화: 해석이 생성되지 않습니다'));
     out.push(h('dl', { class: 'kv' },
       dt('제공자'), dd(v.provider || '—'), dt('모델'), dd(v.model || '—'),
+      ...(stored.length && (!v.provider || v.provider === 'none')
+        ? [dt('저장된 해석'), dd(stored.map((s) => `${s.provider} / ${s.model} (${s.prompt_version}) · ${s.n}건`).join(', '))] : []),
       dt('프롬프트 / 스키마'), dd(`${v.prompt_version || '—'} / ${v.schema_version || '—'}`),
       dt('실행 중'), dd(String(num(v.inflight))),
       dt('제한'), dd(`${v.timeout_s ?? '—'}s · 최대 ${v.max_attempts ?? '—'}회`),
@@ -609,13 +614,15 @@ function renderStage() {
   empty.classList.add('hidden');
   const orig = originalVideoName(ev.source); const hasOrig = !!(orig && state.videos.has(orig));
   if (state.videoMode === 'original' && !hasOrig) state.videoMode = 'clip';
-  const mode = state.videoMode === 'original' ? 'original' : ev.evidence && ev.evidence.clip_available ? 'clip' : 'frames';
+  const clipBroken = state.clipBroken === ev.event_id;
+  const mode = state.videoMode === 'original' ? 'original' : ev.evidence && ev.evidence.clip_available && !clipBroken ? 'clip' : 'frames';
   state.stageMode = mode;
   if (mode === 'frames') {
     video.classList.add('hidden'); if (!video.paused) video.pause();
     frameImg.classList.remove('hidden'); nav.classList.remove('hidden');
     notice.classList.remove('hidden');
-    notice.textContent = ev.evidence_ready ? '근거 클립 없음 — 키 프레임만 표시' : '근거 영상 준비 중 (업로드 대기)';
+    notice.textContent = clipBroken ? '근거 클립을 재생할 수 없어 키 프레임을 표시합니다 (브라우저 코덱 또는 파일 문제)'
+      : ev.evidence_ready ? '근거 클립 없음 — 키 프레임만 표시' : '근거 영상 준비 중 (업로드 대기)';
     syncStageFrame(ev);
   } else {
     frameImg.classList.add('hidden'); notice.classList.add('hidden'); nav.classList.add('hidden'); video.classList.remove('hidden');
@@ -1174,7 +1181,13 @@ function init() {
   video.addEventListener('timeupdate', () => { updateSpanLabel(); updatePlayhead(); if (state.stageMode === 'clip') drawOverlay(); });
   video.addEventListener('seeked', () => { updateSpanLabel(); updatePlayhead(); if (state.stageMode === 'clip') drawOverlay(); });
   video.addEventListener('loadedmetadata', () => { drawOverlay(); renderTimeline(); updatePlayhead(); updateSpanLabel(); });
-  video.addEventListener('error', () => { if (video.dataset.src) toast('영상을 불러오지 못했습니다 (서버의 영상 파일을 확인하세요)', 'err'); });
+  video.addEventListener('error', () => {
+    if (!video.dataset.src) return;
+    const ev = currentEvent();
+    const frames = ev && ev.evidence && Array.isArray(ev.evidence.key_frames) && ev.evidence.key_frames.length;
+    if (state.stageMode === 'clip' && frames) { state.clipBroken = ev.event_id; setVideoSrc(''); renderStage(); return; }  // degrade to key frames
+    toast('영상을 불러오지 못했습니다 (서버의 영상 파일을 확인하세요)', 'err');
+  });
   frameImg.addEventListener('load', drawOverlay);
   if (window.ResizeObserver) new ResizeObserver(() => drawOverlay()).observe($('#stage'));
   else window.addEventListener('resize', drawOverlay);

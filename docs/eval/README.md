@@ -120,6 +120,7 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 
 ## 5. CV만 vs CV+VLM (anthropic / claude-opus-5-5 / prompt v1.2-ko)
 
+- 사건–정답 매칭: (이 결과 파일에는 매칭 정보가 없음 — 이전 형식)
 - 해석 상태 분포: {"done": 19}
 - 해석 지연 p50/p95: 20061 / 25691 ms (n=19), 추정 비용 0.9807 USD
 - CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 0, CV 오탐 0)
@@ -142,6 +143,6 @@ python scripts/failure_scenarios.py --out docs/evidence/failure-scenarios
 # 5 CV vs CV+VLM: 평가 영상을 서버에 재생 → 실제 VLM 제공자로 해석 → 비교
 sceneproof-edge --config configs/eval.yaml offline --camera eval-campus --out /tmp/eval-bundle/events.jsonl   # (4편 반복, evidence 복사)
 SP_SERVER_VLM_PROVIDER=anthropic SP_SERVER_DATA_DIR=data/server-eval sceneproof-server run   # 해석 완료까지 대기
-python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --event-eval docs/eval/raw/event_eval_yolox_tiny.json --out docs/eval/raw/vlm_eval.json
+python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --events-jsonl /tmp/eval-bundle/events.jsonl --out docs/eval/raw/vlm_eval.json   # 같은 실행의 사건을 정답과 매칭
 python scripts/eval_report.py
 ```

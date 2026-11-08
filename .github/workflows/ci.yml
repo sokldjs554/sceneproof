@@ -33,7 +33,7 @@ jobs:
         run: pytest -q -m "not slow"
       - name: Console smoke (Playwright, replay bundle)
         run: |
-          npm i -g playwright@1.47.2 && npx playwright install --with-deps chromium
+          npm i -g playwright@1.63.0 && npx playwright install --with-deps chromium
           SP_SERVER_DATA_DIR=/tmp/zw SP_SERVER_MODE=replay SP_SERVER_REPLAY_BUNDLE=demo/bundle SP_SERVER_VLM_PROVIDER=mock \
             sceneproof-server run --port 8000 > /tmp/server.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done

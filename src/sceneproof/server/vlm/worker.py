@@ -264,4 +264,5 @@ class VLMWorker:
                 "model": self.provider.model if self.provider else "", "prompt_version": PROMPT_VERSION,
                 "schema_version": SCHEMA_VERSION, "inflight": self._inflight, "spend_usd": round(self._spent(), 4),
                 "budget_usd": self.s.vlm_budget_usd, "trigger": self.s.vlm_trigger, "db": self.store.explanation_stats(),
+                "sources": self.store.explanation_sources(),
                 "timeout_s": self.s.vlm_timeout_s, "max_attempts": self.s.vlm_max_attempts}

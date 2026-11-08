@@ -14,7 +14,7 @@ fs.mkdirSync(out, { recursive: true });
 const git = execSync('git rev-parse --short HEAD').toString().trim();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(process.env.SP_CAPTURE_CHANNEL ? { channel: process.env.SP_CAPTURE_CHANNEL } : {});
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, locale: 'ko-KR',
   recordVideo: { dir: out, size: { width: 1440, height: 900 } } });
 const page = await ctx.newPage();

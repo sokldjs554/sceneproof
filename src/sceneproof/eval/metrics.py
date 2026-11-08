@@ -120,8 +120,8 @@ def summarize(m: MatchResult, gt: GroundTruth, duration_s: float) -> dict:
     }
 
 
-def preds_from_jsonl(path: str) -> list[PredEvent]:
-    """Final revision per event_id from an edge events.jsonl."""
+def preds_from_jsonl(path: str, camera_id: str | None = None) -> list[PredEvent]:
+    """Final revision per event_id from an edge events.jsonl (optionally one camera only)."""
     import json
 
     latest: dict[str, dict] = {}
@@ -129,6 +129,8 @@ def preds_from_jsonl(path: str) -> list[PredEvent]:
         for line in f:
             if line.strip():
                 ev = json.loads(line)
+                if camera_id is not None and ev.get("camera_id") != camera_id:
+                    continue
                 if ev["event_id"] not in latest or int(ev.get("revision", 0)) > int(latest[ev["event_id"]]["revision"]):
                     latest[ev["event_id"]] = ev
     out = []

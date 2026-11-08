@@ -126,6 +126,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .chip .mini-btn { border: 0; background: transparent; cursor: pointer; padding: 0 2px; font-size: 12px; color: inherit; line-height: 1; }
 .chip .mini-btn:hover { text-decoration: underline; }
 .warn-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: var(--radius); background: var(--amber-bg); color: var(--amber); border: 1px solid #f0d49a; font-weight: 700; font-size: 12px; }
+.info-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: var(--radius); background: var(--blue-bg, #e8f0fe); color: var(--blue, #1a56db); border: 1px solid #b7cdf5; font-weight: 700; font-size: 12px; }
 .assess { display: inline-block; padding: 2px 10px; border-radius: 4px; font-weight: 800; font-size: 13px; }
 .assess-needs_attention { background: var(--red-bg); color: var(--red); border: 1px solid #f1b9bf; }
 .assess-likely_benign { background: var(--green-bg); color: var(--green); border: 1px solid #b4e2c4; }

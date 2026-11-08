@@ -17,7 +17,7 @@ What needs a human (rubric written to <out>-rubric.csv, one row per explanation)
   * observations match the frames (0/1), hallucinated facts (0/1 + note), uncertainties sensible (0/1),
     Korean readability (1-3). Evaluator name/date columns are left empty on purpose.
 
-    python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --event-eval docs/eval/raw/event_eval_tiny.json \
+    python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --events-jsonl data/runs/eval-bundle-yolox_tiny/events.jsonl \
         --out docs/eval/raw/vlm_eval.json
 """
 
@@ -38,24 +38,51 @@ from sceneproof.server.db import Store
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", required=True)
-    ap.add_argument("--event-eval", required=True, help="JSON written by run_eval (prediction→GT matching)")
+    ap.add_argument("--events-jsonl", default=None,
+                    help="events.jsonl of the SAME offline run that was replayed into the server; matched against --gt here. "
+                         "Event ids are derived from (camera, zone, track, entry frame), so ids from another run/machine do not line up.")
+    ap.add_argument("--gt", default="data/ground_truth")
+    ap.add_argument("--min-overlap", type=float, default=0.5)
+    ap.add_argument("--tolerance", type=float, default=1.0)
+    ap.add_argument("--event-eval", default=None, help="fallback: JSON written by run_eval (prediction→GT matching) for the same run")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
+    if not args.events_jsonl and not args.event_eval:
+        ap.error("one of --events-jsonl (preferred) or --event-eval is required")
     store = Store(Path(args.data_dir) / "sceneproof.db")
-    ev_eval = json.loads(Path(args.event_eval).read_text())
-    # prediction outcome per event_id
-    outcome: dict[str, str] = {}
-    for s in ev_eval["per_video"].values():
-        d = s["details"]
-        for pid, _ in d["tp"]:
-            outcome[pid] = "tp"
-        for pid in d["fp"]:
-            outcome[pid] = "fp"
-        for pid, _ in d["duplicates"]:
-            outcome[pid] = "duplicate"
-        for pid, _ in d["boundary_hits"]:
-            outcome[pid] = "boundary"
     rows = store.list_events(limit=100000)
+    # prediction outcome per event_id: tp | fp | duplicate | boundary
+    outcome: dict[str, str] = {}
+    missed_total = 0
+    if args.events_jsonl:
+        from sceneproof.eval.gt import GroundTruth
+        from sceneproof.eval.metrics import match_events, preds_from_jsonl
+
+        for cam in sorted({r["camera_id"] for r in rows}):
+            gt_path = Path(args.gt) / f"{cam}.yaml"
+            if not gt_path.exists():
+                print(f"warning: no ground truth for camera {cam} ({gt_path}); its events stay unmatched", file=sys.stderr)
+                continue
+            m = match_events(preds_from_jsonl(args.events_jsonl, cam), GroundTruth.load(gt_path), args.min_overlap, args.tolerance)
+            outcome.update({pid: "tp" for pid, _ in m.tp})
+            outcome.update({pid: "fp" for pid in m.fp})
+            outcome.update({pid: "duplicate" for pid, _ in m.duplicates})
+            outcome.update({pid: "boundary" for pid, _ in m.boundary_hits})
+            missed_total += len(m.missed)
+        matching_source = f"{args.events_jsonl} vs {args.gt} (min_overlap={args.min_overlap}s, tolerance={args.tolerance}s)"
+    else:
+        ev_eval = json.loads(Path(args.event_eval).read_text())
+        for s in ev_eval["per_video"].values():
+            d = s["details"]
+            outcome.update({pid: "tp" for pid, _ in d["tp"]})
+            outcome.update({pid: "fp" for pid in d["fp"]})
+            outcome.update({pid: "duplicate" for pid, _ in d["duplicates"]})
+            outcome.update({pid: "boundary" for pid, _ in d["boundary_hits"]})
+            missed_total += len(d["missed"])
+        matching_source = args.event_eval
+    n_unmatched = sum(1 for r in rows if r["event_id"] not in outcome)
+    if rows and n_unmatched == len(rows):
+        print("warning: none of the server events matched the prediction ids — the matching input is from a different run", file=sys.stderr)
     expl = store.latest_explanation_map([r["event_id"] for r in rows])
     status_counts: dict[str, int] = {}
     lat = []
@@ -93,7 +120,11 @@ def main() -> int:
     fp_total = sum(by_outcome_assess.get("fp", {}).values())
     out = {
         "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "provider": provider, "model": model, "prompt_version": prompt,
-        "event_eval": args.event_eval, "events": len(rows), "explanations_by_status": status_counts,
+        "matching": {"source": matching_source, "events": len(rows), "matched": len(rows) - n_unmatched, "unmatched": n_unmatched,
+                     "by_cv_outcome": {k: sum(1 for r in rows if outcome.get(r["event_id"], "unmatched") == k)
+                                       for k in ("tp", "fp", "duplicate", "boundary", "unmatched")},
+                     "gt_intrusions_missed_by_cv": missed_total},
+        "events": len(rows), "explanations_by_status": status_counts,
         "latency_ms": {"p50": float(np.percentile(lat, 50)) if lat else None, "p95": float(np.percentile(lat, 95)) if lat else None, "n": len(lat)},
         "estimated_cost_usd": round(cost, 4),
         "cv_only": {"policy": "every event shown as needs_attention (확인 필요)", "events_needing_review": len(rows),
@@ -112,7 +143,7 @@ def main() -> int:
         w = csv.DictWriter(f, fieldnames=list(rubric[0].keys()) if rubric else ["event_id"])
         w.writeheader()
         w.writerows(rubric)
-    print(json.dumps({k: out[k] for k in ("explanations_by_status", "latency_ms", "cv_plus_vlm")}, ensure_ascii=False, indent=1))
+    print(json.dumps({k: out[k] for k in ("matching", "explanations_by_status", "latency_ms", "cv_plus_vlm")}, ensure_ascii=False, indent=1))
     return 0
 
 

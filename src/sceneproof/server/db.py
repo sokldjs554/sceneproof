@@ -252,6 +252,12 @@ class Store:
     def explanation_stats(self) -> dict[str, int]:
         return {r["status"]: r["n"] for r in self.q("SELECT status, COUNT(*) AS n FROM explanations GROUP BY status")}
 
+    def explanation_sources(self) -> list[dict]:
+        """Distinct (provider, model, prompt_version) of completed explanations — lets a replay server say which
+        model produced the explanations it serves even though it generates none itself."""
+        return [dict(r) for r in self.q("SELECT provider, model, prompt_version, COUNT(*) AS n FROM explanations "
+                                        "WHERE status='done' GROUP BY provider, model, prompt_version ORDER BY n DESC")]
+
     # ------------------------------------------------------------------ review
     def set_review(self, event_id: str, to_state: str, actor: str, note: str, resolution: str | None) -> dict:
         with self.tx() as c:

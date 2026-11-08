@@ -128,6 +128,9 @@ def vlm_section() -> str:
                 "이 절이 자동으로 채워집니다. 추정 비용은 `docs/handoff.md` §4.\n"
                 "- 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.\n")
     out = [f"## 5. CV만 vs CV+VLM ({d['provider']} / {d['model']} / prompt {d['prompt_version']})", "",
+           (f"- 사건–정답 매칭: {d['matching']['matched']}/{d['matching']['events']}건 매칭 (CV 결과별 {json.dumps(d['matching']['by_cv_outcome'])}, "
+            f"CV가 놓친 정답 침입 {d['matching']['gt_intrusions_missed_by_cv']}건 — VLM은 CV가 만든 사건만 볼 수 있음)" if d.get("matching") else
+            "- 사건–정답 매칭: (이 결과 파일에는 매칭 정보가 없음 — 이전 형식)"),
            f"- 해석 상태 분포: {json.dumps(d['explanations_by_status'])}", f"- 해석 지연 p50/p95: {fmt(d['latency_ms']['p50'],0)} / {fmt(d['latency_ms']['p95'],0)} ms (n={d['latency_ms']['n']}), 추정 비용 {d['estimated_cost_usd']} USD",
            f"- CV만: 모든 사건이 '확인 필요' ({d['cv_only']['events_needing_review']}건; 그중 정답 침입 {d['cv_only']['true_intrusions_flagged']}, CV 오탐 {d['cv_only']['cv_false_alarms_flagged']})",
            f"- CV+VLM: 정답 침입을 '확인 필요'로 유지 {d['cv_plus_vlm']['true_intrusions_kept_as_needs_attention']}, CV 오탐을 '정상 가능성 높음'으로 표시 {d['cv_plus_vlm']['cv_false_alarms_marked_likely_benign']}",
@@ -148,7 +151,7 @@ def main() -> int:
             "# 5 CV vs CV+VLM: 평가 영상을 서버에 재생 → 실제 VLM 제공자로 해석 → 비교",
             "sceneproof-edge --config configs/eval.yaml offline --camera eval-campus --out /tmp/eval-bundle/events.jsonl   # (4편 반복, evidence 복사)",
             "SP_SERVER_VLM_PROVIDER=anthropic SP_SERVER_DATA_DIR=data/server-eval sceneproof-server run   # 해석 완료까지 대기",
-            "python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --event-eval docs/eval/raw/event_eval_yolox_tiny.json --out docs/eval/raw/vlm_eval.json",
+            "python -m sceneproof.eval.vlm_eval --data-dir data/server-eval --events-jsonl /tmp/eval-bundle/events.jsonl --out docs/eval/raw/vlm_eval.json   # 같은 실행의 사건을 정답과 매칭",
             "python scripts/eval_report.py", "```", ""]
     (ROOT / "docs/eval/README.md").write_text("\n".join(head + body + tail))
     print("docs/eval/README.md written")
