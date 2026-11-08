@@ -7,6 +7,8 @@
 > 노타 AI **[Solution] AI Software Engineer Intern (전환형)** 지원용 프로젝트입니다. 공고 항목별 대응은 [`docs/job-mapping.md`](docs/job-mapping.md)에 있습니다.
 > 샘플 영상은 공개 데이터(Intel IoT DevKit CC BY 4.0, OpenCV Apache-2.0)이며 신원 식별 기능은 없습니다.
 
+**공개 데모: [https://sokldjs554.github.io/sceneproof/](https://sokldjs554.github.io/sceneproof/)** — 저장된 실행 결과(사건 15건, 근거 클립·키 프레임, Claude Opus 5.5 해석, 처리 상태 전이)를 서버 없이 브라우저에서 재생하는 정적 페이지입니다. GitHub Pages(`pages` 워크플로)가 `demo/bundle`에서 생성합니다. 카메라 명령·실시간 분석·새 해석 생성은 아래 "바로 실행"의 로컬 서버(또는 `render.yaml`)에서만 동작합니다.
+
 ![콘솔 첫 화면](docs/images/01_overview.png)
 
 위 화면은 실시간 모드(mock 제공자)입니다. Claude Opus 5.5가 실제로 생성한 해석이 표시된 재생 모드 화면은 [`docs/images/replay-vlm/03_event_vlm.png`](docs/images/replay-vlm/03_event_vlm.png).
