@@ -138,5 +138,6 @@ jobs:
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
           git commit -m "eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"
           # main may have moved while the (paid) run was in progress: rebase the result commit instead of failing
-          git pull --rebase origin "${GITHUB_REF_NAME}" || { echo "::error::rebase failed — results are still in the uploaded artifact"; exit 1; }
+          # --autostash: fetch_models/fetch_data regenerate tracked helper files (model metadata, checksums) during the run
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || { echo "::error::rebase failed — results are still in the uploaded artifact"; exit 1; }
           git push origin HEAD:"${GITHUB_REF_NAME}"

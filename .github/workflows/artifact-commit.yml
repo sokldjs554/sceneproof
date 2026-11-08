@@ -1,0 +1,42 @@
+name: artifact-commit
+# Recovery: commit result files from a finished vlm-eval run's artifact when that run's own "Commit results back"
+# step failed (e.g. rebase conflict). Free — no model calls. Manual trigger only.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: vlm-eval workflow run id whose `vlm-eval-outputs` artifact to commit
+        required: true
+      paths:
+        description: space-separated repo paths to take from the artifact
+        default: "docs/eval/raw docs/eval/README.md"
+permissions:
+  contents: write
+  actions: read
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vlm-eval-outputs
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/art
+      - name: Copy + commit
+        run: |
+          # the artifact root may be "/" (it also carried /tmp/replay-server.log) — locate the repo subtree
+          SRC=$(find /tmp/art -type d -path '*/work/sceneproof/sceneproof' | head -1); [ -n "$SRC" ] || SRC=/tmp/art
+          echo "artifact repo root: $SRC"; find "$SRC" -maxdepth 4 -type f | head -30
+          for p in ${{ inputs.paths }}; do
+            if [ -e "$SRC/$p" ]; then mkdir -p "$(dirname "$p")"; cp -r "$SRC/$p" "$(dirname "$p")/"; echo "copied $p"; else echo "::warning::$p not in artifact"; fi
+          done
+          git config user.name "sceneproof-ci"
+          git config user.email "ci@users.noreply.github.com"
+          git add ${{ inputs.paths }}
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "eval: vlm-eval run ${{ inputs.run_id }} 결과 커밋(커밋백 실패 복구) [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
