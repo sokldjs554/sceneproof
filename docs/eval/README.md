@@ -118,16 +118,23 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 | duplicates | PASS | first_delivery_accepted=✓, repeat_same_revision_is_duplicate=✓, newer_revision_accepted=✓, older_revision_after_newer_ignored=✓, single_row_with_max_revision=✓ | null |
 | restart | PASS | events_persisted=✓, no_duplicate_rows=✓, review_persisted=✓, vlm_queue_resumed_after_restart=✓, gateway_reconnected=✓ | null |
 
-## 5. CV만 vs CV+VLM (anthropic / claude-opus-5-5 / prompt v1.2-ko)
+## 5. CV만 vs CV+VLM (anthropic / claude-opus-5-5 / prompt v1.3-ko)
 
 - 사건–정답 매칭: 19/19건 매칭 (CV 결과별 {"tp": 10, "fp": 1, "duplicate": 5, "boundary": 3, "unmatched": 0}, CV가 놓친 정답 침입 0건 — VLM은 CV가 만든 사건만 볼 수 있음)
 - 해석 상태 분포: {"done": 19}
-- 해석 지연 p50/p95: 19764 / 27651 ms (n=19), 추정 비용 1.0091 USD
+- 해석 지연 p50/p95: 20120 / 26527 ms (n=19), 추정 비용 0.9847 USD
 - CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 10, CV 오탐 1)
-- CV+VLM: 정답 침입을 '확인 필요'로 유지 4/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
-- assessment × CV 결과: `{"duplicate": {"needs_attention": 3, "unclear": 1, "likely_benign": 1}, "tp": {"needs_attention": 4, "likely_benign": 3, "unclear": 3}, "boundary": {"unclear": 1, "likely_benign": 2}, "fp": {"needs_attention": 1}}`
+- CV+VLM: 정답 침입을 '확인 필요'로 유지 8/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
+- assessment × CV 결과: `{"duplicate": {"needs_attention": 5}, "tp": {"needs_attention": 8, "unclear": 2}, "boundary": {"needs_attention": 2, "unclear": 1}, "fp": {"needs_attention": 1}}`
 - 사람 채점 루브릭: `docs/eval/raw/vlm_eval-rubric.csv` (채점 전)
-- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 3/10건이 사람 눈에 띄지 않았을 것입니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.
+- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 0/10건이 사람 눈에 띄지 않았을 것입니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.
+
+프롬프트 버전 비교 (같은 사건 집합 · 같은 모델; 뒤 버전은 앞 버전의 결과를 보고 assessment 규칙을 명시한 것이므로 같은 사건에 대한 재측정은 뒤 버전에 유리한 평가입니다 — `docs/eval/vlm-findings.md` §4):
+
+| 프롬프트 | 해석 완료 | 정답 침입→확인 필요 | 정답 침입→정상 가능성 높음 | CV 오탐→정상 가능성 높음 | 경계 통과→정상/불확실/확인 필요 | 비용 USD | 지연 p50 ms |
+|---|---|---|---|---|---|---|---|
+| v1.2-ko | 19/19 | 4/10 | 3/10 | 0/1 | 2/1/0 | 1.0091 | 19764 |
+| v1.3-ko | 19/19 | 8/10 | 0/10 | 0/1 | 0/1/2 | 0.9847 | 20120 |
 
 ## 재현 절차
 
