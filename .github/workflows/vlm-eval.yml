@@ -1,0 +1,115 @@
+name: vlm-eval
+# CV-only vs CV+VLM comparison with the Claude API (paid; manual trigger only).
+# Uses the repository secret ANTHROPIC_API_KEY. Spend is capped per server instance by
+# SP_SERVER_VLM_BUDGET_USD (eval 3 USD + demo bundle 2 USD = 5 USD hard ceiling).
+# Results (docs/eval/raw/vlm_eval*.json/csv, docs/eval/README.md, demo/bundle with explanations,
+# replay-mode screenshots) are committed back to the branch so the docs stay reproducible.
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: detector variant for the CV runs
+        default: yolox_tiny
+      budget_eval_usd:
+        description: budget for the held-out evaluation server
+        default: "3"
+      budget_demo_usd:
+        description: budget for the demo bundle server
+        default: "2"
+      rebuild_demo:
+        description: also regenerate demo/bundle with real explanations
+        default: "true"
+permissions:
+  contents: write
+concurrency:
+  group: vlm-eval
+  cancel-in-progress: false
+jobs:
+  vlm-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SP_SERVER_VLM_PROVIDER: anthropic
+      SP_SERVER_VLM_MODEL: claude-opus-5-5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: System deps
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libgl1
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[server,dev,torch]"
+      - name: Data + model
+        run: |
+          bash scripts/fetch_data.sh
+          VARIANTS="${{ inputs.variant }}" bash scripts/fetch_models.sh
+      - name: Smoke — one real explanation (fail fast on API/schema problems)
+        run: |
+          test -n "$ANTHROPIC_API_KEY" || { echo "ANTHROPIC_API_KEY secret missing"; exit 1; }
+          python - <<'PY'
+          import json, time
+          from sceneproof.server.vlm.anthropic_provider import AnthropicProvider
+          from sceneproof.server.vlm.base import ExplainRequest, FrameInput
+          from sceneproof.server.vlm.prompt import EventContext
+          from sceneproof.server.vlm.schema import extract_json, validate
+          prov = AnthropicProvider()
+          ev = [json.loads(l) for l in open("demo/bundle/events.jsonl")][3]
+          kfs = {k["role"]: k for k in ev["evidence"]["key_frames"]}
+          frames = [FrameInput(r, open(f"demo/bundle/evidence/{kfs[r+'_annot']['path']}", "rb").read(), kfs[r+'_annot'].get("media_time_s", 0))
+                    for r in ("context_before", "entry", "dwell", "exit", "context_after") if r + "_annot" in kfs]
+          ctx = EventContext(ev.get("camera_name", ""), ev["zone_name"], ev["kind"], ev.get("dwell_seconds", 0), ev.get("media_entry_s", 0), ev.get("media_exit_s"), ev.get("close_reason", ""), [f.role for f in frames])
+          t0 = time.time(); res = prov.explain(ExplainRequest(ev["event_id"], ctx, frames, lang="ko", max_tokens=700))
+          print(f"latency {time.time()-t0:.1f}s model={res.model} usage={res.usage} cost=${res.cost_usd:.4f} error={res.error!r}")
+          parsed, err = validate(extract_json(res.text)); print("valid:", parsed is not None, err[:300])
+          print(json.dumps(extract_json(res.text), ensure_ascii=False, indent=1)[:1500])
+          assert not res.error and parsed is not None
+          PY
+      - name: Held-out evaluation (CV runs + VLM + metrics + report)
+        env:
+          SP_SERVER_VLM_BUDGET_USD: ${{ inputs.budget_eval_usd }}
+          SP_SERVER_VLM_MAX_CONCURRENCY: "2"
+        run: bash scripts/run_vlm_eval.sh ${{ inputs.variant }}
+      - name: Demo bundle with real explanations
+        if: inputs.rebuild_demo == 'true'
+        env:
+          SP_SERVER_VLM_BUDGET_USD: ${{ inputs.budget_demo_usd }}
+          SP_SERVER_VLM_MAX_CONCURRENCY: "2"
+        run: bash scripts/rebuild_demo_bundle.sh anthropic
+      - name: Replay-mode screenshots with real explanations
+        if: inputs.rebuild_demo == 'true'
+        run: |
+          npm i -g playwright@1.47.2 && npx playwright install --with-deps chromium
+          SP_SERVER_DATA_DIR=/tmp/sp-replay SP_SERVER_MODE=replay SP_SERVER_REPLAY_BUNDLE=demo/bundle SP_SERVER_VLM_PROVIDER=none \
+            sceneproof-server run --port 8000 > /tmp/replay-server.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
+          NODE_PATH=$(npm root -g) node scripts/capture_demo.mjs http://127.0.0.1:8000 docs/images/replay-vlm || cat /tmp/replay-server.log
+      - name: Summary
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("docs/eval/raw/vlm_eval.json"))
+          print(json.dumps({k: d[k] for k in ("provider", "model", "explanations_by_status", "latency_ms", "estimated_cost_usd", "cv_plus_vlm")}, ensure_ascii=False, indent=1))
+          PY
+          ls -la docs/eval/raw/ demo/bundle | head -30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vlm-eval-outputs
+          path: |
+            docs/eval/raw/vlm_eval*
+            docs/eval/README.md
+            data/runs/eval-bundle-*/server.log
+            data/runs/demo-build/server.log
+            docs/images/replay-vlm
+      - name: Commit results back
+        run: |
+          git config user.name "sceneproof-ci"
+          git config user.email "ci@users.noreply.github.com"
+          git add docs/eval/raw docs/eval/README.md demo/bundle docs/images/replay-vlm 2>/dev/null || true
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"
+          git push
