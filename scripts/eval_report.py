@@ -143,6 +143,23 @@ def vlm_section() -> str:
     if tp_total:
         out.append(f"- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 {tp_benign}/{tp_total}건이 사람 눈에 띄지 않았을 것입니다. "
                    "그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.")
+    hist = {}
+    for p in sorted(RAW.glob("vlm_eval_v*.json")) + [RAW / "vlm_eval.json"]:
+        if p.exists():
+            h = json.loads(p.read_text())
+            hist[h["prompt_version"]] = h  # the current file wins for its version
+    if len(hist) > 1:
+        out += ["", "프롬프트 버전 비교 (같은 사건 집합 · 같은 모델; 뒤 버전은 앞 버전의 결과를 보고 assessment 규칙을 명시한 것이므로 "
+                "같은 사건에 대한 재측정은 뒤 버전에 유리한 평가입니다 — `docs/eval/vlm-findings.md` §4):", "",
+                "| 프롬프트 | 해석 완료 | 정답 침입→확인 필요 | 정답 침입→정상 가능성 높음 | CV 오탐→정상 가능성 높음 | 경계 통과→정상/불확실/확인 필요 | 비용 USD | 지연 p50 ms |",
+                "|---|---|---|---|---|---|---|---|"]
+        for ver, h in sorted(hist.items()):
+            a = h["cv_plus_vlm"]["assessment_by_cv_outcome"]
+            tp, b = a.get("tp", {}), a.get("boundary", {})
+            out.append(f"| {ver} | {h['explanations_by_status'].get('done', 0)}/{h.get('events', '—')} | "
+                       f"{h['cv_plus_vlm']['true_intrusions_kept_as_needs_attention']} | {tp.get('likely_benign', 0)}/{sum(tp.values())} | "
+                       f"{h['cv_plus_vlm']['cv_false_alarms_marked_likely_benign']} | "
+                       f"{b.get('likely_benign', 0)}/{b.get('unclear', 0)}/{b.get('needs_attention', 0)} | {h['estimated_cost_usd']} | {fmt(h['latency_ms']['p50'], 0)} |")
     out.append("")
     return "\n".join(out)
 
