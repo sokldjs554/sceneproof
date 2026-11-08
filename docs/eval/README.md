@@ -118,11 +118,14 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 | duplicates | PASS | first_delivery_accepted=✓, repeat_same_revision_is_duplicate=✓, newer_revision_accepted=✓, older_revision_after_newer_ignored=✓, single_row_with_max_revision=✓ | null |
 | restart | PASS | events_persisted=✓, no_duplicate_rows=✓, review_persisted=✓, vlm_queue_resumed_after_restart=✓, gateway_reconnected=✓ | null |
 
-## 5. CV만 vs CV+VLM
+## 5. CV만 vs CV+VLM (anthropic / claude-opus-5-5 / prompt v1.2-ko)
 
-- **로컬 소형 VLM(SmolVLM-500M-Instruct, CPU)**: 네트워크 허용 후 실제로 실행했으나 구조화 출력·장면 기술 모두 신뢰할 수 없어 비교 수치로 쓰지 않았습니다(이미지 분할 기본값에서는 1건에 9분 초과, 분할을 끄면 25초지만 스키마 위반·예시 복제). 시도별 원시 출력: `docs/evidence/vlm-local/`.
-- **API 모델(Claude)**: 유료이므로 사용자 승인 후 `bash scripts/run_vlm_eval.sh`(제공자 anthropic, 예산 상한 환경변수)로 실행하면 이 절이 자동으로 채워집니다. 추정 비용은 `docs/handoff.md` §4.
-- 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.
+- 해석 상태 분포: {"done": 19}
+- 해석 지연 p50/p95: 20061 / 25691 ms (n=19), 추정 비용 0.9807 USD
+- CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 0, CV 오탐 0)
+- CV+VLM: 정답 침입을 '확인 필요'로 유지 0/0, CV 오탐을 '정상 가능성 높음'으로 표시 0/0
+- assessment × CV 결과: `{"unmatched": {"needs_attention": 8, "unclear": 5, "likely_benign": 6}}`
+- 사람 채점 루브릭: `docs/eval/raw/vlm_eval-rubric.csv` (채점 전)
 
 ## 재현 절차
 

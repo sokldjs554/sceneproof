@@ -1,0 +1,46 @@
+{
+ "time": "2026-11-08T07:35:29",
+ "provider": "anthropic",
+ "model": "claude-opus-5-5",
+ "prompt_version": "v1.2-ko",
+ "event_eval": "docs/eval/raw/event_eval_yolox_tiny.json",
+ "events": 19,
+ "explanations_by_status": {
+  "done": 19
+ },
+ "latency_ms": {
+  "p50": 20061.14618899994,
+  "p95": 25690.50287629998,
+  "n": 19
+ },
+ "estimated_cost_usd": 0.9807,
+ "cv_only": {
+  "policy": "every event shown as needs_attention (확인 필요)",
+  "events_needing_review": 19,
+  "true_intrusions_flagged": 0,
+  "cv_false_alarms_flagged": 0
+ },
+ "cv_plus_vlm": {
+  "assessment_by_cv_outcome": {
+   "unmatched": {
+    "needs_attention": 8,
+    "unclear": 5,
+    "likely_benign": 6
+   }
+  },
+  "zone_relation_by_cv_outcome": {
+   "unmatched": {
+    "clearly_inside": 8,
+    "near_boundary": 11
+   }
+  },
+  "true_intrusions_kept_as_needs_attention": "0/0",
+  "cv_false_alarms_marked_likely_benign": "0/0",
+  "assessed_events": 19
+ },
+ "human_rubric_csv": "docs/eval/raw/vlm_eval-rubric.csv",
+ "notes": [
+  "assessment is categorical; no confidence numbers are produced or evaluated",
+  "a VLM 'likely_benign' on a GT intrusion is a miss that CV-only would not have made: report it, do not hide it"
+ ]
+}
