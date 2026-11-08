@@ -144,7 +144,7 @@ def vlm_section() -> str:
         out.append(f"- 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 {tp_benign}/{tp_total}건이 사람 눈에 띄지 않았을 것입니다. "
                    "그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.")
     hist = {}
-    for p in sorted(RAW.glob("vlm_eval_v*.json")) + [RAW / "vlm_eval.json"]:
+    for p in [*sorted(RAW.glob("vlm_eval_v*.json")), RAW / "vlm_eval.json"]:
         if p.exists():
             h = json.loads(p.read_text())
             hist[h["prompt_version"]] = h  # the current file wins for its version
