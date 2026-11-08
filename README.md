@@ -92,7 +92,6 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 | [docs/dev-log.md](docs/dev-log.md) | 발견한 실패·원인·수정 전후, 리팩토링, AI 활용 |
 | [docs/code-review-guide.md](docs/code-review-guide.md) | 읽을 순서·입출력·판단 지점·직접 해 볼 항목 |
 | [docs/papers-and-docs.md](docs/papers-and-docs.md) | 논문·공식 문서 요약과 적용·재현 범위 |
-| [docs/handoff.md](docs/handoff.md) | 인계: 완료/검증/미검증 구분, 본인·AI 수행 범위, 남은 일 |
 | [gateway/README.md](gateway/README.md) | Go 게이트웨이 설계 |
 
 ## 라이선스

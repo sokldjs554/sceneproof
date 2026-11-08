@@ -125,7 +125,7 @@ def vlm_section() -> str:
                 "비교 수치로 쓰지 않았습니다(이미지 분할 기본값에서는 1건에 9분 초과, 분할을 끄면 25초지만 스키마 위반·예시 복제). "
                 "시도별 원시 출력: `docs/evidence/vlm-local/`.\n"
                 "- **API 모델(Claude)**: 유료이므로 사용자 승인 후 `bash scripts/run_vlm_eval.sh`(제공자 anthropic, 예산 상한 환경변수)로 실행하면 "
-                "이 절이 자동으로 채워집니다. 추정 비용은 `docs/handoff.md` §4.\n"
+                "이 절이 자동으로 채워집니다. 비용 실측은 `docs/eval/vlm-findings.md` §5.\n"
                 "- 모의(mock) 제공자 결과는 품질 수치로 보고하지 않습니다.\n")
     out = [f"## 5. CV만 vs CV+VLM ({d['provider']} / {d['model']} / prompt {d['prompt_version']})", "",
            (f"- 사건–정답 매칭: {d['matching']['matched']}/{d['matching']['events']}건 매칭 (CV 결과별 {json.dumps(d['matching']['by_cv_outcome'])}, "
