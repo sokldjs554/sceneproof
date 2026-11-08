@@ -21,7 +21,7 @@ class ExplainRequest:
     ctx: EventContext
     frames: list[FrameInput]
     lang: str = "ko"
-    max_tokens: int = 700
+    max_tokens: int = 4096  # upper bound; API providers include thinking tokens in this budget
 
 
 @dataclass

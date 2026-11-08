@@ -29,7 +29,7 @@ sceneproof-edge --config configs/edge.yaml run --camera cam-bench
 | `SP_SERVER_VLM_PROVIDER` | 필요한 것 | 비고 |
 |---|---|---|
 | `mock` | 없음 | 형식 검증용. 결과에 `[MOCK]` 표시 |
-| `anthropic` | `ANTHROPIC_API_KEY`, `SP_SERVER_VLM_MODEL`(기본 `claude-opus-5-5`), `SP_SERVER_VLM_BUDGET_USD` | 구조화 JSON 출력, 예산 상한 초과 시 `skipped` |
+| `anthropic` | `ANTHROPIC_API_KEY`, `SP_SERVER_VLM_MODEL`(기본 `claude-opus-5-5`), `SP_SERVER_VLM_BUDGET_USD`, `SP_SERVER_VLM_MAX_TOKENS`(기본 4096 — Opus 5.5는 thinking 토큰이 포함되므로 1024로는 JSON이 잘림), `SP_SERVER_VLM_EFFORT`(기본 `medium`) | 구조화 JSON 출력, 예산 상한 초과 시 `skipped` |
 | `openai_compat` | `SP_SERVER_VLM_OPENAI_BASE_URL`(예: vLLM `http://host:8001/v1`), `SP_SERVER_VLM_MODEL` | 자체 호스팅 VLM |
 | `transformers` | `pip install -e ".[vlm-local]"`, huggingface.co 접근 | SmolVLM 등 CPU 소형 모델, 느림 |
 | `none` | | 해석 없음(재생 데모) |

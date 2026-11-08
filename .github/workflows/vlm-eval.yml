@@ -81,7 +81,7 @@ jobs:
           frames = [FrameInput(r, open(f"demo/bundle/evidence/{kfs[r+'_annot']['path']}", "rb").read(), kfs[r+'_annot'].get("media_time_s", 0))
                     for r in ("context_before", "entry", "dwell", "exit", "context_after") if r + "_annot" in kfs]
           ctx = EventContext(ev.get("camera_name", ""), ev["zone_name"], ev["kind"], ev.get("dwell_seconds", 0), ev.get("media_entry_s", 0), ev.get("media_exit_s"), ev.get("close_reason", ""), [f.role for f in frames])
-          t0 = time.time(); res = prov.explain(ExplainRequest(ev["event_id"], ctx, frames, lang="ko", max_tokens=700))
+          t0 = time.time(); res = prov.explain(ExplainRequest(ev["event_id"], ctx, frames, lang="ko", max_tokens=4096))
           print(f"latency {time.time()-t0:.1f}s model={res.model} usage={res.usage} cost=${res.cost_usd:.4f} error={res.error!r}")
           parsed, err = validate(extract_json(res.text)); print("valid:", parsed is not None, err[:300])
           print(json.dumps(extract_json(res.text), ensure_ascii=False, indent=1)[:1500])

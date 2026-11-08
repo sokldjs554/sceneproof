@@ -15,7 +15,7 @@ def build_provider(s: ServerSettings) -> VLMProvider | None:
     if p == "anthropic":
         from .anthropic_provider import AnthropicProvider
 
-        return AnthropicProvider(model=s.vlm_model or "claude-opus-5-5", timeout_s=s.vlm_timeout_s)
+        return AnthropicProvider(model=s.vlm_model or "claude-opus-5-5", effort=s.vlm_effort, timeout_s=s.vlm_timeout_s)
     if p == "openai_compat":
         from .openai_compat import OpenAICompatProvider
 

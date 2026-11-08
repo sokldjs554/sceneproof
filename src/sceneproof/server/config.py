@@ -33,7 +33,10 @@ class ServerSettings(BaseSettings):
     vlm_transformers_model: str = "HuggingFaceTB/SmolVLM-500M-Instruct"
     vlm_transformers_max_images: int = 2
     vlm_transformers_longest_edge: int = 512
-    vlm_max_tokens: int = 700
+    # Upper bound per explanation call. For Claude Opus 5.5 this must also cover the model's (always-on)
+    # thinking tokens — 1024 was cut off before any JSON appeared; see anthropic_provider.MIN_MAX_TOKENS.
+    vlm_max_tokens: int = 4096
+    vlm_effort: str = "medium"  # anthropic only: low | medium | high (controls thinking depth and cost)
     vlm_budget_usd: float = 5.0  # hard stop for paid providers (estimated spend)
     vlm_mock_delay_s: float = 0.2  # fault injection for tests/scenarios (mock provider only)
     vlm_mock_fail_every: int = 0

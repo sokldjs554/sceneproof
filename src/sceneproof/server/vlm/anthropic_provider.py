@@ -17,12 +17,19 @@ import time
 from .base import ExplainRequest, ExplainResult
 from .prompt import REPAIR_INSTRUCTION, build_user_text, system_prompt
 
-# USD per 1M tokens (input, output) — from the Claude API pricing table, 2026-10
+# USD per 1M tokens (input, output, cache read) — Claude API pricing table, 2026-10.
+# Cache writes (5-minute ephemeral) are billed at 1.25x the input price.
 PRICES = {
-    "claude-opus-5-5": (4.0, 20.0),
-    "claude-sonnet-5-5": (2.0, 10.0),
-    "claude-haiku-5-5": (0.10, 0.50),
+    "claude-opus-5-5": (4.0, 20.0, 0.20),
+    "claude-sonnet-5-5": (2.0, 10.0, 0.20),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01),
 }
+CACHE_WRITE_MULTIPLIER = 1.25
+
+# On Claude Opus 5.5 thinking is always on (adaptive) and its tokens count toward ``max_tokens``.
+# With max_tokens=1024 the first CI smoke call ended with ``stop_reason=max_tokens`` before any JSON
+# was emitted (vlm-eval run #3), so the request floor is raised to leave room for thinking + the JSON.
+MIN_MAX_TOKENS = 4096
 
 # Strict schema for output_config.format (every property required, no additional properties).
 STRICT_SCHEMA = {
@@ -86,7 +93,7 @@ class AnthropicProvider:
     def explain(self, req: ExplainRequest, repair_error: str | None = None, previous_text: str | None = None) -> ExplainResult:
         anthropic = self._anthropic
         kwargs = dict(
-            model=self.model, max_tokens=max(req.max_tokens, 1024),
+            model=self.model, max_tokens=max(req.max_tokens, MIN_MAX_TOKENS),
             system=[{"type": "text", "text": system_prompt(req.lang), "cache_control": {"type": "ephemeral"}}],
             messages=self._messages(req, repair_error, previous_text),
             output_config={"effort": self.effort, "format": {"type": "json_schema", "schema": STRICT_SCHEMA}},
@@ -110,8 +117,10 @@ class AnthropicProvider:
             "cache_read_input_tokens": getattr(response.usage, "cache_read_input_tokens", 0) or 0,
             "cache_creation_input_tokens": getattr(response.usage, "cache_creation_input_tokens", 0) or 0,
         }
-        pin, pout = PRICES.get(self.model, (4.0, 20.0))
-        cost = (usage["input_tokens"] * pin + usage["output_tokens"] * pout) / 1e6
+        pin, pout, pcache = PRICES.get(self.model, (4.0, 20.0, 0.20))
+        cost = (usage["input_tokens"] * pin + usage["output_tokens"] * pout
+                + usage["cache_creation_input_tokens"] * pin * CACHE_WRITE_MULTIPLIER
+                + usage["cache_read_input_tokens"] * pcache) / 1e6
         if response.stop_reason == "refusal":
             cat = response.stop_details.category if response.stop_details else None
             return ExplainResult("", response.model, self.name, ms, usage=usage, cost_usd=cost,
