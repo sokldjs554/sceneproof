@@ -120,12 +120,12 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 
 ## 5. CV만 vs CV+VLM (anthropic / claude-opus-5-5 / prompt v1.2-ko)
 
-- 사건–정답 매칭: (이 결과 파일에는 매칭 정보가 없음 — 이전 형식)
+- 사건–정답 매칭: 19/19건 매칭 (CV 결과별 {"tp": 10, "fp": 1, "duplicate": 5, "boundary": 3, "unmatched": 0}, CV가 놓친 정답 침입 0건 — VLM은 CV가 만든 사건만 볼 수 있음)
 - 해석 상태 분포: {"done": 19}
-- 해석 지연 p50/p95: 20061 / 25691 ms (n=19), 추정 비용 0.9807 USD
-- CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 0, CV 오탐 0)
-- CV+VLM: 정답 침입을 '확인 필요'로 유지 0/0, CV 오탐을 '정상 가능성 높음'으로 표시 0/0
-- assessment × CV 결과: `{"unmatched": {"needs_attention": 8, "unclear": 5, "likely_benign": 6}}`
+- 해석 지연 p50/p95: 19764 / 27651 ms (n=19), 추정 비용 1.0091 USD
+- CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 10, CV 오탐 1)
+- CV+VLM: 정답 침입을 '확인 필요'로 유지 4/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
+- assessment × CV 결과: `{"duplicate": {"needs_attention": 3, "unclear": 1, "likely_benign": 1}, "tp": {"needs_attention": 4, "likely_benign": 3, "unclear": 3}, "boundary": {"unclear": 1, "likely_benign": 2}, "fp": {"needs_attention": 1}}`
 - 사람 채점 루브릭: `docs/eval/raw/vlm_eval-rubric.csv` (채점 전)
 
 ## 재현 절차
