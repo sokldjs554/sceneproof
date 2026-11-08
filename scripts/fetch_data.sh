@@ -12,12 +12,12 @@ INTEL_VIDEOS=(worker-zone-detection people-detection one-by-one-person-detection
 for v in "${INTEL_VIDEOS[@]}"; do
   if [ ! -s "$RAW/$v.mp4" ]; then
     echo "[fetch] $v.mp4"
-    curl -fsSL -o "$RAW/$v.mp4" "$INTEL_BASE/$v.mp4"
+    curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$RAW/$v.mp4" "$INTEL_BASE/$v.mp4"
   fi
 done
 if [ ! -s "$RAW/vtest.avi" ]; then
   echo "[fetch] vtest.avi (OpenCV samples)"
-  curl -fsSL -o "$RAW/vtest.avi" "https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data/vtest.avi"
+  curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$RAW/vtest.avi" "https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data/vtest.avi"
 fi
 
 # Working copies: H.264 (browser-playable, RTSP passthrough-friendly), constant frame rate,
