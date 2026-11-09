@@ -139,6 +139,7 @@ def main() -> int:
         L += ["## 5. 최종 측정 (한 번만)", "",
               f"측정 {final['time']}, 커밋 `{final['git']}`, 분할 해시 `{final['split_sha256_16']}`, 구역 파일 해시 `{final['zones_sha12']}`. "
               f"측정 기록: `docs/eval/bench/test_lock.json` (측정 {len(lock['runs']) if lock else '?'}회).", "",
+              "결과를 읽는 법과 소견(용어 설명, 장소 묶음별 해석, 한계, 다음 단계): [`findings.md`](findings.md).", "",
               "### 구역 사건", ""]
         keys = ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "mot16-02-square", "mot16-09-lowangle", "mot20-station",
                 "seen_sites", "unseen_sites", "all"]

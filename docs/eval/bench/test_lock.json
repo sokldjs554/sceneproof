@@ -25,7 +25,9 @@
     "s-coco",
     "tiny-ft"
    ],
-   "reason": "run 1 crashed before writing any result (IndexError in detection AP when MOT ignore boxes are present, fixed in this commit with a regression test); same candidates, zones, split and settings"
+   "reason": "run 1 crashed before writing any result (IndexError in detection AP when MOT ignore boxes are present, fixed in this commit with a regression test); same candidates, zones, split and settings",
+   "completed": "2026-11-09T10:09:40",
+   "result_file": "docs/eval/bench/raw/bench_test_final.json"
   }
  ]
 }
