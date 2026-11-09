@@ -154,16 +154,22 @@ def main() -> int:
         if args.ids:
             ids = [i for i in ids if i in args.ids.split(",")]
     results = {}
-    for c in candidates:
-        results[c["name"]] = evaluate(c, args.split, ids, args.det_stride, edge_cfg)
-    out = {"split": args.split, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "git": _git(),
-           "split_sha256_16": split["sha256_16"], "zones_sha12": _sha(CONFIG_DIR / "zones.yaml"),
-           "zone_rules": load_zones()["rules"], "tracker": edge_cfg["tracker"],
-           "matching": {"min_overlap_s": 0.5, "start_tolerance_s": 1.0, "max_foot_dist_rel": 0.5},
-           "sequences": ids, "results": results}
     path = Path(args.out) if args.out else OUT_DIR / "raw" / f"bench_{args.split}{'_final' if args.final else ''}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(out, indent=1, ensure_ascii=False))
+
+    def write(complete: bool) -> dict:
+        o = {"split": args.split, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "git": _git(), "complete": complete,
+             "split_sha256_16": split["sha256_16"], "zones_sha12": _sha(CONFIG_DIR / "zones.yaml"),
+             "zone_rules": load_zones()["rules"], "tracker": edge_cfg["tracker"],
+             "matching": {"min_overlap_s": 0.5, "start_tolerance_s": 1.0, "max_foot_dist_rel": 0.5},
+             "sequences": ids, "results": results}
+        path.write_text(json.dumps(o, indent=1, ensure_ascii=False))
+        return o
+
+    for c in candidates:  # written after every candidate: a later crash cannot lose finished candidates
+        results[c["name"]] = evaluate(c, args.split, ids, args.det_stride, edge_cfg)
+        write(complete=False)
+    out = write(complete=True)
     if args.split == "test":
         lock = json.loads(LOCK.read_text())
         lock["runs"][-1]["completed"] = out["time"]
