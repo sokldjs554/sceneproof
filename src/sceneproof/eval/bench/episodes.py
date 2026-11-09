@@ -43,7 +43,8 @@ def load_zones() -> dict:
     return yaml.safe_load((CONFIG_DIR / "zones.yaml").read_text())
 
 
-def zone_specs(site: str, zones_cfg: dict | None = None, *, exclude: bool = False, rejoin: bool = False) -> list[ZoneSpec]:
+def zone_specs(site: str, zones_cfg: dict | None = None, *, exclude: bool = False, rejoin: bool = False,
+               rejoin_dist_rel: float | None = None) -> list[ZoneSpec]:
     """exclude/rejoin are corrections for the PREDICTION side only. Ground truth always uses the plain zone: a real
     person standing in an exclusion area is still an intrusion (the product missing it counts as a miss), and
     hand-labelled track ids do not break, so there is nothing to rejoin."""
@@ -57,7 +58,7 @@ def zone_specs(site: str, zones_cfg: dict | None = None, *, exclude: bool = Fals
                             entry_confirm_seconds=float(rules["entry_confirm_seconds"]),
                             exit_confirm_seconds=float(rules["exit_confirm_seconds"]),
                             exclude=[[tuple(p) for p in poly] for poly in zd.get("exclude", [])] if exclude else [],
-                            rejoin=rejoin, rejoin_dist_rel=float(rules.get("rejoin_dist_rel", 1.0))))
+                            rejoin=rejoin, rejoin_dist_rel=float(rejoin_dist_rel or rules.get("rejoin_dist_rel", 1.0))))
     return out
 
 

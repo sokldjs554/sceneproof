@@ -136,8 +136,8 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
             continue
         has_zone = s.site in zc["sites"]
         specs = zone_specs(s.site, zc) if has_zone else []  # ground truth: the plain zone
-        pred_specs = (zone_specs(s.site, zc, exclude=bool(candidate.get("exclude")), rejoin=bool(candidate.get("rejoin")))
-                      if has_zone else [])
+        pred_specs = (zone_specs(s.site, zc, exclude=bool(candidate.get("exclude")), rejoin=bool(candidate.get("rejoin")),
+                                 rejoin_dist_rel=candidate.get("rejoin_dist")) if has_zone else [])
         boxes = load_boxes(s)
         r = run_analyzer(s, pred_specs, detector, edge_cfg["tracker"], track_conf, det_stride)
         for f, (db, ds) in r.det_samples.items():
@@ -178,7 +178,8 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
 
 def parse_candidate(spec: str) -> dict:
     """name:model_path[:variant[:input_w]][+option...] e.g. tiny-coco:models/yolox_tiny.onnx:yolox_tiny
-    options: +track_conf=0.1 (boxes handed to the tracker), +rejoin, +exclude (prediction-side zone corrections)"""
+    options: +track_conf=0.1 (boxes handed to the tracker), +rejoin, +rejoin_dist=0.5 (box heights), +exclude
+    (prediction-side zone corrections)"""
     head, *opts = spec.split("+")
     parts = head.split(":")
     name, model = parts[0], parts[1]
@@ -190,7 +191,7 @@ def parse_candidate(spec: str) -> dict:
         k, _, v = o.partition("=")
         if k in ("rejoin", "exclude"):
             c[k] = v.lower() not in ("0", "false", "no") if v else True
-        elif k in ("track_conf", "conf_threshold"):
+        elif k in ("track_conf", "conf_threshold", "rejoin_dist"):
             c[k] = float(v)
         else:
             raise ValueError(f"unknown candidate option {k!r} in {spec!r}")
@@ -206,8 +207,11 @@ def main() -> int:
     ap.add_argument("--ids", default="", help="restrict to these sequence ids (dev/train only)")
     ap.add_argument("--det-stride", type=int, default=5, help="score detection AP on every Nth frame (0 = off)")
     ap.add_argument("--out", default="")
+    ap.add_argument("--threads", type=int, default=0, help="detector threads (0 = configs/edge.yaml)")
     args = ap.parse_args()
     edge_cfg = yaml.safe_load((ROOT / "configs" / "edge.yaml").read_text())
+    if args.threads:
+        edge_cfg["detector"]["intra_op_threads"] = args.threads
     split, ids = _split_for(args.split)
     final_set = FINAL_SETS.get(args.split)
     # provenance captured BEFORE the run (a commit made while an hour-long run is in progress must not be recorded)

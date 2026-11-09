@@ -207,3 +207,13 @@ def test_zone_settings_survive_the_command_round_trip():
     assert back.entry_confirm_seconds == 0.3 and back.exit_confirm_seconds == 0.8
     assert back.rejoin and abs(back.rejoin_dist_rel - 0.8) < 1e-6 and len(back.exclude) == 1
     assert [tuple(round(v, 6) for v in p) for p in back.exclude[0]] == [(0.5, 0.5), (0.6, 0.5), (0.6, 0.6)]
+
+
+def test_rejoin_expects_a_walking_person_further_along():
+    """A person walking right disappears behind something and comes out 30 px further: rejoined because the expected
+    position moves on at the walking speed; a standing-still expectation (the last position) would reject it."""
+    frames = [(i, [T(1, 55 + 6 * i, 100, h=40)]) for i in range(10)] + [(i, []) for i in range(10, 14)] \
+        + [(i, [T(4, 55 + 6 * i, 100, h=40)]) for i in range(14, 16)]
+    ev = _run(ZoneMonitor([zone(rejoin=True, rejoin_dist_rel=0.5)], "cam"), frames)
+    opened = [e for e in ev if e.transition == Transition.OPENED]
+    assert len(opened) == 1 and opened[0].episode.rejoined_track_ids == [4] and not opened[0].episode.closed
