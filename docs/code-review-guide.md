@@ -60,6 +60,10 @@ PY
 - 매칭 규칙과 분모(문서 `docs/eval/ground-truth.md`). `rescore`로 정답만 바꿔 재채점.
 - 해 볼 것: `data/ground_truth/eval-campus.yaml`의 e01 라벨을 `intrusion`으로 바꾸고 rescore → precision 변화.
 
+## 9-1. 연구용 벤치마크와 추가 학습: `src/sceneproof/eval/bench/*`, `src/sceneproof/train/finetune.py`
+- 볼 곳: 정답 사건을 만드는 `episodes.gt_episodes`(제품 ZoneMonitor 재사용), 같은 사람 판정이 들어간 `match.match`, 분할 고정 `split.py`(해시), 최종 1회 잠금 `run.py`, 원본 학습 손실 `edge/yolox_model/losses.py`.
+- 해 볼 것: `python scripts/fetch_bench.py`(약 2.3GB) → `python -m sceneproof.eval.bench.run --split dev --candidate tiny-coco:models/yolox_tiny.onnx` → `python scripts/bench_report.py`. `configs/bench/split.yaml`을 한 글자 고치고 다시 실행해 해시 검사로 거부되는지 확인. `--split test`가 `--final` 없이 거부되는지 확인.
+
 ## 10. 콘솔: `console/app.js`
 - 폴링·diff 렌더, 상태 전이 버튼, 정적 재생 모드(`window.SP_STATIC_BASE`).
 

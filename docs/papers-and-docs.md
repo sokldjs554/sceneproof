@@ -14,8 +14,12 @@
 - 링크: https://arxiv.org/abs/2107.08430 · 코드: https://github.com/Megvii-BaseDetection/YOLOX (Apache-2.0)
 - 핵심: anchor-free 헤드(그리드 셀마다 1개 예측, 중심 오프셋+log 크기), decoupled head(분류/회귀 분리), SimOTA 라벨 할당, 강한 증강(Mosaic/MixUp).
 - 적용: 모델 그래프 5개 파일을 벤더링(`src/sceneproof/edge/yolox_model/`, 추론 전용으로 손질)하고 공식 COCO 체크포인트(nano/tiny/s)를 사용. 디코딩(`(xy+grid)*stride`, `exp(wh)*stride`)과 NMS는 `detector.py`에 numpy로 재구현해 PyTorch/ONNX 양쪽이 같은 후처리를 쓴다. 사람 클래스(0)만 사용.
-- 재현한 범위: 추론·내보내기·수치 일치. 학습·SimOTA는 제거.
+- 재현한 범위: 추론·내보내기·수치 일치, 그리고 추가 학습을 위해 원본 학습 손실(SimOTA 동적 k 할당, IoU 손실 1-IoU², 객체·분류 BCE, `reg_weight=5`)을 `yolox_model/losses.py`로 복원. 공식 학습기·Mosaic/MixUp은 쓰지 않고 크기·위치·좌우·색상 증강만 직접 구현(`sceneproof.train.finetune`).
 - 읽은 범위: (1) 공식 저장소의 `yolox/models/*.py`, `exps/default/yolox_{nano,tiny,s}.py`, `yolox/exp/yolox_base.py`를 이 세션에서 직접 내려받아 읽음(벤더링 과정); arXiv 초록(2107.08430: anchor-free, decoupled head, SimOTA; YOLOX-Nano 0.91M 파라미터 25.3% AP). 본문 세부는 (2).
+
+## 2-1. 평가 데이터 — CAVIAR (EC Funded CAVIAR project/IST 2001 37540) · MOT16 (Milan et al., arXiv:1603.00831) · MOT20 (Dendorfer et al., arXiv:2003.09003)
+- 적용: 연구용 벤치마크(`docs/eval/bench/README.md`). CAVIAR 데이터 페이지에서 정답이 "이미지에 손으로 표시한 것"이고 움직이지 않는 사람은 상자가 없다는 점, 쇼핑몰 두 시점이 같은 촬영이라는 점을 확인하고 분할·구역 설계에 반영. MOT 데이터 페이지에서 CC BY-NC-SA 3.0, 시퀀스별 정지/이동 카메라와 MOT 클래스 체계(보행자·정지한 사람·방해물·반사)를 확인.
+- 확인한 것과 다른 점: CHAD(주차장, Apache-2.0)는 논문 §4에서 상자를 YOLOv4+HRNet이 만들었다고 밝혀 사람 정답이 아니므로 제외.
 
 ## 3. ONNX Runtime — 공식 문서(Python API, Graph Optimizations, Execution Providers)
 - 링크: https://onnxruntime.ai/docs/ · https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html · https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html
