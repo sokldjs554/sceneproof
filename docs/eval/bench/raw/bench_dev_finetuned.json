@@ -1,0 +1,2184 @@
+{
+ "split": "dev",
+ "time": "2026-11-09T08:22:20",
+ "git": "a5a956e",
+ "split_sha256_16": "56c1ec58729798c8",
+ "zones_sha12": "39ae944aad49",
+ "zone_rules": {
+  "entry_confirm_seconds": 0.3,
+  "exit_confirm_seconds": 0.8,
+  "dwell_seconds": 5,
+  "lost_grace_seconds": 1.5
+ },
+ "tracker": {
+  "track_thresh": 0.5,
+  "low_thresh": 0.1,
+  "new_track_thresh": 0.6,
+  "match_thresh": 0.8,
+  "track_buffer_seconds": 1.5,
+  "fuse_score": true
+ },
+ "matching": {
+  "min_overlap_s": 0.5,
+  "start_tolerance_s": 1.0,
+  "max_foot_dist_rel": 0.5
+ },
+ "sequences": [
+  "caviar-lobby-browse3",
+  "caviar-lobby-fight-run-away1",
+  "caviar-lobby-meet-walk-split",
+  "caviar-lobby-meet-walk-together2",
+  "caviar-mall-cor-one-shop-one-wait2",
+  "caviar-mall-cor-one-stop-move-enter1",
+  "caviar-mall-cor-shop-assistant2",
+  "caviar-mall-cor-two-leave-shop1",
+  "caviar-mall-front-one-shop-one-wait2",
+  "caviar-mall-front-one-stop-move-enter1",
+  "caviar-mall-front-shop-assistant2",
+  "caviar-mall-front-two-leave-shop1"
+ ],
+ "results": {
+  "tiny-ft": {
+   "candidate": {
+    "name": "tiny-ft",
+    "model": "models/finetune/yolox_tiny_bench/best.onnx",
+    "variant": "yolox_tiny",
+    "model_sha256_12": "dfe8f498fb02",
+    "op_conf": 0.4,
+    "detector_info": {
+     "model_name": "yolox_tiny",
+     "model_version": "dfe8f498fb02",
+     "backend": "onnxruntime-cpu",
+     "backend_version": "1.31.1",
+     "input_width": 416,
+     "input_height": 416,
+     "conf_thresh": 0.05,
+     "nms_thresh": 0.45
+    }
+   },
+   "events": {
+    "all": {
+     "gt_intrusions": 70,
+     "tp": 65,
+     "fp": 1,
+     "missed": 5,
+     "duplicates": 8,
+     "neutral": 1,
+     "precision": 0.985,
+     "recall": 0.929,
+     "f1": 0.956,
+     "duration_s": 764.1,
+     "false_alarms_per_hour": 4.7,
+     "start_mae_s": 1.56,
+     "end_mae_s": 1.08,
+     "dwell_agreement": "61/65"
+    },
+    "caviar-lobby": {
+     "gt_intrusions": 10,
+     "tp": 8,
+     "fp": 0,
+     "missed": 2,
+     "duplicates": 1,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 0.8,
+     "f1": 0.889,
+     "duration_s": 116.5,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.02,
+     "end_mae_s": 0.12,
+     "dwell_agreement": "7/8"
+    },
+    "caviar-mall-cor": {
+     "gt_intrusions": 44,
+     "tp": 43,
+     "fp": 0,
+     "missed": 1,
+     "duplicates": 1,
+     "neutral": 1,
+     "precision": 1.0,
+     "recall": 0.977,
+     "f1": 0.989,
+     "duration_s": 323.8,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.19,
+     "end_mae_s": 0.25,
+     "dwell_agreement": "42/43"
+    },
+    "caviar-mall-front": {
+     "gt_intrusions": 16,
+     "tp": 14,
+     "fp": 1,
+     "missed": 2,
+     "duplicates": 6,
+     "neutral": 0,
+     "precision": 0.933,
+     "recall": 0.875,
+     "f1": 0.903,
+     "duration_s": 323.8,
+     "false_alarms_per_hour": 11.1,
+     "start_mae_s": 6.65,
+     "end_mae_s": 4.15,
+     "dwell_agreement": "12/14"
+    },
+    "seen_sites": {
+     "gt_intrusions": 70,
+     "tp": 65,
+     "fp": 1,
+     "missed": 5,
+     "duplicates": 8,
+     "neutral": 1,
+     "precision": 0.985,
+     "recall": 0.929,
+     "f1": 0.956,
+     "duration_s": 764.1,
+     "false_alarms_per_hour": 4.7,
+     "start_mae_s": 1.56,
+     "end_mae_s": 1.08,
+     "dwell_agreement": "61/65"
+    }
+   },
+   "detection": {
+    "all": {
+     "frames": 3825,
+     "gt_boxes": 11905,
+     "ap50": 0.8534,
+     "ap50_95": 0.6263,
+     "recall_at_op_by_height": {
+      "h<50px": 0.653,
+      "50-100px": 0.934,
+      "h>=100px": 0.991
+     },
+     "gt_by_height": {
+      "h<50px": 4542,
+      "50-100px": 5515,
+      "h>=100px": 1848
+     }
+    },
+    "caviar-lobby": {
+     "frames": 585,
+     "gt_boxes": 1081,
+     "ap50": 0.6347,
+     "ap50_95": 0.3807,
+     "recall_at_op_by_height": {
+      "h<50px": 0.638,
+      "50-100px": 1.0,
+      "h>=100px": null
+     },
+     "gt_by_height": {
+      "h<50px": 1063,
+      "50-100px": 18,
+      "h>=100px": 0
+     }
+    },
+    "caviar-mall-cor": {
+     "frames": 1620,
+     "gt_boxes": 7588,
+     "ap50": 0.9177,
+     "ap50_95": 0.7248,
+     "recall_at_op_by_height": {
+      "h<50px": 0.732,
+      "50-100px": 0.974,
+      "h>=100px": 0.991
+     },
+     "gt_by_height": {
+      "h<50px": 2077,
+      "50-100px": 3663,
+      "h>=100px": 1848
+     }
+    },
+    "caviar-mall-front": {
+     "frames": 1620,
+     "gt_boxes": 3236,
+     "ap50": 0.7646,
+     "ap50_95": 0.4665,
+     "recall_at_op_by_height": {
+      "h<50px": 0.547,
+      "50-100px": 0.855,
+      "h>=100px": null
+     },
+     "gt_by_height": {
+      "h<50px": 1402,
+      "50-100px": 1834,
+      "h>=100px": 0
+     }
+    }
+   },
+   "per_sequence": {
+    "caviar-lobby-browse3": {
+     "site": "caviar-lobby",
+     "frames": 911,
+     "duration_s": 36.4,
+     "wall_s": 70.0,
+     "gt_intrusions": 3,
+     "tp": 3,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.0,
+     "end_mae_s": 0.03,
+     "dwell_agreement": "3/3",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 0.32,
+       "end_s": 4.96,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 18.92,
+       "end_s": 20.32,
+       "dwell": false
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 28.8,
+       "end_s": 31.88,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 1,
+       "start_s": 0.32,
+       "end_s": 4.96,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 2,
+       "start_s": 18.92,
+       "end_s": 20.36,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr002",
+       "track": 2,
+       "start_s": 28.8,
+       "end_s": 31.92,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr002",
+        "gt002"
+       ],
+       [
+        "pr001",
+        "gt001"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-lobby-fight-run-away1": {
+     "site": "caviar-lobby",
+     "frames": 551,
+     "duration_s": 22.0,
+     "wall_s": 43.0,
+     "gt_intrusions": 2,
+     "tp": 2,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.02,
+     "end_mae_s": 0.02,
+     "dwell_agreement": "2/2",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 0.32,
+       "end_s": 1.96,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 6,
+       "start_s": 11.48,
+       "end_s": 16.48,
+       "dwell": false
+      },
+      {
+       "id": "bp002",
+       "label": "boundary_pass",
+       "track": 7,
+       "start_s": 13.32,
+       "end_s": 13.6,
+       "dwell": false
+      },
+      {
+       "id": "bp003",
+       "label": "boundary_pass",
+       "track": 7,
+       "start_s": 14.32,
+       "end_s": 15.08,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 4,
+       "start_s": 0.32,
+       "end_s": 1.96,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 11,
+       "start_s": 11.52,
+       "end_s": 16.44,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr001",
+        "gt001"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-lobby-meet-walk-split": {
+     "site": "caviar-lobby",
+     "frames": 623,
+     "duration_s": 24.9,
+     "wall_s": 50.7,
+     "gt_intrusions": 2,
+     "tp": 1,
+     "fp": 0,
+     "missed": 1,
+     "duplicates": 1,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 0.5,
+     "f1": 0.667,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.04,
+     "end_mae_s": 0.12,
+     "dwell_agreement": "1/1",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 6.36,
+       "end_s": 8.92,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 5.8,
+       "end_s": 9.08,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 23,
+       "start_s": 5.76,
+       "end_s": 8.96,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 20,
+       "start_s": 6.32,
+       "end_s": 9.0,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr000",
+        "gt001"
+       ]
+      ],
+      "duplicates": [
+       [
+        "pr001",
+        "gt001"
+       ]
+      ],
+      "neutral": [],
+      "fp": [],
+      "missed": [
+       "gt000"
+      ]
+     }
+    },
+    "caviar-lobby-meet-walk-together2": {
+     "site": "caviar-lobby",
+     "frames": 827,
+     "duration_s": 33.1,
+     "wall_s": 66.2,
+     "gt_intrusions": 3,
+     "tp": 2,
+     "fp": 0,
+     "missed": 1,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 0.667,
+     "f1": 0.8,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.02,
+     "end_mae_s": 0.38,
+     "dwell_agreement": "1/2",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 0.32,
+       "end_s": 3.2,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 10.48,
+       "end_s": 11.32,
+       "dwell": false
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 2,
+       "start_s": 9.6,
+       "end_s": 15.48,
+       "dwell": true
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 35,
+       "start_s": 0.32,
+       "end_s": 3.04,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 37,
+       "start_s": 9.64,
+       "end_s": 14.88,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr001",
+        "gt002"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": [
+       "gt001"
+      ]
+     }
+    },
+    "caviar-mall-cor-one-shop-one-wait2": {
+     "site": "caviar-mall-cor",
+     "frames": 1462,
+     "duration_s": 58.5,
+     "wall_s": 119.8,
+     "gt_intrusions": 11,
+     "tp": 11,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.25,
+     "end_mae_s": 0.24,
+     "dwell_agreement": "11/11",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 7.16,
+       "end_s": 13.08,
+       "dwell": true
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 8,
+       "start_s": 5.72,
+       "end_s": 14.24,
+       "dwell": true
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 7,
+       "start_s": 4.88,
+       "end_s": 20.6,
+       "dwell": true
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 7,
+       "start_s": 29.4,
+       "end_s": 30.64,
+       "dwell": false
+      },
+      {
+       "id": "gt004",
+       "label": "intrusion",
+       "track": 7,
+       "start_s": 32.68,
+       "end_s": 36.2,
+       "dwell": false
+      },
+      {
+       "id": "gt005",
+       "label": "intrusion",
+       "track": 9,
+       "start_s": 43.4,
+       "end_s": 46.24,
+       "dwell": false
+      },
+      {
+       "id": "gt006",
+       "label": "intrusion",
+       "track": 7,
+       "start_s": 48.04,
+       "end_s": 51.56,
+       "dwell": false
+      },
+      {
+       "id": "gt007",
+       "label": "intrusion",
+       "track": 4,
+       "start_s": 49.72,
+       "end_s": 52.8,
+       "dwell": false
+      },
+      {
+       "id": "gt008",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 51.84,
+       "end_s": 56.36,
+       "dwell": false
+      },
+      {
+       "id": "gt009",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 44.64,
+       "end_s": 58.44,
+       "dwell": true
+      },
+      {
+       "id": "gt010",
+       "label": "intrusion",
+       "track": 2,
+       "start_s": 44.52,
+       "end_s": 58.44,
+       "dwell": true
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 41,
+       "start_s": 7.16,
+       "end_s": 13.08,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 46,
+       "start_s": 4.88,
+       "end_s": 13.36,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr002",
+       "track": 47,
+       "start_s": 5.76,
+       "end_s": 20.52,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr003",
+       "track": 47,
+       "start_s": 29.56,
+       "end_s": 30.6,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr004",
+       "track": 47,
+       "start_s": 32.76,
+       "end_s": 36.2,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr005",
+       "track": 64,
+       "start_s": 43.44,
+       "end_s": 46.24,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr006",
+       "track": 47,
+       "start_s": 48.08,
+       "end_s": 51.6,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr007",
+       "track": 63,
+       "start_s": 49.6,
+       "end_s": 51.92,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr008",
+       "track": 55,
+       "start_s": 52.08,
+       "end_s": 55.88,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr009",
+       "track": 42,
+       "start_s": 44.88,
+       "end_s": 58.16,
+       "dwell": true,
+       "close": "stream_ended"
+      },
+      {
+       "id": "pr010",
+       "track": 44,
+       "start_s": 44.44,
+       "end_s": 58.44,
+       "dwell": true,
+       "close": "stream_ended"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr002",
+        "gt002"
+       ],
+       [
+        "pr010",
+        "gt010"
+       ],
+       [
+        "pr009",
+        "gt009"
+       ],
+       [
+        "pr001",
+        "gt001"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr008",
+        "gt008"
+       ],
+       [
+        "pr006",
+        "gt006"
+       ],
+       [
+        "pr004",
+        "gt004"
+       ],
+       [
+        "pr005",
+        "gt005"
+       ],
+       [
+        "pr007",
+        "gt007"
+       ],
+       [
+        "pr003",
+        "gt003"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-mall-cor-one-stop-move-enter1": {
+     "site": "caviar-mall-cor",
+     "frames": 1590,
+     "duration_s": 63.6,
+     "wall_s": 127.3,
+     "gt_intrusions": 17,
+     "tp": 16,
+     "fp": 0,
+     "missed": 1,
+     "duplicates": 1,
+     "neutral": 1,
+     "precision": 1.0,
+     "recall": 0.941,
+     "f1": 0.97,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.24,
+     "end_mae_s": 0.38,
+     "dwell_agreement": "16/16",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 2.2,
+       "end_s": 5.28,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 5,
+       "start_s": 8.44,
+       "end_s": 12.92,
+       "dwell": false
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 4,
+       "start_s": 10.28,
+       "end_s": 15.32,
+       "dwell": false
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 4.28,
+       "end_s": 15.72,
+       "dwell": true
+      },
+      {
+       "id": "gt004",
+       "label": "intrusion",
+       "track": 5,
+       "start_s": 14.88,
+       "end_s": 15.92,
+       "dwell": false
+      },
+      {
+       "id": "gt005",
+       "label": "intrusion",
+       "track": 10,
+       "start_s": 18.96,
+       "end_s": 24.2,
+       "dwell": false
+      },
+      {
+       "id": "gt006",
+       "label": "intrusion",
+       "track": 6,
+       "start_s": 14.4,
+       "end_s": 27.68,
+       "dwell": true
+      },
+      {
+       "id": "gt007",
+       "label": "intrusion",
+       "track": 7,
+       "start_s": 19.08,
+       "end_s": 27.88,
+       "dwell": true
+      },
+      {
+       "id": "gt008",
+       "label": "intrusion",
+       "track": 2,
+       "start_s": 27.8,
+       "end_s": 32.88,
+       "dwell": false
+      },
+      {
+       "id": "gt009",
+       "label": "intrusion",
+       "track": 13,
+       "start_s": 33.6,
+       "end_s": 40.4,
+       "dwell": true
+      },
+      {
+       "id": "gt010",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 27.76,
+       "end_s": 40.52,
+       "dwell": true
+      },
+      {
+       "id": "gt011",
+       "label": "intrusion",
+       "track": 11,
+       "start_s": 33.48,
+       "end_s": 41.24,
+       "dwell": true
+      },
+      {
+       "id": "gt012",
+       "label": "intrusion",
+       "track": 13,
+       "start_s": 41.16,
+       "end_s": 44.48,
+       "dwell": false
+      },
+      {
+       "id": "gt013",
+       "label": "intrusion",
+       "track": 12,
+       "start_s": 38.8,
+       "end_s": 44.52,
+       "dwell": false
+      },
+      {
+       "id": "gt014",
+       "label": "intrusion",
+       "track": 14,
+       "start_s": 41.56,
+       "end_s": 44.8,
+       "dwell": false
+      },
+      {
+       "id": "gt015",
+       "label": "intrusion",
+       "track": 19,
+       "start_s": 52.68,
+       "end_s": 56.84,
+       "dwell": false
+      },
+      {
+       "id": "gt016",
+       "label": "intrusion",
+       "track": 18,
+       "start_s": 61.08,
+       "end_s": 63.56,
+       "dwell": false
+      },
+      {
+       "id": "bp017",
+       "label": "boundary_pass",
+       "track": 4,
+       "start_s": 5.76,
+       "end_s": 6.04,
+       "dwell": false
+      },
+      {
+       "id": "bp018",
+       "label": "boundary_pass",
+       "track": 7,
+       "start_s": 12.32,
+       "end_s": 15.44,
+       "dwell": false
+      },
+      {
+       "id": "bp019",
+       "label": "boundary_pass",
+       "track": 12,
+       "start_s": 32.04,
+       "end_s": 34.72,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 72,
+       "start_s": 2.12,
+       "end_s": 5.16,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 76,
+       "start_s": 10.12,
+       "end_s": 10.24,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr002",
+       "track": 78,
+       "start_s": 8.32,
+       "end_s": 13.0,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr003",
+       "track": 83,
+       "start_s": 11.16,
+       "end_s": 14.72,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr004",
+       "track": 75,
+       "start_s": 3.56,
+       "end_s": 15.48,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr005",
+       "track": 78,
+       "start_s": 13.56,
+       "end_s": 16.0,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr006",
+       "track": 84,
+       "start_s": 19.16,
+       "end_s": 24.28,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr007",
+       "track": 79,
+       "start_s": 14.24,
+       "end_s": 27.76,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr008",
+       "track": 80,
+       "start_s": 18.96,
+       "end_s": 27.88,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr009",
+       "track": 74,
+       "start_s": 27.76,
+       "end_s": 32.8,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr010",
+       "track": 94,
+       "start_s": 33.52,
+       "end_s": 34.48,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr011",
+       "track": 73,
+       "start_s": 27.76,
+       "end_s": 40.44,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr012",
+       "track": 90,
+       "start_s": 33.44,
+       "end_s": 41.28,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr013",
+       "track": 94,
+       "start_s": 38.88,
+       "end_s": 44.2,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr014",
+       "track": 92,
+       "start_s": 33.6,
+       "end_s": 44.56,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr015",
+       "track": 93,
+       "start_s": 41.52,
+       "end_s": 44.68,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr016",
+       "track": 99,
+       "start_s": 52.68,
+       "end_s": 56.8,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr017",
+       "track": 100,
+       "start_s": 61.08,
+       "end_s": 63.56,
+       "dwell": false,
+       "close": "stream_ended"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr007",
+        "gt006"
+       ],
+       [
+        "pr011",
+        "gt010"
+       ],
+       [
+        "pr004",
+        "gt003"
+       ],
+       [
+        "pr008",
+        "gt007"
+       ],
+       [
+        "pr012",
+        "gt011"
+       ],
+       [
+        "pr014",
+        "gt009"
+       ],
+       [
+        "pr013",
+        "gt013"
+       ],
+       [
+        "pr006",
+        "gt005"
+       ],
+       [
+        "pr009",
+        "gt008"
+       ],
+       [
+        "pr002",
+        "gt001"
+       ],
+       [
+        "pr016",
+        "gt015"
+       ],
+       [
+        "pr003",
+        "gt002"
+       ],
+       [
+        "pr015",
+        "gt014"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr017",
+        "gt016"
+       ],
+       [
+        "pr005",
+        "gt004"
+       ]
+      ],
+      "duplicates": [
+       [
+        "pr001",
+        "gt001"
+       ]
+      ],
+      "neutral": [
+       [
+        "pr010",
+        "bp019"
+       ]
+      ],
+      "fp": [],
+      "missed": [
+       "gt012"
+      ]
+     }
+    },
+    "caviar-mall-cor-shop-assistant2": {
+     "site": "caviar-mall-cor",
+     "frames": 3700,
+     "duration_s": 148.0,
+     "wall_s": 308.1,
+     "gt_intrusions": 11,
+     "tp": 11,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.14,
+     "end_mae_s": 0.12,
+     "dwell_agreement": "11/11",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 6,
+       "start_s": 5.04,
+       "end_s": 10.64,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 12.64,
+       "end_s": 13.8,
+       "dwell": false
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 11.4,
+       "end_s": 22.44,
+       "dwell": true
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 11.64,
+       "end_s": 22.76,
+       "dwell": true
+      },
+      {
+       "id": "gt004",
+       "label": "intrusion",
+       "track": 8,
+       "start_s": 50.28,
+       "end_s": 55.2,
+       "dwell": false
+      },
+      {
+       "id": "gt005",
+       "label": "intrusion",
+       "track": 19,
+       "start_s": 116.0,
+       "end_s": 123.4,
+       "dwell": true
+      },
+      {
+       "id": "gt006",
+       "label": "intrusion",
+       "track": 18,
+       "start_s": 116.0,
+       "end_s": 126.68,
+       "dwell": true
+      },
+      {
+       "id": "gt007",
+       "label": "intrusion",
+       "track": 19,
+       "start_s": 129.84,
+       "end_s": 132.12,
+       "dwell": false
+      },
+      {
+       "id": "gt008",
+       "label": "intrusion",
+       "track": 15,
+       "start_s": 130.16,
+       "end_s": 139.2,
+       "dwell": true
+      },
+      {
+       "id": "gt009",
+       "label": "intrusion",
+       "track": 17,
+       "start_s": 134.96,
+       "end_s": 140.0,
+       "dwell": false
+      },
+      {
+       "id": "gt010",
+       "label": "intrusion",
+       "track": 16,
+       "start_s": 135.8,
+       "end_s": 140.08,
+       "dwell": false
+      },
+      {
+       "id": "bp011",
+       "label": "boundary_pass",
+       "track": 3,
+       "start_s": 17.32,
+       "end_s": 17.56,
+       "dwell": false
+      },
+      {
+       "id": "bp012",
+       "label": "boundary_pass",
+       "track": 3,
+       "start_s": 21.24,
+       "end_s": 21.76,
+       "dwell": false
+      },
+      {
+       "id": "bp013",
+       "label": "boundary_pass",
+       "track": 3,
+       "start_s": 22.32,
+       "end_s": 22.44,
+       "dwell": false
+      },
+      {
+       "id": "bp014",
+       "label": "boundary_pass",
+       "track": 5,
+       "start_s": 19.84,
+       "end_s": 28.2,
+       "dwell": false
+      },
+      {
+       "id": "bp015",
+       "label": "boundary_pass",
+       "track": 7,
+       "start_s": 36.96,
+       "end_s": 38.76,
+       "dwell": false
+      },
+      {
+       "id": "bp016",
+       "label": "boundary_pass",
+       "track": 9,
+       "start_s": 74.44,
+       "end_s": 74.84,
+       "dwell": false
+      },
+      {
+       "id": "bp017",
+       "label": "boundary_pass",
+       "track": 18,
+       "start_s": 129.84,
+       "end_s": 132.24,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 109,
+       "start_s": 5.04,
+       "end_s": 10.8,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 104,
+       "start_s": 11.56,
+       "end_s": 13.64,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr002",
+       "track": 103,
+       "start_s": 11.4,
+       "end_s": 22.44,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr003",
+       "track": 102,
+       "start_s": 11.56,
+       "end_s": 22.76,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr004",
+       "track": 122,
+       "start_s": 50.16,
+       "end_s": 55.2,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr005",
+       "track": 127,
+       "start_s": 115.88,
+       "end_s": 123.36,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr006",
+       "track": 128,
+       "start_s": 115.92,
+       "end_s": 126.68,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr007",
+       "track": 128,
+       "start_s": 129.84,
+       "end_s": 132.12,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr008",
+       "track": 138,
+       "start_s": 130.2,
+       "end_s": 138.24,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr009",
+       "track": 140,
+       "start_s": 134.96,
+       "end_s": 139.96,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr010",
+       "track": 141,
+       "start_s": 135.8,
+       "end_s": 140.08,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr003",
+        "gt003"
+       ],
+       [
+        "pr002",
+        "gt002"
+       ],
+       [
+        "pr006",
+        "gt006"
+       ],
+       [
+        "pr008",
+        "gt008"
+       ],
+       [
+        "pr005",
+        "gt005"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr009",
+        "gt009"
+       ],
+       [
+        "pr004",
+        "gt004"
+       ],
+       [
+        "pr010",
+        "gt010"
+       ],
+       [
+        "pr007",
+        "gt007"
+       ],
+       [
+        "pr001",
+        "gt001"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-mall-cor-two-leave-shop1": {
+     "site": "caviar-mall-cor",
+     "frames": 1343,
+     "duration_s": 53.7,
+     "wall_s": 115.7,
+     "gt_intrusions": 5,
+     "tp": 5,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.02,
+     "end_mae_s": 0.11,
+     "dwell_agreement": "4/5",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 0.32,
+       "end_s": 3.48,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 12.88,
+       "end_s": 18.84,
+       "dwell": true
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 4,
+       "start_s": 14.96,
+       "end_s": 19.0,
+       "dwell": false
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 8,
+       "start_s": 42.6,
+       "end_s": 46.88,
+       "dwell": false
+      },
+      {
+       "id": "gt004",
+       "label": "intrusion",
+       "track": 10,
+       "start_s": 52.4,
+       "end_s": 53.68,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 144,
+       "start_s": 0.32,
+       "end_s": 3.48,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 147,
+       "start_s": 12.88,
+       "end_s": 18.36,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr002",
+       "track": 148,
+       "start_s": 14.92,
+       "end_s": 18.92,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr003",
+       "track": 154,
+       "start_s": 42.52,
+       "end_s": 46.88,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr004",
+       "track": 155,
+       "start_s": 52.4,
+       "end_s": 53.68,
+       "dwell": false,
+       "close": "stream_ended"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr001",
+        "gt001"
+       ],
+       [
+        "pr003",
+        "gt003"
+       ],
+       [
+        "pr002",
+        "gt002"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr004",
+        "gt004"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-mall-front-one-shop-one-wait2": {
+     "site": "caviar-mall-front",
+     "frames": 1462,
+     "duration_s": 58.5,
+     "wall_s": 125.7,
+     "gt_intrusions": 4,
+     "tp": 4,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 1,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 1.62,
+     "end_mae_s": 0.36,
+     "dwell_agreement": "3/4",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 2,
+       "start_s": 17.08,
+       "end_s": 18.6,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 18.24,
+       "end_s": 28.76,
+       "dwell": true
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 35.84,
+       "end_s": 45.4,
+       "dwell": true
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 6,
+       "start_s": 57.0,
+       "end_s": 58.44,
+       "dwell": false
+      },
+      {
+       "id": "bp004",
+       "label": "boundary_pass",
+       "track": 2,
+       "start_s": 14.04,
+       "end_s": 14.16,
+       "dwell": false
+      },
+      {
+       "id": "bp005",
+       "label": "boundary_pass",
+       "track": 7,
+       "start_s": 54.72,
+       "end_s": 54.76,
+       "dwell": false
+      },
+      {
+       "id": "bp006",
+       "label": "boundary_pass",
+       "track": 9,
+       "start_s": 53.84,
+       "end_s": 54.04,
+       "dwell": false
+      },
+      {
+       "id": "bp007",
+       "label": "boundary_pass",
+       "track": 9,
+       "start_s": 55.84,
+       "end_s": 55.92,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 160,
+       "start_s": 17.6,
+       "end_s": 17.68,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr001",
+       "track": 156,
+       "start_s": 18.6,
+       "end_s": 28.44,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr002",
+       "track": 163,
+       "start_s": 39.56,
+       "end_s": 39.6,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr003",
+       "track": 164,
+       "start_s": 41.4,
+       "end_s": 45.2,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr004",
+       "track": 159,
+       "start_s": 57.04,
+       "end_s": 58.44,
+       "dwell": false,
+       "close": "stream_ended"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr001",
+        "gt001"
+       ],
+       [
+        "pr003",
+        "gt002"
+       ],
+       [
+        "pr004",
+        "gt003"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ]
+      ],
+      "duplicates": [
+       [
+        "pr002",
+        "gt002"
+       ]
+      ],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    },
+    "caviar-mall-front-one-stop-move-enter1": {
+     "site": "caviar-mall-front",
+     "frames": 1590,
+     "duration_s": 63.6,
+     "wall_s": 134.6,
+     "gt_intrusions": 6,
+     "tp": 4,
+     "fp": 0,
+     "missed": 2,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 0.667,
+     "f1": 0.8,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.92,
+     "end_mae_s": 2.41,
+     "dwell_agreement": "4/4",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 3,
+       "start_s": 22.0,
+       "end_s": 38.2,
+       "dwell": true
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 12,
+       "start_s": 40.36,
+       "end_s": 42.6,
+       "dwell": false
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 9,
+       "start_s": 42.24,
+       "end_s": 43.12,
+       "dwell": false
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 13,
+       "start_s": 40.4,
+       "end_s": 46.04,
+       "dwell": false
+      },
+      {
+       "id": "gt004",
+       "label": "intrusion",
+       "track": 13,
+       "start_s": 51.68,
+       "end_s": 54.44,
+       "dwell": false
+      },
+      {
+       "id": "gt005",
+       "label": "intrusion",
+       "track": 14,
+       "start_s": 58.08,
+       "end_s": 61.92,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 176,
+       "start_s": 22.44,
+       "end_s": 30.64,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr001",
+       "track": 189,
+       "start_s": 42.12,
+       "end_s": 44.12,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr002",
+       "track": 191,
+       "start_s": 52.0,
+       "end_s": 54.36,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr003",
+       "track": 193,
+       "start_s": 59.28,
+       "end_s": 61.84,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr000",
+        "gt000"
+       ],
+       [
+        "pr003",
+        "gt005"
+       ],
+       [
+        "pr002",
+        "gt004"
+       ],
+       [
+        "pr001",
+        "gt003"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": [
+       "gt001",
+       "gt002"
+      ]
+     }
+    },
+    "caviar-mall-front-shop-assistant2": {
+     "site": "caviar-mall-front",
+     "frames": 3700,
+     "duration_s": 148.0,
+     "wall_s": 316.8,
+     "gt_intrusions": 4,
+     "tp": 4,
+     "fp": 1,
+     "missed": 0,
+     "duplicates": 5,
+     "neutral": 0,
+     "precision": 0.8,
+     "recall": 1.0,
+     "f1": 0.889,
+     "false_alarms_per_hour": 24.3,
+     "start_mae_s": 20.45,
+     "end_mae_s": 11.77,
+     "dwell_agreement": "3/4",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 5,
+       "start_s": 48.2,
+       "end_s": 50.24,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 15.68,
+       "end_s": 129.0,
+       "dwell": true
+      },
+      {
+       "id": "gt002",
+       "label": "intrusion",
+       "track": 6,
+       "start_s": 51.08,
+       "end_s": 136.8,
+       "dwell": true
+      },
+      {
+       "id": "gt003",
+       "label": "intrusion",
+       "track": 0,
+       "start_s": 134.68,
+       "end_s": 136.96,
+       "dwell": false
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 194,
+       "start_s": 15.28,
+       "end_s": 37.76,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr001",
+       "track": 206,
+       "start_s": 48.52,
+       "end_s": 49.8,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr002",
+       "track": 209,
+       "start_s": 51.8,
+       "end_s": 59.88,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr003",
+       "track": 210,
+       "start_s": 91.28,
+       "end_s": 92.0,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr004",
+       "track": 204,
+       "start_s": 42.0,
+       "end_s": 106.12,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr005",
+       "track": 211,
+       "start_s": 93.76,
+       "end_s": 113.48,
+       "dwell": true,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr006",
+       "track": 215,
+       "start_s": 120.36,
+       "end_s": 120.36,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr007",
+       "track": 219,
+       "start_s": 124.24,
+       "end_s": 125.32,
+       "dwell": false,
+       "close": "track_lost"
+      },
+      {
+       "id": "pr008",
+       "track": 217,
+       "start_s": 122.2,
+       "end_s": 136.52,
+       "dwell": true,
+       "close": "exited"
+      },
+      {
+       "id": "pr009",
+       "track": 223,
+       "start_s": 135.08,
+       "end_s": 136.92,
+       "dwell": false,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr004",
+        "gt001"
+       ],
+       [
+        "pr005",
+        "gt002"
+       ],
+       [
+        "pr008",
+        "gt003"
+       ],
+       [
+        "pr001",
+        "gt000"
+       ]
+      ],
+      "duplicates": [
+       [
+        "pr000",
+        "gt001"
+       ],
+       [
+        "pr002",
+        "gt002"
+       ],
+       [
+        "pr009",
+        "gt003"
+       ],
+       [
+        "pr007",
+        "gt002"
+       ],
+       [
+        "pr003",
+        "gt002"
+       ]
+      ],
+      "neutral": [],
+      "fp": [
+       "pr006"
+      ],
+      "missed": []
+     }
+    },
+    "caviar-mall-front-two-leave-shop1": {
+     "site": "caviar-mall-front",
+     "frames": 1343,
+     "duration_s": 53.7,
+     "wall_s": 104.9,
+     "gt_intrusions": 2,
+     "tp": 2,
+     "fp": 0,
+     "missed": 0,
+     "duplicates": 0,
+     "neutral": 0,
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_hour": 0.0,
+     "start_mae_s": 0.54,
+     "end_mae_s": 0.0,
+     "dwell_agreement": "2/2",
+     "gt_events": [
+      {
+       "id": "gt000",
+       "label": "intrusion",
+       "track": 2,
+       "start_s": 10.8,
+       "end_s": 14.56,
+       "dwell": false
+      },
+      {
+       "id": "gt001",
+       "label": "intrusion",
+       "track": 1,
+       "start_s": 4.08,
+       "end_s": 15.16,
+       "dwell": true
+      }
+     ],
+     "predictions": [
+      {
+       "id": "pr000",
+       "track": 230,
+       "start_s": 11.56,
+       "end_s": 14.56,
+       "dwell": false,
+       "close": "exited"
+      },
+      {
+       "id": "pr001",
+       "track": 228,
+       "start_s": 4.4,
+       "end_s": 15.16,
+       "dwell": true,
+       "close": "exited"
+      }
+     ],
+     "outcome": {
+      "tp": [
+       [
+        "pr001",
+        "gt001"
+       ],
+       [
+        "pr000",
+        "gt000"
+       ]
+      ],
+      "duplicates": [],
+      "neutral": [],
+      "fp": [],
+      "missed": []
+     }
+    }
+   },
+   "wall_s": 1587.5
+  }
+ }
+}
