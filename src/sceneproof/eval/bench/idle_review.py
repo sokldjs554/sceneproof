@@ -67,7 +67,7 @@ def run(args) -> int:
     spec = ZoneSpec("z-review", args.zone_name, poly, dwell_seconds=float(rules["dwell_seconds"]),
                     lost_grace_seconds=float(rules["lost_grace_seconds"]), entry_confirm_seconds=float(rules["entry_confirm_seconds"]),
                     exit_confirm_seconds=float(rules["exit_confirm_seconds"]),
-                    exclude=exclude, rejoin=not args.no_rejoin)  # same as the product defaults
+                    exclude=exclude, rejoin=args.rejoin)  # same as the product defaults
     det_cfg = {**edge["detector"], "model": args.model, "variant": args.variant, "conf_threshold": 0.05}
     detector = build_detector(det_cfg)
     seq = Sequence(video.stem, "user", "user", video.stem, fps, video, video, n, w, h)
@@ -134,7 +134,7 @@ def main() -> int:
     r.add_argument("--zone", required=True, help='normalised polygon "x,y x,y x,y ..."')
     r.add_argument("--zone-name", default="통제 구역")
     r.add_argument("--exclude", action="append", default=[], help='exclusion polygon inside the zone (repeatable), same format')
-    r.add_argument("--no-rejoin", action="store_true", help="turn off event rejoin (on by default, as in the product)")
+    r.add_argument("--rejoin", action="store_true", help="turn on strict event rejoin (off by default, as in the product)")
     r.add_argument("--model", default="models/yolox_tiny.onnx")
     r.add_argument("--variant", default="yolox_tiny")
     r.add_argument("--out", required=True)
