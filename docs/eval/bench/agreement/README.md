@@ -6,7 +6,7 @@
 
 ```bash
 python -m sceneproof.eval.bench.agreement A.json B.json --with-gt --out docs/eval/bench/agreement/<영상>.json
-python scripts/bench_report.py    # docs/eval/bench/README.md §6이 이 폴더의 결과로 채워짐
+python scripts/bench_report.py    # docs/eval/bench/README.md §7이 이 폴더의 결과로 채워짐
 ```
 
 `--with-gt`는 각 사람의 표시를 데이터셋 상자로 만든 정답과도 비교합니다. 사람끼리의 일치도가 사람–정답 일치도보다 크게 높다면, 정답을 만드는 규칙(발 위치·확정 시간)이 사람의 판단과 다르다는 뜻입니다.

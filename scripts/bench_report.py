@@ -113,8 +113,8 @@ def followup_section() -> list[str]:
                  "low": "낮은 점수 상자(0.1 이상)도 추적기에 넣기", "low-rj10": "낮은 점수 + 이어받기 1.0",
                  "low-rj05": "낮은 점수 + 이어받기 0.5", "rj05": "이어받기 0.5", "rj075": "이어받기 0.75",
                  "rj10": "이어받기 1.0", "ex-rj10": "제외 영역 + 이어받기 1.0"}
-        L += ["## 8. 측정 뒤 보완 (개발 일지 L19·L20)", "",
-              "### 8-1. 추적 끊김·마네킹 대응: 조정 분할에서 고르기", "",
+        L += ["## 6. 측정 뒤 보완 (개발 일지 L19·L20)", "",
+              "### 6-1. 추적 끊김·마네킹 대응: 조정 분할에서 고르기", "",
               "기본 작은 모델(tiny-coco)로 조정 분할 12편(정답 사건 70건)을 돌려 비교했습니다. 이어받기 = 추적기가 같은 사람에게 새 번호를 "
               "붙였을 때, 사람이 사라진 뒤 예상 위치(걷던 속도로 옮긴 위치)에서 상자 높이 × 숫자 안에 나타난 새 추적이 열린 사건을 이어받음. "
               "제외 영역 = 매장 정면의 마네킹 자리(조정 분할 잘못 울림 4건이 모두 같은 자리). 둘 다 프로그램 쪽에만 적용하고 정답에는 적용하지 않습니다.", "",
@@ -129,7 +129,7 @@ def followup_section() -> list[str]:
     ft2 = load("finetune_log_v2.json")
     if ft2:
         ft1 = load("finetune_log.json")
-        L += ["### 8-2. 추가 학습 다시 하기 (학습 정답 상자를 사진 범위로 자르도록 고친 뒤)", "",
+        L += ["### 6-2. 추가 학습 다시 하기 (학습 정답 상자를 사진 범위로 자르도록 고친 뒤)", "",
               "같은 데이터·설정으로 다시 학습했습니다. 조정 분할 사람 찾기 점수(AP50:95):", "",
               "| 회차 | 처음 학습 | 다시 학습 |", "|---|---|---|"]
         e1 = {e["epoch"]: e for e in (ft1 or {}).get("epochs", [])}
@@ -148,7 +148,7 @@ def followup_section() -> list[str]:
     if t2:
         lock2 = json.loads((BENCH / "test2_lock.json").read_text()) if (BENCH / "test2_lock.json").exists() else {}
         run = (lock2.get("runs") or [{}])[0]
-        L += ["### 8-3. 두 번째 최종 측정 (새 장면 2곳, 한 번만)", "",
+        L += ["### 6-3. 두 번째 최종 측정 (새 장면 2곳, 한 번만)", "",
               "첫 최종 측정 결과를 본 뒤에 바꾼 것(이어받기, 다시 학습)을 첫 최종 분할로 다시 재면 공정하지 않습니다. 그래서 어디에도 쓰지 않은 "
               "MOT20-03(밤 광장)과 MOT20-05(아주 붐비는 광장)를 `configs/bench/split2.yaml`로 먼저 고정하고, 구역과 후보"
               "(`configs/bench/final2.yaml`)도 모델을 돌리기 전에 커밋한 뒤 한 번 쟀습니다.", "",
@@ -269,7 +269,7 @@ def main() -> int:
               "그중 22개가 저각도 거리 영상(766개 중 2.9%)입니다. 이 영상의 AP50은 최대 약 0.03 낮게 나왔을 수 있습니다. "
               "점수 계산은 측정 당시 그대로 둡니다(다시 재지 않음).", ""]
     L += followup_section()
-    L += ["## 6. 두 사람 표시 일치도", "",
+    L += ["## 7. 두 사람 표시 일치도", "",
           "도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.", ""]
     agr = sorted((BENCH / "agreement").glob("*.json")) if (BENCH / "agreement").exists() else []
     if agr:
@@ -281,7 +281,7 @@ def main() -> int:
     else:
         L += ["**아직 측정하지 않았습니다.** 사람 두 명이 같은 영상을 따로 표시해야 하므로 사용자가 해야 하는 작업입니다. 결과 JSON을 "
               "`docs/eval/bench/agreement/`에 넣고 이 스크립트를 다시 돌리면 이 절이 채워집니다."]
-    L += ["", "## 7. 재현", "", "```bash",
+    L += ["", "## 8. 재현", "", "```bash",
           "python scripts/fetch_bench.py                      # 원 사이트에서 84편 다운로드·재인코딩 (약 2.3GB, 프레임 수 = 정답 프레임 수 검사)",
           "python -m sceneproof.eval.bench.run --split dev --candidate tiny-coco:models/yolox_tiny.onnx \\",
           "    --candidate s-coco:models/yolox_s.onnx:yolox_s --out docs/eval/bench/raw/bench_dev_baseline.json",
