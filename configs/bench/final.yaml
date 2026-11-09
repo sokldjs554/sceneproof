@@ -1,0 +1,15 @@
+# Candidates for the ONE final measurement on the test split (python -m sceneproof.eval.bench.run --split test --final).
+# Fixed before the test split was touched. The fine-tuned epoch was chosen on DEV person AP (models/finetune/yolox_tiny_bench/train_log.json).
+candidates:
+  - name: tiny-coco
+    note: "product default: YOLOX-tiny, official COCO weights"
+    model: models/yolox_tiny.onnx
+    variant: yolox_tiny
+  - name: s-coco
+    note: "about 3x larger COCO model, no fine-tuning — is a bigger model enough?"
+    model: models/yolox_s.onnx
+    variant: yolox_s
+  - name: tiny-ft
+    note: "YOLOX-tiny fine-tuned on the TRAIN split (CAVIAR + MOT16-04), epoch 10 selected on DEV; onnx sha256[:12] dfe8f498fb02"
+    model: models/finetune/yolox_tiny_bench/best.onnx
+    variant: yolox_tiny

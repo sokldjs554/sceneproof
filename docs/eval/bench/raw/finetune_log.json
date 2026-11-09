@@ -1,0 +1,324 @@
+{
+ "args": {
+  "variant": "yolox_tiny",
+  "weights": "",
+  "epochs": 10,
+  "batch": 8,
+  "lr": 0.001,
+  "backbone_lr_mult": 0.1,
+  "stride": 10,
+  "mot_stride": 3,
+  "dev_stride": 5,
+  "threads": 4,
+  "seed": 0,
+  "out": "models/finetune/yolox_tiny_bench"
+ },
+ "weights": "models/yolox_tiny.pth",
+ "started": "2026-11-09T06:01:28",
+ "epochs": [
+  {
+   "epoch": 1,
+   "train_s": 671.1,
+   "total_loss": 3.9838,
+   "iou_loss": 1.8893,
+   "conf_loss": 1.5489,
+   "cls_loss": 0.5456,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8177,
+    "ap50_95": 0.5635,
+    "recall_at_op_by_height": {
+     "h<50px": 0.566,
+     "50-100px": 0.907,
+     "h>=100px": 0.966
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 2,
+   "train_s": 703.5,
+   "total_loss": 3.0766,
+   "iou_loss": 1.7602,
+   "conf_loss": 0.8297,
+   "cls_loss": 0.4867,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8296,
+    "ap50_95": 0.5841,
+    "recall_at_op_by_height": {
+     "h<50px": 0.606,
+     "50-100px": 0.913,
+     "h>=100px": 0.977
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 3,
+   "train_s": 577.2,
+   "total_loss": 2.8318,
+   "iou_loss": 1.6606,
+   "conf_loss": 0.7026,
+   "cls_loss": 0.4685,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8437,
+    "ap50_95": 0.6083,
+    "recall_at_op_by_height": {
+     "h<50px": 0.627,
+     "50-100px": 0.931,
+     "h>=100px": 0.988
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 4,
+   "train_s": 585.7,
+   "total_loss": 2.6941,
+   "iou_loss": 1.5937,
+   "conf_loss": 0.6445,
+   "cls_loss": 0.4559,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8453,
+    "ap50_95": 0.6127,
+    "recall_at_op_by_height": {
+     "h<50px": 0.639,
+     "50-100px": 0.929,
+     "h>=100px": 0.985
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 5,
+   "train_s": 578.1,
+   "total_loss": 2.5967,
+   "iou_loss": 1.5441,
+   "conf_loss": 0.6062,
+   "cls_loss": 0.4464,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8445,
+    "ap50_95": 0.6161,
+    "recall_at_op_by_height": {
+     "h<50px": 0.649,
+     "50-100px": 0.926,
+     "h>=100px": 0.989
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 6,
+   "train_s": 605.3,
+   "total_loss": 2.4875,
+   "iou_loss": 1.4925,
+   "conf_loss": 0.5589,
+   "cls_loss": 0.436,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8454,
+    "ap50_95": 0.6196,
+    "recall_at_op_by_height": {
+     "h<50px": 0.647,
+     "50-100px": 0.93,
+     "h>=100px": 0.99
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 7,
+   "train_s": 764.6,
+   "total_loss": 2.4061,
+   "iou_loss": 1.4492,
+   "conf_loss": 0.5298,
+   "cls_loss": 0.4271,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.846,
+    "ap50_95": 0.6235,
+    "recall_at_op_by_height": {
+     "h<50px": 0.651,
+     "50-100px": 0.932,
+     "h>=100px": 0.99
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 8,
+   "train_s": 548.6,
+   "total_loss": 2.3496,
+   "iou_loss": 1.4227,
+   "conf_loss": 0.5054,
+   "cls_loss": 0.4215,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8461,
+    "ap50_95": 0.6252,
+    "recall_at_op_by_height": {
+     "h<50px": 0.649,
+     "50-100px": 0.933,
+     "h>=100px": 0.99
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 9,
+   "train_s": 568.2,
+   "total_loss": 2.3173,
+   "iou_loss": 1.4066,
+   "conf_loss": 0.4931,
+   "cls_loss": 0.4175,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8461,
+    "ap50_95": 0.6256,
+    "recall_at_op_by_height": {
+     "h<50px": 0.651,
+     "50-100px": 0.934,
+     "h>=100px": 0.991
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  },
+  {
+   "epoch": 10,
+   "train_s": 554.0,
+   "total_loss": 2.304,
+   "iou_loss": 1.3902,
+   "conf_loss": 0.4995,
+   "cls_loss": 0.4143,
+   "dev": {
+    "frames": 3825,
+    "gt_boxes": 11905,
+    "ap50": 0.8534,
+    "ap50_95": 0.6263,
+    "recall_at_op_by_height": {
+     "h<50px": 0.653,
+     "50-100px": 0.934,
+     "h>=100px": 0.991
+    },
+    "gt_by_height": {
+     "h<50px": 4542,
+     "50-100px": 5515,
+     "h>=100px": 1848
+    }
+   }
+  }
+ ],
+ "data": {
+  "train_images": 4528,
+  "train_boxes": 25216,
+  "train_sequences": [
+   "caviar-lobby-browse-while-waiting1",
+   "caviar-lobby-browse-while-waiting2",
+   "caviar-lobby-browse1",
+   "caviar-lobby-browse2",
+   "caviar-lobby-browse4",
+   "caviar-lobby-left-bag",
+   "caviar-lobby-left-bag-behind-chair",
+   "caviar-lobby-left-box",
+   "caviar-lobby-meet-crowd",
+   "caviar-lobby-meet-split-3rd-guy",
+   "caviar-lobby-rest-fall-on-floor",
+   "caviar-lobby-walk1",
+   "caviar-lobby-walk3",
+   "caviar-mall-cor-one-leave-shop-reenter1",
+   "caviar-mall-cor-one-leave-shop-reenter2",
+   "caviar-mall-cor-one-leave-shop1",
+   "caviar-mall-cor-one-shop-one-wait1",
+   "caviar-mall-cor-one-stop-enter1",
+   "caviar-mall-cor-one-stop-enter2",
+   "caviar-mall-cor-one-stop-no-enter1",
+   "caviar-mall-cor-three-past-shop1",
+   "caviar-mall-cor-three-past-shop2",
+   "caviar-mall-cor-two-enter-shop2",
+   "caviar-mall-cor-two-enter-shop3",
+   "caviar-mall-cor-two-leave-shop2",
+   "caviar-mall-front-one-leave-shop-reenter1",
+   "caviar-mall-front-one-leave-shop-reenter2",
+   "caviar-mall-front-one-leave-shop1",
+   "caviar-mall-front-one-shop-one-wait1",
+   "caviar-mall-front-one-stop-enter1",
+   "caviar-mall-front-one-stop-enter2",
+   "caviar-mall-front-one-stop-no-enter1",
+   "caviar-mall-front-three-past-shop1",
+   "caviar-mall-front-three-past-shop2",
+   "caviar-mall-front-two-enter-shop2",
+   "caviar-mall-front-two-enter-shop3",
+   "caviar-mall-front-two-leave-shop2",
+   "mot16-04"
+  ],
+  "dev_frames": 3825,
+  "train_digest": "bb9ca5d63e0a"
+ },
+ "dev_before": {
+  "frames": 3825,
+  "gt_boxes": 11905,
+  "ap50": 0.7144,
+  "ap50_95": 0.4899,
+  "recall_at_op_by_height": {
+   "h<50px": 0.388,
+   "50-100px": 0.819,
+   "h>=100px": 0.961
+  },
+  "gt_by_height": {
+   "h<50px": 4542,
+   "50-100px": 5515,
+   "h>=100px": 1848
+  }
+ },
+ "best_epoch": 10,
+ "finished": "2026-11-09T07:54:30"
+}

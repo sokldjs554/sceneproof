@@ -126,10 +126,12 @@ def main() -> int:
         L += [""]
     dev_ft = load("bench_dev_finetuned.json")
     if dev_ft:
-        L += ["조정 영상에서 학습 전·후 비교(선택한 회차, 제품과 같은 ONNX 경로):", ""]
-        L += detection_table(dev_ft["results"], ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
+        merged = {**(dev["results"] if dev else {}), **dev_ft["results"]}
+        L += ["조정 영상에서 학습 전·후 비교(선택한 회차를 제품과 같은 ONNX 경로로 실행). tiny-coco = 제품 기본 모델, "
+              "s-coco = 약 3배 큰 COCO 모델(추가 학습 없음), tiny-ft = 제품 기본 모델을 추가 학습한 것:", ""]
+        L += detection_table(merged, ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
         L += [""]
-        L += events_table(dev_ft["results"], ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
+        L += events_table(merged, ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
         L += [""]
     final = load("bench_test_final.json")
     lock = json.loads((BENCH / "test_lock.json").read_text()) if (BENCH / "test_lock.json").exists() else None

@@ -256,11 +256,12 @@ def main() -> int:
         rec = {"epoch": epoch, "train_s": round(time.time() - te, 1), **{k: round(v / steps_per_epoch, 4) for k, v in sums.items()},
                "dev": res}
         log["epochs"].append(rec)
-        torch.save({"model": ema.ema.state_dict(), "epoch": epoch, "dev": res}, out / f"epoch{epoch:02d}.pth")
+        plain = json.loads(json.dumps(res, default=float))  # plain types only, so torch.load(weights_only=True) accepts it
+        torch.save({"model": ema.ema.state_dict(), "epoch": epoch, "dev": plain}, out / f"epoch{epoch:02d}.pth")
         score = res.get("ap50_95") or 0.0
         if score > best[0]:
             best = (score, epoch)
-            torch.save({"model": ema.ema.state_dict(), "epoch": epoch, "dev": res}, out / "best.pth")
+            torch.save({"model": ema.ema.state_dict(), "epoch": epoch, "dev": plain}, out / "best.pth")
         print(f"[ft] epoch {epoch} done in {rec['train_s']}s loss={rec['total_loss']} dev AP50={res.get('ap50')} "
               f"AP50:95={res.get('ap50_95')} (best epoch {best[1]})", flush=True)
         log["best_epoch"] = best[1]
