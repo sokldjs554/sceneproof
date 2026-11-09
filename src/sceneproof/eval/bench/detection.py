@@ -53,7 +53,10 @@ class APAccumulator:
     THRESHOLDS = np.round(np.arange(0.5, 0.96, 0.05), 2)
 
     def __init__(self) -> None:
-        self.scores: list[float] = []
+        # per IoU threshold: (score, is_tp) of every detection that counts at that threshold. A detection that
+        # matches no person but lies in an ignore region is dropped — and that can differ between thresholds
+        # (matched at 0.5, unmatched at 0.75), so scores are kept per threshold, as COCO does.
+        self.scores: dict[float, list[float]] = {t: [] for t in self.THRESHOLDS}
         self.tp = {t: [] for t in self.THRESHOLDS}
         self.n_gt = 0
         self.frames = 0
@@ -68,7 +71,6 @@ class APAccumulator:
         d, s = det_boxes[order], det_scores[order]
         iou = _iou(d, pos) if len(d) and len(pos) else np.zeros((len(d), len(pos)))
         ioa = _ioa(d, ign).max(1) if len(d) and len(ign) else np.zeros(len(d))
-        keep_det = np.ones(len(d), bool)
         for t in self.THRESHOLDS:
             taken = np.zeros(len(pos), bool)
             flags = []
@@ -86,7 +88,6 @@ class APAccumulator:
                 else:
                     flags.append(0)
             if t == self.THRESHOLDS[0]:
-                keep_det = np.array([f != -1 for f in flags], bool)
                 # recall by height at the operating threshold (IoU 0.5)
                 hit_at_op = np.zeros(len(pos), bool)
                 taken2 = np.zeros(len(pos), bool)
@@ -102,14 +103,14 @@ class APAccumulator:
                             self.bucket_gt[name] += 1
                             self.bucket_hit[name] += int(hit_at_op[k])
             self.tp[t] += [f for f in flags if f != -1]
-        self.scores += [float(x) for x, k in zip(s, keep_det, strict=False) if k]
+            self.scores[t] += [float(x) for x, f in zip(s, flags, strict=True) if f != -1]
 
     def result(self) -> dict:
         if not self.n_gt:
             return {"frames": self.frames, "gt_boxes": 0}
-        order = np.argsort(-np.array(self.scores)) if self.scores else np.array([], int)
         aps = {}
         for t in self.THRESHOLDS:
+            order = np.argsort(-np.array(self.scores[t]), kind="stable") if self.scores[t] else np.array([], int)
             tp = np.array(self.tp[t], float)[order] if len(order) else np.zeros(0)
             ctp, cfp = np.cumsum(tp), np.cumsum(1 - tp)
             rec = ctp / self.n_gt

@@ -128,3 +128,17 @@ def test_frozen_split_hash_and_no_group_leak():
     assert all(len(parts) == 1 for parts in groups.values()), "a group is split across train/dev/test"
     assert set(s["unseen_sites"]).isdisjoint({seq["site"] for seq in load_sources()["sequences"]
                                               if where[seq["id"]] in ("train", "dev")})
+
+
+def test_ap_ignore_region_can_differ_between_iou_thresholds():
+    """Regression (final run crashed): a box matched at IoU 0.5 but not at 0.75 that also overlaps an ignore
+    region is kept at 0.5 and dropped at 0.75 — per-threshold score lists must stay aligned."""
+    acc = APAccumulator()
+    person = GTBox(1, (10, 10, 30, 60))
+    ignore = GTBox(2, (8, 8, 34, 66), label="ignore")  # e.g. a distractor right behind the person
+    det = np.array([[10, 16, 30, 66], [200, 200, 220, 250]], np.float32)  # IoU ~0.68 with the person; one far FP
+    for _ in range(3):
+        acc.add(det, np.array([0.9, 0.3], np.float32), [person, ignore])
+    r = acc.result()
+    assert r["gt_boxes"] == 3 and 0.0 < r["ap50_95"] < r["ap50"] <= 1.0
+    assert all(len(acc.scores[t]) == len(acc.tp[t]) for t in acc.THRESHOLDS)
