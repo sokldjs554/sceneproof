@@ -10,10 +10,19 @@ States per (track_id, zone_id):
     OUTSIDE --inside xN--> INSIDE(episode) --outside xM--> OUTSIDE   (close: EXITED)
     INSIDE --track missing > grace--> OUTSIDE                        (close: TRACK_LOST)
     INSIDE --dwell >= T--> INSIDE (dwell escalated once)
+
+Two corrections for what the tracker and detector get wrong:
+  * rejoin: in a crowd the tracker often loses a person and starts a NEW track id for the same person a moment
+    later. While the old episode is still in its grace period, a track that first appeared after the loss, close
+    to where the person vanished and of similar size, continues that episode instead of opening a second one.
+  * exclude: polygons inside a zone where a person-shaped object stands (mannequin, signboard). A box whose feet
+    are there cannot OPEN an episode; an already open episode is held (a real person walking past the spot is
+    neither cut nor closed).
 """
 
 from __future__ import annotations
 
+import math
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
@@ -57,12 +66,18 @@ class ZoneSpec:
     # override the frame counts.
     entry_confirm_seconds: float | None = None
     exit_confirm_seconds: float | None = None
+    exclude: list[list[tuple[float, float]]] = field(default_factory=list)  # normalized polygons (see module doc)
+    rejoin: bool = False
+    rejoin_dist_rel: float = 1.0  # max feet distance for a rejoin, in units of the person's box height
 
     def polygon_px(self, w: int, h: int) -> list[tuple[float, float]]:
         return [(x * w, y * h) for x, y in self.polygon]
 
     def contains_px(self, x: float, y: float, w: int, h: int) -> bool:
         return point_in_polygon(x / w, y / h, self.polygon)
+
+    def excluded_px(self, x: float, y: float, w: int, h: int) -> bool:
+        return any(point_in_polygon(x / w, y / h, poly) for poly in self.exclude)
 
 
 class CloseReason(Enum):
@@ -105,6 +120,7 @@ class Episode:
     exit_wall_ts: float | None = None
     trajectory: list[TrajPoint] = field(default_factory=list)
     revision: int = 0
+    rejoined_track_ids: list[int] = field(default_factory=list)  # later track ids that continued this episode
 
     @property
     def dwell_seconds(self) -> float:
@@ -157,7 +173,9 @@ class ZoneMonitor:
         self.camera_id = camera_id
         self.trajectory_stride = max(1, trajectory_stride)
         self._state: dict[tuple[int, str], _TrackZoneState] = {}
+        self._first_seen: dict[int, float] = {}  # track id -> media time of its first frame
         self.open_episodes: dict[str, Episode] = {}
+        self.rejoins = 0
 
     # ------------------------------------------------------------------ helpers
     def _new_episode(self, zone: ZoneSpec, track_id: int, meta: FrameMeta, xyxy: np.ndarray) -> Episode:
@@ -189,7 +207,11 @@ class ZoneMonitor:
         """tracks: objects with .track_id, .xyxy, .score (TrackOutput)."""
         out: list[EpisodeEvent] = []
         seen: set[tuple[int, str]] = set()
+        for t in tracks:
+            self._first_seen.setdefault(t.track_id, meta.media_s)
         for zone in self.zones:
+            if zone.rejoin:
+                self._rejoin(zone, tracks, meta)
             for t in tracks:
                 key = (t.track_id, zone.zone_id)
                 seen.add(key)
@@ -198,6 +220,11 @@ class ZoneMonitor:
                 ax, ay = anchor_point(t.xyxy)
                 clipped = box_clipped_at_bottom(t.xyxy, meta.height)
                 inside = zone.contains_px(ax, ay, meta.width, meta.height)
+                if inside and zone.exclude and zone.excluded_px(ax, ay, meta.width, meta.height):
+                    if st.episode is None:
+                        inside = False  # a person-shaped object here never opens an episode
+                    else:
+                        clipped = True  # hold an open episode (same as feet not visible)
                 if clipped:
                     # feet not visible: hold the current state, but keep an open episode alive
                     if st.episode is not None:
@@ -256,7 +283,55 @@ class ZoneMonitor:
                     self._close(st, CloseReason.TRACK_LOST, meta, out)
             elif meta.media_s - st.last_seen_media_s > 30:
                 del self._state[key]  # forget stale (track_id, zone) pairs
+        if len(self._first_seen) > 4 * len(self._state) + 1000:
+            live = {k[0] for k in self._state}
+            self._first_seen = {tid: ts for tid, ts in self._first_seen.items() if tid in live}
         return out
+
+    def _rejoin(self, zone: ZoneSpec, tracks: list, meta: FrameMeta) -> None:
+        """Hand open episodes whose track vanished to a track that appeared after the loss, nearby (see module doc)."""
+        present = {t.track_id for t in tracks}
+        orphans = [(key, st) for key, st in self._state.items()
+                   if key[1] == zone.zone_id and st.episode is not None and key[0] not in present]
+        if not orphans:
+            return
+        pairs = []
+        for t in tracks:
+            st_new = self._state.get((t.track_id, zone.zone_id))
+            if st_new is not None and st_new.episode is not None:
+                continue
+            ax, ay = anchor_point(t.xyxy)
+            h_new = float(t.xyxy[3] - t.xyxy[1])
+            for key, st in orphans:
+                ep = st.episode
+                if self._first_seen.get(t.track_id, -1.0) <= ep.last_media_s:
+                    continue  # this track existed while the person was still visible: a different person
+                lx = (ep.last_xyxy[0] + ep.last_xyxy[2]) / 2
+                ly = ep.last_xyxy[3]
+                h_old = ep.last_xyxy[3] - ep.last_xyxy[1]
+                if h_old <= 0 or h_new <= 0 or not 0.5 <= h_new / h_old <= 2.0:
+                    continue
+                d = math.hypot(ax - lx, ay - ly) / max(h_old, h_new)
+                if d <= zone.rejoin_dist_rel:
+                    pairs.append((d, t.track_id, key))
+        used_new, used_old = set(), set()
+        for _d, tid, key in sorted(pairs):
+            if tid in used_new or key in used_old:
+                continue
+            used_new.add(tid)
+            used_old.add(key)
+            old = self._state[key]
+            ep = old.episode
+            old.episode = None
+            old.inside_count = old.outside_count = 0
+            old.inside_since = old.outside_since = None
+            new = self._state.setdefault((tid, zone.zone_id), _TrackZoneState())
+            new.episode = ep
+            new.inside_count = new.outside_count = 0
+            new.inside_since = new.outside_since = None
+            new.last_seen_media_s = meta.media_s
+            ep.rejoined_track_ids.append(tid)
+            self.rejoins += 1
 
     def close_all(self, reason: CloseReason, meta: FrameMeta) -> list[EpisodeEvent]:
         out: list[EpisodeEvent] = []

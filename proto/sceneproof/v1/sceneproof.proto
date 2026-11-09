@@ -237,6 +237,10 @@ enum CommandType {
   COMMAND_TYPE_STOP_CAMERA = 2;
 }
 
+message Polygon {
+  repeated Point points = 1;       // normalized
+}
+
 message ZoneSpec {
   string zone_id = 1;
   string name = 2;
@@ -245,6 +249,11 @@ message ZoneSpec {
   int32 exit_confirm_frames = 5;
   double dwell_seconds = 6;
   double lost_grace_seconds = 7;
+  double entry_confirm_seconds = 8;  // time-based debounce (0 = use the frame counts)
+  double exit_confirm_seconds = 9;
+  repeated Polygon exclude = 10;     // person-shaped objects inside the zone (mannequin, signboard): never open an episode
+  bool rejoin = 11;                  // continue an episode when the tracker starts a new id for the same person
+  double rejoin_dist_rel = 12;       // max feet distance for a rejoin, in box heights (0 = default 1.0)
 }
 
 message Command {

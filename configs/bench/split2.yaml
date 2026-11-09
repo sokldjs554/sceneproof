@@ -1,0 +1,13 @@
+# FROZEN — generated once by `python -m sceneproof.eval.bench.split --second`; edits break the hash check.
+created: '2026-11-09T13:48:49'
+sha256_16: 9017b3da7ba7b19b
+rules: sequences absent from split.yaml (never trained, tuned, analysed or measured on); measured once to compare the product
+  before/after the post-measurement changes
+after_split_sha256_16: 56c1ec58729798c8
+unseen_sites:
+- mot20-03-plaza
+- mot20-05-square
+sequences:
+  test2:
+  - mot20-03
+  - mot20-05

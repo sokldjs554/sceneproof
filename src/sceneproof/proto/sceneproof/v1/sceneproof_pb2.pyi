@@ -381,8 +381,14 @@ class Empty(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class Polygon(_message.Message):
+    __slots__ = ("points",)
+    POINTS_FIELD_NUMBER: _ClassVar[int]
+    points: _containers.RepeatedCompositeFieldContainer[Point]
+    def __init__(self, points: _Optional[_Iterable[_Union[Point, _Mapping]]] = ...) -> None: ...
+
 class ZoneSpec(_message.Message):
-    __slots__ = ("zone_id", "name", "polygon", "entry_confirm_frames", "exit_confirm_frames", "dwell_seconds", "lost_grace_seconds")
+    __slots__ = ("zone_id", "name", "polygon", "entry_confirm_frames", "exit_confirm_frames", "dwell_seconds", "lost_grace_seconds", "entry_confirm_seconds", "exit_confirm_seconds", "exclude", "rejoin", "rejoin_dist_rel")
     ZONE_ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     POLYGON_FIELD_NUMBER: _ClassVar[int]
@@ -390,6 +396,11 @@ class ZoneSpec(_message.Message):
     EXIT_CONFIRM_FRAMES_FIELD_NUMBER: _ClassVar[int]
     DWELL_SECONDS_FIELD_NUMBER: _ClassVar[int]
     LOST_GRACE_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    ENTRY_CONFIRM_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    EXIT_CONFIRM_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    EXCLUDE_FIELD_NUMBER: _ClassVar[int]
+    REJOIN_FIELD_NUMBER: _ClassVar[int]
+    REJOIN_DIST_REL_FIELD_NUMBER: _ClassVar[int]
     zone_id: str
     name: str
     polygon: _containers.RepeatedCompositeFieldContainer[Point]
@@ -397,7 +408,12 @@ class ZoneSpec(_message.Message):
     exit_confirm_frames: int
     dwell_seconds: float
     lost_grace_seconds: float
-    def __init__(self, zone_id: _Optional[str] = ..., name: _Optional[str] = ..., polygon: _Optional[_Iterable[_Union[Point, _Mapping]]] = ..., entry_confirm_frames: _Optional[int] = ..., exit_confirm_frames: _Optional[int] = ..., dwell_seconds: _Optional[float] = ..., lost_grace_seconds: _Optional[float] = ...) -> None: ...
+    entry_confirm_seconds: float
+    exit_confirm_seconds: float
+    exclude: _containers.RepeatedCompositeFieldContainer[Polygon]
+    rejoin: bool
+    rejoin_dist_rel: float
+    def __init__(self, zone_id: _Optional[str] = ..., name: _Optional[str] = ..., polygon: _Optional[_Iterable[_Union[Point, _Mapping]]] = ..., entry_confirm_frames: _Optional[int] = ..., exit_confirm_frames: _Optional[int] = ..., dwell_seconds: _Optional[float] = ..., lost_grace_seconds: _Optional[float] = ..., entry_confirm_seconds: _Optional[float] = ..., exit_confirm_seconds: _Optional[float] = ..., exclude: _Optional[_Iterable[_Union[Polygon, _Mapping]]] = ..., rejoin: _Optional[bool] = ..., rejoin_dist_rel: _Optional[float] = ...) -> None: ...
 
 class Command(_message.Message):
     __slots__ = ("command_id", "type", "device_id", "camera_id", "source", "zones", "issued_at", "issued_by")

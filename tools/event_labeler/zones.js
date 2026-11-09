@@ -168,6 +168,33 @@ window.BENCH_ZONES = {
      ]
     }
    ]
+  },
+  "mot16-04-street": {
+   "description": "Pedestrian street at night, elevated camera (1920x1080, 30 fps) — train only, used to tune tracking",
+   "zones": [
+    {
+     "zone_id": "z-roadway",
+     "name": "차도 (차량 통행 구역 가정)",
+     "polygon": [
+      [
+       0.4,
+       0.15
+      ],
+      [
+       0.6,
+       0.15
+      ],
+      [
+       0.62,
+       0.6
+      ],
+      [
+       0.4,
+       0.6
+      ]
+     ]
+    }
+   ]
   }
  }
 };

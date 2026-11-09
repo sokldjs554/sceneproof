@@ -112,3 +112,7 @@ sequences:
   - {id: mot16-09, dataset: mot16, site: mot16-09-lowangle, group: "mot16-09", fps: 30, zip_prefix: "train/MOT16-09/", note: "Pedestrian street filmed from a low angle (static camera)"}
   - {id: mot20-01, dataset: mot20, site: mot20-station, group: "mot20-01", fps: 25, zip_prefix: "MOT20/train/MOT20-01/", note: "Crowded indoor train station"}
   - {id: mot20-02, dataset: mot20, site: mot20-station, group: "mot20-02", fps: 25, zip_prefix: "MOT20/train/MOT20-02/", note: "Crowded indoor train station"}
+# Second held-out set (added after the first final measurement; see configs/bench/split2.yaml): two more static-camera
+# MOT20 scenes that nothing was trained, tuned or measured on before. Used once to measure the tracking/event fixes.
+  - {id: mot20-03, dataset: mot20, site: mot20-03-plaza, group: "mot20-03", fps: 25, zip_prefix: "MOT20/train/MOT20-03/", note: "Crowded outdoor plaza at night, elevated static camera"}
+  - {id: mot20-05, dataset: mot20, site: mot20-05-square, group: "mot20-05", fps: 25, zip_prefix: "MOT20/train/MOT20-05/", note: "Very crowded outdoor square (static camera)"}

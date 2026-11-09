@@ -29,10 +29,33 @@ from .data import CONFIG_DIR, ROOT, load_boxes, load_sequences
 from .detection import APAccumulator
 from .episodes import gt_episodes, load_zones, run_analyzer, zone_specs
 from .match import Match, match, summarize
-from .split import load_split
+from .split import load_split, load_split2
 
 OUT_DIR = ROOT / "docs" / "eval" / "bench"
 LOCK = OUT_DIR / "test_lock.json"
+LOCK2 = OUT_DIR / "test2_lock.json"
+# held-out sets measured once: (candidates file, result file); the lock path is read at call time (tests patch it)
+FINAL_SETS = {"test": ("final.yaml", "bench_test_final.json"), "test2": ("final2.yaml", "bench_test2_final.json")}
+
+
+def _lock_path(split_name: str) -> Path:
+    return LOCK if split_name == "test" else LOCK2
+
+
+def _split_for(split_name: str) -> tuple[dict, list[str]]:
+    """(the frozen split file that holds this part, its sequence ids)"""
+    if split_name == "test2":
+        s2 = load_split2()
+        return s2, s2["sequences"]["test2"]
+    s = load_split()
+    return s, s["sequences"][split_name]
+
+
+def _unseen_sites() -> set[str]:
+    out = set(load_split()["unseen_sites"])
+    if (CONFIG_DIR / "split2.yaml").exists():
+        out |= set(load_split2()["unseen_sites"])
+    return out
 
 
 def _sha(path: Path, n: int = 12) -> str:
@@ -91,12 +114,15 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
     model_sha = _sha(ROOT / candidate["model"])  # hash the file that is about to be measured, not the one present later
     seqs = load_sequences()
     zc = load_zones()
-    split = load_split()
+    unseen = _unseen_sites()
     det_cfg = {**edge_cfg["detector"], "variant": candidate["variant"], "model": candidate["model"],
                "backend": candidate.get("backend", "onnxruntime"), "conf_threshold": 0.05}
     if candidate.get("input_size"):
         det_cfg["input_size"] = candidate["input_size"]
     op = float(candidate.get("conf_threshold", edge_cfg["detector"]["conf_threshold"]))
+    # boxes handed to the tracker: the operating threshold (old behaviour) or lower, so that ByteTrack's
+    # low-score association can keep people whose score dips in a crowd
+    track_conf = float(candidate.get("track_conf", op))
     detector = build_detector(det_cfg)
     per_seq, matches_by, ap_by = {}, defaultdict(list), defaultdict(APAccumulator)
     dur_by, gt_by = defaultdict(float), defaultdict(int)
@@ -109,13 +135,15 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
             log(f"[bench] {sid}: data missing (run scripts/fetch_bench.py)")
             continue
         has_zone = s.site in zc["sites"]
-        specs = zone_specs(s.site, zc) if has_zone else []
+        specs = zone_specs(s.site, zc) if has_zone else []  # ground truth: the plain zone
+        pred_specs = (zone_specs(s.site, zc, exclude=bool(candidate.get("exclude")), rejoin=bool(candidate.get("rejoin")))
+                      if has_zone else [])
         boxes = load_boxes(s)
-        r = run_analyzer(s, specs, detector, edge_cfg["tracker"], op, det_stride)
+        r = run_analyzer(s, pred_specs, detector, edge_cfg["tracker"], track_conf, det_stride)
         for f, (db, ds) in r.det_samples.items():
             gtb = boxes.get(f, [])
-            ap_by[s.site].add(db, ds, gtb, op)
-            ap_by["all"].add(db, ds, gtb, op)
+            ap_by[s.site].add(db, ds, gtb, op, frame_wh=(s.width, s.height))
+            ap_by["all"].add(db, ds, gtb, op, frame_wh=(s.width, s.height))
         if r.frames != s.frames:
             msg = f"{sid}: decoded {r.frames} frames, expected {s.frames}"
             if strict:
@@ -133,7 +161,7 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
             entry["predictions"] = [{"id": p.id, "track": p.track_id, "start_s": round(p.start_s, 2), "end_s": round(p.end_s, 2),
                                      "dwell": p.dwell, "close": p.close_reason} for p in r.episodes]
             entry["outcome"] = {"tp": m.tp, "duplicates": m.duplicates, "neutral": m.neutral, "fp": m.fp, "missed": m.missed}
-            group = "unseen_sites" if s.site in split["unseen_sites"] else "seen_sites"
+            group = "unseen_sites" if s.site in unseen else "seen_sites"
             for key in (s.site, group, "all"):
                 matches_by[key].append(m)
                 dur_by[key] += s.duration_s
@@ -142,26 +170,36 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
                 f"dup={len(m.duplicates)} ({r.frames} frames, {r.wall_s:.0f}s)")
         per_seq[sid] = entry
     events = {k: summarize(_merge(v), dur_by[k], gt_by[k]) for k, v in matches_by.items()}
-    return {"candidate": {**candidate, "model_sha256_12": model_sha, "op_conf": op,
+    return {"candidate": {**candidate, "model_sha256_12": model_sha, "op_conf": op, "track_conf": track_conf,
                           "detector_info": detector.info.__dict__},
             "events": dict(sorted(events.items())), "detection": {k: v.result() for k, v in sorted(ap_by.items())},
             "per_sequence": per_seq, "wall_s": round(time.time() - t_all, 1)}
 
 
 def parse_candidate(spec: str) -> dict:
-    """name:model_path[:variant[:input_w]] e.g. tiny-coco:models/yolox_tiny.onnx:yolox_tiny"""
-    parts = spec.split(":")
+    """name:model_path[:variant[:input_w]][+option...] e.g. tiny-coco:models/yolox_tiny.onnx:yolox_tiny
+    options: +track_conf=0.1 (boxes handed to the tracker), +rejoin, +exclude (prediction-side zone corrections)"""
+    head, *opts = spec.split("+")
+    parts = head.split(":")
     name, model = parts[0], parts[1]
     variant = parts[2] if len(parts) > 2 else ("yolox_s" if "yolox_s" in model else "yolox_nano" if "nano" in model else "yolox_tiny")
-    c = {"name": name, "model": model, "variant": variant}
+    c: dict = {"name": name, "model": model, "variant": variant}
     if len(parts) > 3:
         c["input_size"] = [int(parts[3]), int(parts[3])]
+    for o in opts:
+        k, _, v = o.partition("=")
+        if k in ("rejoin", "exclude"):
+            c[k] = v.lower() not in ("0", "false", "no") if v else True
+        elif k in ("track_conf", "conf_threshold"):
+            c[k] = float(v)
+        else:
+            raise ValueError(f"unknown candidate option {k!r} in {spec!r}")
     return c
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=["train", "dev", "test"], required=True)
+    ap.add_argument("--split", choices=["train", "dev", "test", "test2"], required=True)
     ap.add_argument("--candidate", action="append", default=[], help="name:model_path[:variant[:input]] (dev/train only)")
     ap.add_argument("--final", action="store_true", help="required for --split test; uses configs/bench/final.yaml")
     ap.add_argument("--rerun-reason", default="")
@@ -170,23 +208,24 @@ def main() -> int:
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     edge_cfg = yaml.safe_load((ROOT / "configs" / "edge.yaml").read_text())
-    split = load_split()
-    ids = split["sequences"][args.split]
+    split, ids = _split_for(args.split)
+    final_set = FINAL_SETS.get(args.split)
     # provenance captured BEFORE the run (a commit made while an hour-long run is in progress must not be recorded)
     started, git_start, dirty = time.strftime("%Y-%m-%dT%H:%M:%S"), _git(), _dirty()
     zones_sha, zone_rules = _sha(CONFIG_DIR / "zones.yaml"), load_zones()["rules"]
-    if args.split == "test":
+    if final_set:
+        lock_path = _lock_path(args.split)
         if not args.final or args.candidate or args.ids:
-            print("the test split is measured only with --final (all candidates from configs/bench/final.yaml, all sequences)",
-                  file=sys.stderr)
+            print(f"the {args.split} split is measured only with --final (all candidates from configs/bench/{final_set[0]}, "
+                  "all sequences)", file=sys.stderr)
             return 2
-        final = yaml.safe_load((CONFIG_DIR / "final.yaml").read_text())
+        final = yaml.safe_load((CONFIG_DIR / final_set[0]).read_text())
         candidates = final["candidates"]
-        if LOCK.exists():
-            lock = json.loads(LOCK.read_text())
+        if lock_path.exists():
+            lock = json.loads(lock_path.read_text())
             if not args.rerun_reason:
-                print(f"test split already measured at {lock['runs'][0]['opened']} — refusing. Pass --rerun-reason to "
-                      f"measure again (it will be recorded in {_rel(LOCK)}).", file=sys.stderr)
+                print(f"{args.split} split already measured at {lock['runs'][0]['opened']} — refusing. Pass --rerun-reason to "
+                      f"measure again (it will be recorded in {_rel(lock_path)}).", file=sys.stderr)
                 return 3
         else:
             lock = {"policy": "the test split is measured once; every further run must give a reason", "runs": []}
@@ -197,10 +236,10 @@ def main() -> int:
             print("final measurement refused before touching the lock:\n  " + "\n  ".join(problems), file=sys.stderr)
             return 4
         lock["runs"].append({"opened": started, "git": git_start, "split_sha256_16": split["sha256_16"],
-                             "zones_sha12": zones_sha, "final_sha12": _sha(CONFIG_DIR / "final.yaml"),
+                             "zones_sha12": zones_sha, "final_sha12": _sha(CONFIG_DIR / final_set[0]),
                              "candidates": [c["name"] for c in candidates], "reason": args.rerun_reason or "first measurement"})
-        LOCK.parent.mkdir(parents=True, exist_ok=True)
-        LOCK.write_text(json.dumps(lock, indent=1, ensure_ascii=False))
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path.write_text(json.dumps(lock, indent=1, ensure_ascii=False))
     else:
         candidates = [parse_candidate(c) for c in args.candidate] or [parse_candidate("tiny-coco:models/yolox_tiny.onnx")]
         if args.ids:
@@ -210,11 +249,11 @@ def main() -> int:
     results = {}
     if args.out:
         path = Path(args.out)
-    elif args.split == "test":  # one file per final run: a rerun never overwrites an earlier run's result
+    elif final_set:  # one file per final run: a rerun never overwrites an earlier run's result
         used = {r.get("result_file") for r in lock["runs"][:-1]}
-        path = OUT_DIR / "raw" / "bench_test_final.json"
+        path = OUT_DIR / "raw" / final_set[1]
         if _rel(path) in used:
-            path = OUT_DIR / "raw" / f"bench_test_final_run{len(lock['runs'])}.json"
+            path = OUT_DIR / "raw" / final_set[1].replace(".json", f"_run{len(lock['runs'])}.json")
     else:
         path = OUT_DIR / "raw" / f"bench_{args.split}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -230,14 +269,14 @@ def main() -> int:
         return o
 
     for c in candidates:  # written after every candidate: a later crash cannot lose finished candidates
-        results[c["name"]] = evaluate(c, args.split, ids, args.det_stride, edge_cfg, strict=args.split == "test")
+        results[c["name"]] = evaluate(c, args.split, ids, args.det_stride, edge_cfg, strict=bool(final_set))
         write(complete=False)
     out = write(complete=True)
-    if args.split == "test":
-        lock = json.loads(LOCK.read_text())
+    if final_set:
+        lock = json.loads(lock_path.read_text())
         lock["runs"][-1]["completed"] = out["time"]
         lock["runs"][-1]["result_file"] = _rel(path)
-        LOCK.write_text(json.dumps(lock, indent=1, ensure_ascii=False))
+        lock_path.write_text(json.dumps(lock, indent=1, ensure_ascii=False))
     for name, r in results.items():
         a = r["events"].get("all", {})
         print(f"[bench] {name} {args.split}: P={a.get('precision')} R={a.get('recall')} F1={a.get('f1')} "

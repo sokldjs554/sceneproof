@@ -7,7 +7,11 @@
 #     unboxed — a detector would be "wrong" there for no fault of its own.
 #   * Unseen test sites (MOT16-02, MOT16-09, MOT20 station): on the FIRST FRAME only, without any ground truth
 #     overlay — the way an operator draws a zone when installing a camera.
-#   * mot16-04 is train-only (boxes for fine-tuning), so it has no zone.
+#   * mot16-04 is train-only (boxes for fine-tuning). Its zone was added later (first frame only) so that the
+#     tracking settings could be tuned on a crowded street without touching any held-out sequence.
+#   * Second held-out sites (MOT20-03, MOT20-05; configs/bench/split2.yaml): drawn on the FIRST FRAME before any
+#     model ran on them, with a coarse table of where the hand-labelled feet are (10x10 grid counts) to make sure
+#     people actually walk through the zone. No model output was looked at.
 # Rules are the product defaults (configs/edge.yaml): feet point inside for 0.3 s opens, outside for 0.8 s
 # closes, 5 s inside escalates to dwell, 1.5 s without a box closes as "track lost".
 rules:
@@ -52,3 +56,9 @@ sites:
       - zone_id: z-wet-floor
         name: "미끄럼 주의 표지 주변 바닥 (청소 중 통제 구역 가정)"
         polygon: [[0.12, 0.78], [0.32, 0.78], [0.34, 0.95], [0.10, 0.95]]
+  mot16-04-street:
+    description: "Pedestrian street at night, elevated camera (1920x1080, 30 fps) — train only, used to tune tracking"
+    zones:
+      - zone_id: z-roadway
+        name: "차도 (차량 통행 구역 가정)"
+        polygon: [[0.40, 0.15], [0.60, 0.15], [0.62, 0.60], [0.40, 0.60]]

@@ -43,7 +43,10 @@ def load_zones() -> dict:
     return yaml.safe_load((CONFIG_DIR / "zones.yaml").read_text())
 
 
-def zone_specs(site: str, zones_cfg: dict | None = None) -> list[ZoneSpec]:
+def zone_specs(site: str, zones_cfg: dict | None = None, *, exclude: bool = False, rejoin: bool = False) -> list[ZoneSpec]:
+    """exclude/rejoin are corrections for the PREDICTION side only. Ground truth always uses the plain zone: a real
+    person standing in an exclusion area is still an intrusion (the product missing it counts as a miss), and
+    hand-labelled track ids do not break, so there is nothing to rejoin."""
     z = zones_cfg or load_zones()
     rules = z["rules"]
     out = []
@@ -52,7 +55,9 @@ def zone_specs(site: str, zones_cfg: dict | None = None) -> list[ZoneSpec]:
                             dwell_seconds=float(zd.get("dwell_seconds", rules["dwell_seconds"])),
                             lost_grace_seconds=float(rules["lost_grace_seconds"]),
                             entry_confirm_seconds=float(rules["entry_confirm_seconds"]),
-                            exit_confirm_seconds=float(rules["exit_confirm_seconds"])))
+                            exit_confirm_seconds=float(rules["exit_confirm_seconds"]),
+                            exclude=[[tuple(p) for p in poly] for poly in zd.get("exclude", [])] if exclude else [],
+                            rejoin=rejoin, rejoin_dist_rel=float(rules.get("rejoin_dist_rel", 1.0))))
     return out
 
 
@@ -158,7 +163,9 @@ def run_analyzer(seq: Sequence, specs: list[ZoneSpec], detector, tracker_cfg: di
 
     The detector should be built with a LOW conf threshold (e.g. 0.05) so that det_samples serve the AP
     evaluation; boxes below ``conf_threshold`` are dropped before tracking, which is exactly what the product
-    does (greedy NMS on boxes above a threshold does not depend on boxes below it)."""
+    does with its detector threshold (greedy NMS on boxes above a threshold does not depend on boxes below it).
+    With conf_threshold <= the tracker's low_thresh, ByteTrack's second association (low-score boxes extend
+    existing tracks, never start one) sees every box it was designed for."""
     cap = cv2.VideoCapture(str(seq.video))
     fps = seq.fps
     tp = TrackerParams(tracker_cfg["track_thresh"], tracker_cfg["low_thresh"], tracker_cfg["new_track_thresh"],

@@ -118,16 +118,22 @@ def test_agreement_identical_and_disjoint():
 
 def test_frozen_split_hash_and_no_group_leak():
     from sceneproof.eval.bench.data import load_sources
-    from sceneproof.eval.bench.split import load_split
+    from sceneproof.eval.bench.split import load_split, load_split2
 
-    s = load_split()  # raises if the frozen file was edited
+    s, s2 = load_split(), load_split2()  # raise if a frozen file was edited
+    assert s2["after_split_sha256_16"] == s["sha256_16"]
     where = {sid: part for part, ids in s["sequences"].items() for sid in ids}
+    second = {sid for ids in s2["sequences"].values() for sid in ids}
+    assert second.isdisjoint(where), "a second held-out sequence was already in the first split"
+    where.update({sid: "test2" for sid in second})
     groups: dict[str, set] = {}
     for seq in load_sources()["sequences"]:
-        groups.setdefault(seq["group"], set()).add(where[seq["id"]])
+        groups.setdefault(seq["group"], set()).add(where[seq["id"]])  # every source sequence is in exactly one split
     assert all(len(parts) == 1 for parts in groups.values()), "a group is split across train/dev/test"
+    seen_sites = {seq["site"] for seq in load_sources()["sequences"] if where[seq["id"]] in ("train", "dev", "test")}
     assert set(s["unseen_sites"]).isdisjoint({seq["site"] for seq in load_sources()["sequences"]
                                               if where[seq["id"]] in ("train", "dev")})
+    assert set(s2["unseen_sites"]).isdisjoint(seen_sites)
 
 
 def test_ap_ignore_region_can_differ_between_iou_thresholds():
@@ -212,3 +218,40 @@ def test_augment_clips_targets_to_the_image_not_the_padding():
         ys, xs = np.where(canvas[..., 0] == 0)
         for x0, y0, x1, y1 in b:
             assert xs.min() - 1 <= x0 and x1 <= xs.max() + 1 and ys.min() - 1 <= y0 and y1 <= ys.max() + 1
+
+
+def test_candidate_options_and_prediction_only_corrections():
+    from sceneproof.eval.bench.episodes import zone_specs
+    from sceneproof.eval.bench.run import parse_candidate
+
+    c = parse_candidate("t:models/yolox_tiny.onnx+track_conf=0.1+rejoin+exclude=0")
+    assert c == {"name": "t", "model": "models/yolox_tiny.onnx", "variant": "yolox_tiny", "track_conf": 0.1,
+                 "rejoin": True, "exclude": False}
+    with pytest.raises(ValueError):
+        parse_candidate("t:m.onnx+typo")
+    cfg = {"rules": {"dwell_seconds": 5, "lost_grace_seconds": 1.5, "entry_confirm_seconds": 0.3, "exit_confirm_seconds": 0.8},
+           "sites": {"s": {"zones": [{"zone_id": "z", "name": "z", "polygon": [[0, 0], [1, 0], [1, 1]],
+                                      "exclude": [[[0.1, 0.1], [0.2, 0.1], [0.2, 0.2]]]}]}}}
+    gt, pred = zone_specs("s", cfg)[0], zone_specs("s", cfg, exclude=True, rejoin=True)[0]
+    assert gt.exclude == [] and not gt.rejoin  # ground truth always uses the plain zone
+    assert len(pred.exclude) == 1 and pred.rejoin
+
+
+def test_match_assignment_is_optimal_not_greedy():
+    """p1 overlaps g1 longest but also qualifies for g2; p2 qualifies only for g1. Greedy would give p1-g1 and leave
+    g2 missed + p2 duplicate; the optimal assignment matches both people."""
+    gt = [_ep("g1", 2.0, 8.0, "intrusion", foot_x=50), _ep("g2", 2.0, 6.0, "intrusion", track=2, foot_x=56)]
+    preds = [_ep("p1", 2.0, 8.0, foot_x=53), _ep("p2", 2.0, 4.0, foot_x=45)]
+    m = match(preds, gt)
+    assert sorted(m.tp) == [("p1", "g2"), ("p2", "g1")] and not m.missed and not m.duplicates
+
+
+def test_ap_clips_ground_truth_to_the_frame():
+    """A person cut off at the bottom edge: MOT's box runs past the frame, the detector's box stops at the edge.
+    Unclipped, IoU is 0.4 (a miss at IoU 0.5); clipped to the frame it is a hit."""
+    gt = [GTBox(1, (10, 60, 30, 160))]  # frame is 100 px high: 60% of the box is outside
+    det = np.array([[10, 60, 30, 100]], np.float32)
+    plain, clipped = APAccumulator(), APAccumulator()
+    plain.add(det, np.array([0.9], np.float32), gt)
+    clipped.add(det, np.array([0.9], np.float32), gt, frame_wh=(100, 100))
+    assert plain.result()["ap50"] == pytest.approx(0.0) and clipped.result()["ap50"] == pytest.approx(1.0)

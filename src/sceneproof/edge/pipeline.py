@@ -24,6 +24,7 @@ from .evidence import EvidenceWriter
 from .frames import FrameQueue, FrameRing, StageTimer
 from .sources import SourceState, VideoSource, open_source
 from .tracker import ByteTracker, TrackerParams
+from .zone_proto import fill_pb
 from .zones import CloseReason, Episode, FrameMeta, Transition, ZoneMonitor
 
 log = logging.getLogger(__name__)
@@ -245,11 +246,7 @@ class CameraPipeline:
         if src.last_frame_wall_ts:
             cs.last_frame_ts.CopyFrom(ts(src.last_frame_wall_ts))
         for z in self.monitor.zones:
-            zs = cs.zones.add(zone_id=z.zone_id, name=z.name, entry_confirm_frames=z.entry_confirm_frames,
-                              exit_confirm_frames=z.exit_confirm_frames, dwell_seconds=z.dwell_seconds,
-                              lost_grace_seconds=z.lost_grace_seconds)
-            for x, y in z.polygon:
-                zs.polygon.add(x=x, y=y)
+            fill_pb(z, cs.zones.add())
         return cs
 
 

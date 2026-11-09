@@ -146,3 +146,64 @@ def test_box_clipped_at_frame_bottom_holds_state():
     for i in range(40, 43):  # clearly outside now
         ev += m.update([T(1, 10, 100)], meta(i))
     assert [e.transition for e in ev] == [Transition.CLOSED]
+
+
+def _run(m, frames):
+    ev = []
+    for i, tracks in frames:
+        ev += m.update(tracks, meta(i))
+    return ev
+
+
+def test_rejoin_continues_episode_when_tracker_starts_a_new_id():
+    """Crowd case: the tracker loses person 1 and a moment later starts track 7 for the same person nearby."""
+    frames = [(i, [T(1, 100, 100)]) for i in range(10)] + [(i, []) for i in range(10, 13)] \
+        + [(i, [T(7, 104, 102)]) for i in range(13, 25)] + [(i, [T(7, 10, 100)]) for i in range(25, 30)]
+    m = ZoneMonitor([zone(rejoin=True)], "cam")
+    ev = _run(m, frames)
+    assert [e.transition for e in ev] == [Transition.OPENED, Transition.DWELL, Transition.CLOSED]
+    ep = ev[0].episode
+    assert ep.track_id == 1 and ep.rejoined_track_ids == [7] and ep.close_reason == CloseReason.EXITED
+    # without rejoin the same input is two episodes (the split the benchmark counted as a duplicate)
+    ev2 = _run(ZoneMonitor([zone()], "cam"), frames)
+    assert [e.transition for e in ev2].count(Transition.OPENED) == 2
+
+
+def test_rejoin_ignores_tracks_that_existed_before_the_loss_or_are_far():
+    # track 2 was already visible next to person 1 -> a different person, must not inherit the episode
+    frames = [(i, [T(1, 100, 100), T(2, 110, 100)]) for i in range(10)] + [(i, [T(2, 110, 100)]) for i in range(10, 20)]
+    m = ZoneMonitor([zone(rejoin=True)], "cam")
+    ev = _run(m, frames)
+    ep1 = next(e.episode for e in ev if e.transition == Transition.OPENED and e.episode.track_id == 1)
+    assert ep1.closed and ep1.close_reason == CloseReason.TRACK_LOST and ep1.rejoined_track_ids == []
+    # a new track far away (> 1 box height from where person 1 vanished) opens its own episode
+    frames = [(i, [T(1, 60, 100)]) for i in range(10)] + [(i, [T(9, 140, 140)]) for i in range(10, 20)]
+    ev = _run(ZoneMonitor([zone(rejoin=True)], "cam"), frames)
+    assert [e.episode.track_id for e in ev if e.transition == Transition.OPENED] == [1, 9]
+
+
+def test_exclusion_area_blocks_opening_but_holds_an_open_episode():
+    exclude = [[(0.55, 0.40), (0.70, 0.40), (0.70, 0.60), (0.55, 0.60)]]  # e.g. a mannequin inside the zone
+    m = ZoneMonitor([zone(exclude=exclude)], "cam")
+    ev = _run(m, [(i, [T(5, 125, 100)]) for i in range(30)])  # standing still on the mannequin spot
+    assert ev == []
+    # a real person who entered elsewhere and walks across the spot keeps one open episode
+    m = ZoneMonitor([zone(exclude=exclude)], "cam")
+    frames = [(i, [T(1, 80, 100)]) for i in range(5)] + [(i, [T(1, 125, 100)]) for i in range(5, 15)] \
+        + [(i, [T(1, 80, 100)]) for i in range(15, 18)]
+    ev = _run(m, frames)
+    assert [e.transition for e in ev] == [Transition.OPENED, Transition.DWELL]
+    assert not ev[0].episode.closed
+
+
+def test_zone_settings_survive_the_command_round_trip():
+    """Zones sent from the server (START_CAMERA) keep time-based debounce, exclusion areas and rejoin settings."""
+    from sceneproof.edge.zone_proto import fill_pb, from_pb
+    from sceneproof.proto.sceneproof.v1 import sceneproof_pb2 as pb
+
+    z = zone(entry_confirm_seconds=0.3, exit_confirm_seconds=0.8, rejoin=True, rejoin_dist_rel=0.8,
+             exclude=[[(0.5, 0.5), (0.6, 0.5), (0.6, 0.6)]])
+    back = from_pb(pb.ZoneSpec.FromString(fill_pb(z, pb.ZoneSpec()).SerializeToString()))
+    assert back.entry_confirm_seconds == 0.3 and back.exit_confirm_seconds == 0.8
+    assert back.rejoin and abs(back.rejoin_dist_rel - 0.8) < 1e-6 and len(back.exclude) == 1
+    assert [tuple(round(v, 6) for v in p) for p in back.exclude[0]] == [(0.5, 0.5), (0.6, 0.5), (0.6, 0.6)]

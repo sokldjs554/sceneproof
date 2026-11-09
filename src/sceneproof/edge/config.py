@@ -23,6 +23,11 @@ class ZoneConfig(BaseModel):
     lost_grace_seconds: float = 1.5
     entry_confirm_seconds: float | None = None
     exit_confirm_seconds: float | None = None
+    # person-shaped objects inside the zone (mannequin, signboard): feet there never open an episode
+    exclude: list[list[tuple[float, float]]] = Field(default_factory=list)
+    # continue an episode when the tracker starts a new id for the same person (crowds, occlusion)
+    rejoin: bool = False
+    rejoin_dist_rel: float = Field(default=1.0, gt=0)
 
     @field_validator("polygon")
     @classmethod
@@ -32,10 +37,21 @@ class ZoneConfig(BaseModel):
                 raise ValueError("polygon points must be normalized to [0,1]")
         return v
 
+    @field_validator("exclude")
+    @classmethod
+    def _norm_exclude(cls, v: list[list[tuple[float, float]]]) -> list[list[tuple[float, float]]]:
+        for poly in v:
+            if len(poly) < 3:
+                raise ValueError("an exclusion polygon needs at least 3 points")
+            cls._norm(poly)
+        return v
+
     def to_spec(self) -> ZoneSpec:
         return ZoneSpec(self.zone_id, self.name, [tuple(p) for p in self.polygon], self.entry_confirm_frames,
                         self.exit_confirm_frames, self.dwell_seconds, self.lost_grace_seconds,
-                        self.entry_confirm_seconds, self.exit_confirm_seconds)
+                        self.entry_confirm_seconds, self.exit_confirm_seconds,
+                        exclude=[[tuple(p) for p in poly] for poly in self.exclude],
+                        rejoin=self.rejoin, rejoin_dist_rel=self.rejoin_dist_rel)
 
 
 class CameraConfig(BaseModel):

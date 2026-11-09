@@ -17,6 +17,7 @@ from .config import CameraConfig, EdgeConfig
 from .detector import build_detector
 from .events import EventSink, GatewaySink, JsonlSink, ts
 from .pipeline import CameraPipeline, process_cpu_rss
+from .zone_proto import fill_pb, from_pb
 from .zones import CloseReason, ZoneSpec
 
 log = logging.getLogger(__name__)
@@ -93,11 +94,7 @@ class EdgeAgent:
                 cs = ds.cameras.add(camera_id=cam.camera_id, source=cam.source, name=cam.name,
                                     state=pb.CAMERA_STATE_STOPPED)
                 for z in cam.zones:
-                    zs = cs.zones.add(zone_id=z.zone_id, name=z.name, entry_confirm_frames=z.entry_confirm_frames,
-                                      exit_confirm_frames=z.exit_confirm_frames, dwell_seconds=z.dwell_seconds,
-                                      lost_grace_seconds=z.lost_grace_seconds)
-                    for x, y in z.polygon:
-                        zs.polygon.add(x=x, y=y)
+                    fill_pb(z.to_spec(), cs.zones.add())
         for cid, p in running.items():
             if self.cfg.camera(cid) is None:
                 ds.cameras.append(p.camera_status())
@@ -139,9 +136,7 @@ class EdgeAgent:
             if cmd.type == pb.COMMAND_TYPE_START_CAMERA:
                 zones = None
                 if cmd.zones:
-                    zones = [ZoneSpec(z.zone_id, z.name, [(p.x, p.y) for p in z.polygon], z.entry_confirm_frames or 3,
-                                      z.exit_confirm_frames or 5, z.dwell_seconds or 5.0, z.lost_grace_seconds or 1.5)
-                             for z in cmd.zones]
+                    zones = [from_pb(z) for z in cmd.zones]
                 res.message = self.start_camera(cmd.camera_id, cmd.source or None, zones)
                 res.ok = True
             elif cmd.type == pb.COMMAND_TYPE_STOP_CAMERA:

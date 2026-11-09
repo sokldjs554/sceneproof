@@ -72,9 +72,16 @@ def command_to_pb(cmd: dict) -> pb.Command:
                          entry_confirm_frames=int(z.get("entry_confirm_frames", 3)),
                          exit_confirm_frames=int(z.get("exit_confirm_frames", 5)),
                          dwell_seconds=float(z.get("dwell_seconds", 5.0)),
-                         lost_grace_seconds=float(z.get("lost_grace_seconds", 1.5)))
+                         lost_grace_seconds=float(z.get("lost_grace_seconds", 1.5)),
+                         entry_confirm_seconds=float(z.get("entry_confirm_seconds") or 0.0),
+                         exit_confirm_seconds=float(z.get("exit_confirm_seconds") or 0.0),
+                         rejoin=bool(z.get("rejoin", False)), rejoin_dist_rel=float(z.get("rejoin_dist_rel", 1.0)))
         for x, y in z["polygon"]:
             zs.polygon.add(x=float(x), y=float(y))
+        for poly in z.get("exclude", []) or []:
+            ex = zs.exclude.add()
+            for x, y in poly:
+                ex.points.add(x=float(x), y=float(y))
     return c
 
 

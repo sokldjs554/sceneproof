@@ -7,14 +7,13 @@ a box, the median distance between the two feet points is at most ``max_foot_dis
 Condition (3) is new: in crowded scenes two different people are often in the zone at the same time, and a
 time-only rule would credit a detection of person A to the ground truth of person B.
 
-Outcome per prediction: tp (the pair with the largest time overlap, then the smallest feet distance, wins; one
-prediction per GT intrusion), duplicate (another prediction of an already matched GT intrusion — usually a track
-split), neutral (matches a boundary_pass or ignore episode), fp. GT intrusions without a match are misses.
+Outcome per prediction: tp (one prediction per GT intrusion), duplicate (another prediction of an already matched
+GT intrusion — usually a track split), neutral (matches a boundary_pass or ignore episode), fp. GT intrusions
+without a match are misses.
 
-The assignment is greedy, not a global optimum: when two people walk side by side and both predictions qualify for
-both GTs, a greedy pick can leave one pair unmatched that an optimal assignment would keep. The feet-distance gate
-(0.5 x GT height) makes such ties rare outside dense crowds. How often it happened in the reported results was
-not measured (result files keep episode times, not boxes); a crowded site's duplicate/miss counts can include it.
+The tp assignment is optimal (Hungarian): it maximises the number of matched pairs first, then the total time
+overlap, then closeness of the feet. A greedy "best pair first" pick can leave a pair unmatched when two people
+walk side by side and both predictions qualify for both people; the optimal assignment does not.
 """
 
 from __future__ import annotations
@@ -22,6 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 from .episodes import Ep
 
@@ -93,12 +93,17 @@ def match(preds: list[Ep], gts: list[Ep], min_overlap_s: float = 0.5, tol_s: flo
             if d is None or d > max_foot_dist_rel:
                 continue
             cands.append((ov, -d, pi, gi))
-    cands.sort(reverse=True)
     pred_done: dict[int, str] = {}
     gt_hit: dict[int, int] = {}
-    for _ov, _nd, pi, gi in cands:  # greedy: best overlap first, one TP per GT
-        if pi in pred_done or gi in gt_hit:
-            continue
+    pairs: list[tuple[int, int]] = []
+    if cands:
+        # weight: a match always beats no match (1e6), then more time overlap (seconds), then closer feet
+        w = np.zeros((len(preds), len(intr)))
+        for ov, nd, pi, gi in cands:
+            w[pi, gi] = 1e6 + 1e3 * ov + nd
+        rows, cols = linear_sum_assignment(w, maximize=True)
+        pairs = sorted((int(r), int(c)) for r, c in zip(rows, cols, strict=True) if w[r, c] > 0)
+    for pi, gi in pairs:  # one TP per GT
         gt_hit[gi] = pi
         pred_done[pi] = "tp"
         p, g = preds[pi], intr[gi]
@@ -107,7 +112,7 @@ def match(preds: list[Ep], gts: list[Ep], min_overlap_s: float = 0.5, tol_s: flo
         m.end_err_s.append(p.end_s - g.end_s)
         m.dwell_total += 1
         m.dwell_agree += int(p.dwell == g.dwell)
-    for _ov, _nd, pi, gi in cands:  # remaining predictions on an already matched GT intrusion
+    for _ov, _nd, pi, gi in sorted(cands, reverse=True):  # remaining predictions on an already matched GT intrusion
         if pi in pred_done:
             continue
         pred_done[pi] = "dup"

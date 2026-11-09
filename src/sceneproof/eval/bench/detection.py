@@ -37,14 +37,26 @@ def _ioa(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return inter / np.maximum(aa[:, None], 1e-9)
 
 
-def split_gt(boxes: list[GTBox]) -> tuple[np.ndarray, np.ndarray]:
+def split_gt(boxes: list[GTBox], frame_wh: tuple[int, int] | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """(scored person boxes, ignore boxes). With frame_wh, boxes are clipped to the frame: MOT draws the whole body of
+    a person cut off by the frame edge, but a detector can only box what is in the picture."""
     pos, ign = [], []
     for b in boxes:
         if b.label == "person" and b.consider and b.visibility >= 0.2:
             pos.append(b.xyxy)
         else:
             ign.append(b.xyxy)
-    return np.array(pos, np.float32).reshape(-1, 4), np.array(ign, np.float32).reshape(-1, 4)
+    pos_a, ign_a = np.array(pos, np.float32).reshape(-1, 4), np.array(ign, np.float32).reshape(-1, 4)
+    if frame_wh is not None:
+        w, h = frame_wh
+        out = []
+        for a in (pos_a, ign_a):
+            a = a.copy()
+            a[:, [0, 2]] = a[:, [0, 2]].clip(0, w)
+            a[:, [1, 3]] = a[:, [1, 3]].clip(0, h)
+            out.append(a[(a[:, 2] - a[:, 0] >= 1) & (a[:, 3] - a[:, 1] >= 1)])
+        pos_a, ign_a = out
+    return pos_a, ign_a
 
 
 class APAccumulator:
@@ -63,8 +75,9 @@ class APAccumulator:
         self.bucket_gt = {name: 0 for *_, name in HEIGHT_BUCKETS}
         self.bucket_hit = {name: 0 for *_, name in HEIGHT_BUCKETS}
 
-    def add(self, det_boxes: np.ndarray, det_scores: np.ndarray, gt: list[GTBox], op_thresh: float = 0.4) -> None:
-        pos, ign = split_gt(gt)
+    def add(self, det_boxes: np.ndarray, det_scores: np.ndarray, gt: list[GTBox], op_thresh: float = 0.4,
+            frame_wh: tuple[int, int] | None = None) -> None:
+        pos, ign = split_gt(gt, frame_wh)
         self.frames += 1
         self.n_gt += len(pos)
         order = np.argsort(-det_scores)
