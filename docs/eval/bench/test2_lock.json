@@ -1,0 +1,20 @@
+{
+ "policy": "the test split is measured once; every further run must give a reason",
+ "runs": [
+  {
+   "opened": "2026-11-09T16:33:42",
+   "git": "e7273c3",
+   "split_sha256_16": "9017b3da7ba7b19b",
+   "zones_sha12": "67aef6119f7d",
+   "final_sha12": "dd6619c133d4",
+   "candidates": [
+    "tiny-coco",
+    "tiny-coco-rj",
+    "tiny-ft",
+    "tiny-ft2",
+    "tiny-ft2-rj"
+   ],
+   "reason": "first measurement"
+  }
+ ]
+}
