@@ -54,6 +54,15 @@ class ZoneConfig(BaseModel):
                         rejoin=self.rejoin, rejoin_dist_rel=self.rejoin_dist_rel)
 
 
+class TrackerConfig(BaseModel):
+    track_thresh: float = 0.5
+    low_thresh: float = 0.1
+    new_track_thresh: float = 0.6
+    match_thresh: float = 0.8
+    track_buffer_seconds: float = 1.5
+    fuse_score: bool = True
+
+
 class CameraConfig(BaseModel):
     camera_id: str
     name: str = ""
@@ -66,6 +75,9 @@ class CameraConfig(BaseModel):
     max_width: int = 0
     zones: list[ZoneConfig] = Field(default_factory=list)
     split: str = "dev"  # dev | eval  (documentation only; the evaluator enforces the split)
+    # per-camera tracker settings (replace the global `tracker:` block for this camera), e.g. the crowded-site
+    # profile in configs/edge.yaml: fewer split events in dense crowds at the cost of a few more misses
+    tracker: TrackerConfig | None = None
 
 
 class DetectorConfig(BaseModel):
@@ -79,15 +91,6 @@ class DetectorConfig(BaseModel):
     providers: list[Any] | None = None
     device: str = "cpu"
     input_size: list[int] | None = None
-
-
-class TrackerConfig(BaseModel):
-    track_thresh: float = 0.5
-    low_thresh: float = 0.1
-    new_track_thresh: float = 0.6
-    match_thresh: float = 0.8
-    track_buffer_seconds: float = 1.5
-    fuse_score: bool = True
 
 
 class PipelineConfig(BaseModel):

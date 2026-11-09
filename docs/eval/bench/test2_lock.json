@@ -18,5 +18,14 @@
    "completed": "2026-11-09T16:58:52",
    "result_file": "docs/eval/bench/raw/bench_test2_final.json"
   }
+ ],
+ "reuse": [
+  {
+   "time": "2026-11-09T18:00:17",
+   "git": "4e3712d",
+   "what": "replay of cached tiny-ft2 detections with tracker / rejoin settings (no detector re-run)",
+   "reason": "after the one measurement showed loose rejoin adds false alarms in dense crowds, tracker settings were tuned on OTHER data (bench_tracker_sweep.json: DEV + MOT16-04 + first final split's MOT sequences); this replay checks the chosen settings here. The first two rows reproduce the measured candidates exactly. Not a held-out number.",
+   "result_file": "docs/eval/bench/raw/bench_test2_tracker_replay.json"
+  }
  ]
 }

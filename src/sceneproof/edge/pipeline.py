@@ -56,9 +56,9 @@ class CameraPipeline:
         self.queue = FrameQueue(pc.queue_capacity, lossless=not cam.realtime)
         self.ring = FrameRing(pc.ring_seconds, pc.ring_max_mb << 20, pc.ring_max_side, pc.ring_jpeg_quality)
         self.evidence = EvidenceWriter(cfg.evidence_root, pc.pre_roll_s, pc.post_roll_s, pc.clip_fps, pc.clip_max_frames)
-        tp = TrackerParams(cfg.tracker.track_thresh, cfg.tracker.low_thresh, cfg.tracker.new_track_thresh,
-                           cfg.tracker.match_thresh, track_buffer=max(5, int(cfg.tracker.track_buffer_seconds * cam.fps_hint)),
-                           fuse_score=cfg.tracker.fuse_score)
+        tc = cam.tracker or cfg.tracker
+        tp = TrackerParams(tc.track_thresh, tc.low_thresh, tc.new_track_thresh, tc.match_thresh,
+                           track_buffer=max(5, int(tc.track_buffer_seconds * cam.fps_hint)), fuse_score=tc.fuse_score)
         self.tracker = ByteTracker(tp)
         zones = zones_override if zones_override is not None else [z.to_spec() for z in cam.zones]
         self.monitor = ZoneMonitor(zones, cam.camera_id, pc.trajectory_stride)

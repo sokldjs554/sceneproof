@@ -23,6 +23,12 @@ tracker:
   match_thresh: 0.8
   track_buffer_seconds: 1.5
   fuse_score: true
+# Crowded sites: a camera may carry its own `tracker:` block. Measured on crowded tuning videos (benchmark
+# docs/eval/bench/README.md §6): new_track_thresh 0.7 + track_buffer_seconds 3.0 cut split events (duplicates) by
+# ~40% but missed ~1% more entries. The default above keeps misses lowest (safety first).
+#   cameras:
+#     - camera_id: cam-station
+#       tracker: { track_thresh: 0.5, low_thresh: 0.1, new_track_thresh: 0.7, match_thresh: 0.8, track_buffer_seconds: 3.0 }
 
 pipeline:
   source_backend: auto         # auto | gstreamer | opencv

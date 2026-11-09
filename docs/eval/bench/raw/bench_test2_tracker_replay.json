@@ -1,0 +1,107 @@
+{
+ "time": "2026-11-09T18:00:17",
+ "git": "4e3712d",
+ "model": "models/finetune/yolox_tiny_bench_v2/best.onnx",
+ "model_sha256_12": "3042ef279eef",
+ "note": "SECOND USE of the second held-out set (after its one measurement): tracker settings were chosen on tuning data (bench_tracker_sweep.json) before this replay; the first two rows reproduce the measured candidates exactly",
+ "groups": {
+  "test2": [
+   "mot20-03",
+   "mot20-05"
+  ]
+ },
+ "results": {
+  "current (measured as tiny-ft2)": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "test2": {
+     "gt": 503,
+     "tp": 488,
+     "missed": 15,
+     "fp": 5,
+     "duplicates": 123,
+     "rejoins": 0
+    }
+   }
+  },
+  "rejoin_loose (measured as tiny-ft2-rj)": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    },
+    "rejoin": true,
+    "rejoin_strict": false,
+    "rejoin_dist": 1.0
+   },
+   "groups": {
+    "test2": {
+     "gt": 503,
+     "tp": 482,
+     "missed": 21,
+     "fp": 26,
+     "duplicates": 75,
+     "rejoins": 337
+    }
+   }
+  },
+  "rejoin_strict": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    },
+    "rejoin": true
+   },
+   "groups": {
+    "test2": {
+     "gt": 503,
+     "tp": 488,
+     "missed": 15,
+     "fp": 5,
+     "duplicates": 123,
+     "rejoins": 0
+    }
+   }
+  },
+  "new_track_0.7+buffer_3s": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.7,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 3.0,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "test2": {
+     "gt": 503,
+     "tp": 484,
+     "missed": 19,
+     "fp": 3,
+     "duplicates": 79,
+     "rejoins": 0
+    }
+   }
+  }
+ }
+}

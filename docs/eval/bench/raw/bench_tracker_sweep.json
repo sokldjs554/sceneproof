@@ -1,0 +1,337 @@
+{
+ "time": "2026-11-09T17:59:45",
+ "git": "4e3712d",
+ "model": "models/finetune/yolox_tiny_bench_v2/best.onnx",
+ "model_sha256_12": "3042ef279eef",
+ "note": "tuning data only: DEV split + MOT16-04 (train) + the first final split's MOT sequences (already measured and reported; reused here for tuning, so they are no longer held out)",
+ "groups": {
+  "crowd": [
+   "mot16-04",
+   "mot20-01",
+   "mot20-02",
+   "mot16-02",
+   "mot16-09"
+  ],
+  "dev": [
+   "caviar-lobby-browse3",
+   "caviar-lobby-fight-run-away1",
+   "caviar-lobby-meet-walk-split",
+   "caviar-lobby-meet-walk-together2",
+   "caviar-mall-cor-one-shop-one-wait2",
+   "caviar-mall-cor-one-stop-move-enter1",
+   "caviar-mall-cor-shop-assistant2",
+   "caviar-mall-cor-two-leave-shop1",
+   "caviar-mall-front-one-shop-one-wait2",
+   "caviar-mall-front-one-stop-move-enter1",
+   "caviar-mall-front-shop-assistant2",
+   "caviar-mall-front-two-leave-shop1"
+  ]
+ },
+ "results": {
+  "current": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 157,
+     "missed": 4,
+     "fp": 5,
+     "duplicates": 49,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 8,
+     "rejoins": 0
+    }
+   }
+  },
+  "new_track_0.65": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.65,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 156,
+     "missed": 5,
+     "fp": 5,
+     "duplicates": 37,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 6,
+     "rejoins": 0
+    }
+   }
+  },
+  "new_track_0.7": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.7,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 153,
+     "missed": 8,
+     "fp": 4,
+     "duplicates": 28,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 6,
+     "rejoins": 0
+    }
+   }
+  },
+  "new_track_0.7+buffer_3s": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.7,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 3.0,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 155,
+     "missed": 6,
+     "fp": 4,
+     "duplicates": 29,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 6,
+     "rejoins": 0
+    }
+   }
+  },
+  "buffer_3s": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 3.0,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 157,
+     "missed": 4,
+     "fp": 6,
+     "duplicates": 50,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 8,
+     "rejoins": 0
+    }
+   }
+  },
+  "match_0.9": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.9,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    }
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 156,
+     "missed": 5,
+     "fp": 10,
+     "duplicates": 49,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 7,
+     "rejoins": 0
+    }
+   }
+  },
+  "track_conf_0.3": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    },
+    "track_conf": 0.3
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 155,
+     "missed": 6,
+     "fp": 4,
+     "duplicates": 52,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 8,
+     "rejoins": 0
+    }
+   }
+  },
+  "rejoin_loose": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    },
+    "rejoin": true,
+    "rejoin_strict": false
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 156,
+     "missed": 5,
+     "fp": 9,
+     "duplicates": 38,
+     "rejoins": 113
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 5,
+     "rejoins": 4
+    }
+   }
+  },
+  "rejoin_strict": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.6,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 1.5,
+     "fuse_score": true
+    },
+    "rejoin": true
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 157,
+     "missed": 4,
+     "fp": 5,
+     "duplicates": 49,
+     "rejoins": 0
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 6,
+     "rejoins": 3
+    }
+   }
+  },
+  "new_track_0.7+buffer_3s+rejoin_strict": {
+   "settings": {
+    "tracker": {
+     "track_thresh": 0.5,
+     "low_thresh": 0.1,
+     "new_track_thresh": 0.7,
+     "match_thresh": 0.8,
+     "track_buffer_seconds": 3.0,
+     "fuse_score": true
+    },
+    "rejoin": true
+   },
+   "groups": {
+    "crowd": {
+     "gt": 161,
+     "tp": 155,
+     "missed": 6,
+     "fp": 4,
+     "duplicates": 28,
+     "rejoins": 1
+    },
+    "dev": {
+     "gt": 70,
+     "tp": 64,
+     "missed": 6,
+     "fp": 1,
+     "duplicates": 6,
+     "rejoins": 0
+    }
+   }
+  }
+ }
+}
