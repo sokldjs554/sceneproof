@@ -114,6 +114,60 @@ window.BENCH_ZONES = {
      ]
     }
    ]
+  },
+  "mot16-09-lowangle": {
+   "description": "Pedestrian street in front of shops, low camera (1920x1080, 30 fps) — unseen site",
+   "zones": [
+    {
+     "zone_id": "z-shop-entrance",
+     "name": "상점 입구 앞 바닥 (출입 통제 구역 가정)",
+     "polygon": [
+      [
+       0.6,
+       0.58
+      ],
+      [
+       0.82,
+       0.58
+      ],
+      [
+       0.84,
+       0.7
+      ],
+      [
+       0.58,
+       0.7
+      ]
+     ]
+    }
+   ]
+  },
+  "mot20-station": {
+   "description": "Crowded indoor train station, elevated camera (1920x1080, 25 fps) — unseen site",
+   "zones": [
+    {
+     "zone_id": "z-wet-floor",
+     "name": "미끄럼 주의 표지 주변 바닥 (청소 중 통제 구역 가정)",
+     "polygon": [
+      [
+       0.12,
+       0.78
+      ],
+      [
+       0.32,
+       0.78
+      ],
+      [
+       0.34,
+       0.95
+      ],
+      [
+       0.1,
+       0.95
+      ]
+     ]
+    }
+   ]
   }
  }
 };
