@@ -1,0 +1,12 @@
+{
+ "current": {},
+ "new_track_0.65": {"new_track_thresh": 0.65},
+ "new_track_0.7": {"new_track_thresh": 0.7},
+ "new_track_0.7+buffer_3s": {"new_track_thresh": 0.7, "track_buffer_seconds": 3.0},
+ "buffer_3s": {"track_buffer_seconds": 3.0},
+ "match_0.9": {"match_thresh": 0.9},
+ "track_conf_0.3": {"track_conf": 0.3},
+ "rejoin_loose": {"rejoin": true, "rejoin_strict": false},
+ "rejoin_strict": {"rejoin": true},
+ "new_track_0.7+buffer_3s+rejoin_strict": {"new_track_thresh": 0.7, "track_buffer_seconds": 3.0, "rejoin": true}
+}

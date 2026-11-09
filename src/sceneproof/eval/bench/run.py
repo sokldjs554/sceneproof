@@ -123,6 +123,8 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
     # boxes handed to the tracker: the operating threshold (old behaviour) or lower, so that ByteTrack's
     # low-score association can keep people whose score dips in a crowd
     track_conf = float(candidate.get("track_conf", op))
+    tracker_cfg = {**edge_cfg["tracker"], **{k: candidate[k] for k in ("new_track_thresh", "track_buffer_seconds",
+                                                                      "match_thresh", "track_thresh") if k in candidate}}
     detector = build_detector(det_cfg)
     per_seq, matches_by, ap_by = {}, defaultdict(list), defaultdict(APAccumulator)
     dur_by, gt_by = defaultdict(float), defaultdict(int)
@@ -139,7 +141,7 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
         pred_specs = (zone_specs(s.site, zc, exclude=bool(candidate.get("exclude")), rejoin=bool(candidate.get("rejoin")),
                                  rejoin_dist_rel=candidate.get("rejoin_dist")) if has_zone else [])
         boxes = load_boxes(s)
-        r = run_analyzer(s, pred_specs, detector, edge_cfg["tracker"], track_conf, det_stride)
+        r = run_analyzer(s, pred_specs, detector, tracker_cfg, track_conf, det_stride)
         for f, (db, ds) in r.det_samples.items():
             gtb = boxes.get(f, [])
             ap_by[s.site].add(db, ds, gtb, op, frame_wh=(s.width, s.height))
@@ -171,6 +173,7 @@ def evaluate(candidate: dict, split_name: str, seq_ids: list[str], det_stride: i
         per_seq[sid] = entry
     events = {k: summarize(_merge(v), dur_by[k], gt_by[k]) for k, v in matches_by.items()}
     return {"candidate": {**candidate, "model_sha256_12": model_sha, "op_conf": op, "track_conf": track_conf,
+                          "tracker": tracker_cfg,
                           "detector_info": detector.info.__dict__},
             "events": dict(sorted(events.items())), "detection": {k: v.result() for k, v in sorted(ap_by.items())},
             "per_sequence": per_seq, "wall_s": round(time.time() - t_all, 1)}
@@ -191,7 +194,8 @@ def parse_candidate(spec: str) -> dict:
         k, _, v = o.partition("=")
         if k in ("rejoin", "exclude"):
             c[k] = v.lower() not in ("0", "false", "no") if v else True
-        elif k in ("track_conf", "conf_threshold", "rejoin_dist"):
+        elif k in ("track_conf", "conf_threshold", "rejoin_dist", "new_track_thresh", "track_buffer_seconds",
+                   "match_thresh", "track_thresh"):
             c[k] = float(v)
         else:
             raise ValueError(f"unknown candidate option {k!r} in {spec!r}")
