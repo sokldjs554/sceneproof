@@ -1,6 +1,6 @@
 # Vendored from Megvii YOLOX (https://github.com/Megvii-BaseDetection/YOLOX), Apache-2.0.
-# Modified for sceneproof: training-only code (losses, SimOTA assignment, visualisation)
-# and the loguru/yolox.utils dependencies were removed. Inference path is unchanged.
+# Modified for sceneproof: the loguru/yolox.utils dependencies and visualisation were removed; the
+# training losses (SimOTA, IoU/obj/cls/L1) live in ./losses.py for fine-tuning. Inference path is unchanged.
 # Copyright (c) Megvii Inc. All rights reserved.
 
 import math
@@ -188,7 +188,10 @@ class YOLOXHead(nn.Module):
             outputs.append(output)
 
         if self.training:
-            raise RuntimeError("sceneproof vendors YOLOXHead for inference only; training code was removed")
+            from .losses import get_losses
+
+            return get_losses(self, x_shifts, y_shifts, expanded_strides, labels,
+                              torch.cat(outputs, 1), origin_preds, dtype=xin[0].dtype)
         else:
             self.hw = [x.shape[-2:] for x in outputs]
             # [batch, n_anchors_all, 85]

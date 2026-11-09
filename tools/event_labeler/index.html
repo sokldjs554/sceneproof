@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>구역 사건 표시 도구</title>
+<style>
+  :root { --bg: #f6f7f9; --fg: #1d2330; --muted: #5d6676; --line: #d9dde4; --accent: #1d5fb8; --red: #c62828; --card: #fff; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #14171c; --fg: #e8ebf0; --muted: #9aa3b2; --line: #2c323c; --accent: #6aa3ff; --red: #ff6b6b; --card: #1c2027; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; background: var(--bg); color: var(--fg); }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  h1 { font-size: 16px; margin: 0 12px 0 0; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; padding: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  #stage { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+  #stage video, #stage canvas { display: block; width: 100%; height: auto; }
+  #stage canvas { position: absolute; inset: 0; pointer-events: none; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  button { font: inherit; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  input, select { font: inherit; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
+  .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  td, th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  kbd { font: 12px ui-monospace, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+  #open { color: var(--red); font-weight: 700; }
+  ol { padding-left: 18px; margin: 6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>구역 사건 표시 도구</h1>
+  <label>영상 <input type="file" id="file" accept="video/*"></label>
+  <label>장소(구역) <select id="site"></select></label>
+  <label>표시자 이름 <input id="annotator" placeholder="예: 홍길동" size="10"></label>
+  <span class="muted">파일은 브라우저 밖으로 나가지 않습니다.</span>
+</header>
+<main>
+  <section>
+    <div id="stage" class="card" style="padding:0">
+      <video id="video" playsinline></video>
+      <canvas id="overlay"></canvas>
+    </div>
+    <div class="row">
+      <button id="play">재생/정지 <kbd>Space</kbd></button>
+      <button id="back">◀ 0.2초 <kbd>←</kbd></button>
+      <button id="fwd">0.2초 ▶ <kbd>→</kbd></button>
+      <label>속도 <select id="rate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option></select></label>
+      <span id="time" class="muted">0.00초</span>
+    </div>
+    <div class="card">
+      <b>표시 방법</b>
+      <ol>
+        <li>사람의 <b>발</b>이 빨간 구역 안에 들어간 순간 <kbd>I</kbd>, 구역에서 나온 순간 <kbd>O</kbd>를 누릅니다. 한 사람이 들어갔다 나오면 사건 1건입니다.</li>
+        <li>여러 사람이 동시에 들어가면 사람마다 따로 <kbd>I</kbd>를 누르고, 나올 때 목록에서 그 사람 줄의 "나감" 버튼을 누릅니다.</li>
+        <li>발이 선 위를 스치기만 했으면 <kbd>B</kbd>(경계 통과), 확신이 없으면 <kbd>U</kbd>(불확실)로 바꿉니다.</li>
+        <li>다른 사람의 결과를 보지 말고 혼자 표시한 뒤 <b>내보내기</b>로 저장하세요. 두 사람의 파일을 비교합니다.</li>
+      </ol>
+      <span class="muted">← → 로 0.2초씩, Shift+← → 로 1초씩 움직이며 정확한 순간을 고르면 좋습니다.</span>
+    </div>
+  </section>
+  <aside class="card">
+    <div class="row"><b>사건 목록</b> <span id="open"></span></div>
+    <table><thead><tr><th>#</th><th>들어감</th><th>나감</th><th>종류</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+    <div class="row">
+      <button id="export" class="primary">내보내기 (JSON)</button>
+      <button id="clear">모두 지우기</button>
+    </div>
+    <p class="muted" id="hint">영상과 장소를 고르세요. 영상 파일 이름이 벤치마크 이름(예: caviar-lobby-walk1.mp4)이면 장소가 자동으로 선택됩니다.</p>
+  </aside>
+</main>
+<script src="zones.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
+const LABEL = { intrusion: '침입', boundary_pass: '경계 통과', unsure: '불확실' };
+let events = [], fileName = '';
+const sites = (window.BENCH_ZONES && window.BENCH_ZONES.sites) || {};
+for (const [k, v] of Object.entries(sites)) { const o = document.createElement('option'); o.value = k; o.textContent = `${k} — ${v.zones[0].name}`; $('site').appendChild(o); }
+try { $('annotator').value = localStorage.getItem('labeler.name') || ''; } catch { /* storage unavailable */ }
+$('annotator').addEventListener('change', () => { try { localStorage.setItem('labeler.name', $('annotator').value); } catch { /* ignore */ } });
+
+$('file').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  fileName = f.name; video.src = URL.createObjectURL(f); events = []; render();
+  const stem = f.name.replace(/\.[^.]+$/, '');
+  const site = Object.keys(sites).find((s) => stem.startsWith(s));
+  if (site) $('site').value = site;
+  $('hint').textContent = `영상: ${f.name}`;
+});
+$('site').addEventListener('change', draw);
+video.addEventListener('loadedmetadata', () => { canvas.width = video.videoWidth; canvas.height = video.videoHeight; draw(); });
+video.addEventListener('timeupdate', () => { $('time').textContent = `${video.currentTime.toFixed(2)}초`; });
+$('rate').addEventListener('change', () => { video.playbackRate = Number($('rate').value); });
+
+function draw() {
+  if (!canvas.width) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const s = sites[$('site').value]; if (!s) return;
+  for (const z of s.zones) {
+    ctx.beginPath();
+    z.polygon.forEach(([x, y], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x * canvas.width, y * canvas.height));
+    ctx.closePath(); ctx.lineWidth = Math.max(2, canvas.width / 300); ctx.strokeStyle = '#ff3b30'; ctx.fillStyle = 'rgba(255,59,48,0.15)'; ctx.fill(); ctx.stroke();
+  }
+}
+function step(d) { video.pause(); video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + d)); }
+function openEvent() { events.push({ start_s: +video.currentTime.toFixed(2), end_s: null, label: 'intrusion', note: '' }); render(); }
+function closeEvent(i) {
+  const idx = i ?? events.map((e) => e.end_s === null).lastIndexOf(true);
+  if (idx < 0) return; events[idx].end_s = +video.currentTime.toFixed(2); render();
+}
+function setLabel(lab) { const e = events[events.length - 1]; if (e) { e.label = lab; render(); } }
+function render() {
+  const tb = $('rows'); tb.innerHTML = '';
+  events.forEach((e, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i + 1}</td><td>${e.start_s.toFixed(2)}</td><td>${e.end_s === null ? '—' : e.end_s.toFixed(2)}</td>`;
+    const sel = document.createElement('select');
+    for (const [k, v] of Object.entries(LABEL)) { const o = document.createElement('option'); o.value = k; o.textContent = v; o.selected = e.label === k; sel.appendChild(o); }
+    sel.addEventListener('change', () => { e.label = sel.value; });
+    const td = document.createElement('td'); td.appendChild(sel); tr.appendChild(td);
+    const act = document.createElement('td');
+    const close = document.createElement('button'); close.textContent = '나감'; close.disabled = e.end_s !== null; close.onclick = () => closeEvent(i);
+    const del = document.createElement('button'); del.textContent = '삭제'; del.onclick = () => { events.splice(i, 1); render(); };
+    act.append(close, ' ', del); tr.appendChild(act); tb.appendChild(tr);
+  });
+  const n = events.filter((e) => e.end_s === null).length;
+  $('open').textContent = n ? `구역 안에 ${n}명 표시 중` : '';
+}
+$('play').onclick = () => (video.paused ? video.play() : video.pause());
+$('back').onclick = () => step(-0.2); $('fwd').onclick = () => step(0.2);
+$('clear').onclick = () => { if (confirm('표시한 사건을 모두 지울까요?')) { events = []; render(); } };
+$('export').onclick = () => {
+  if (events.some((e) => e.end_s === null) && !confirm('아직 "나감"을 누르지 않은 사건이 있습니다. 영상 끝까지 구역 안에 있었다면 그대로 내보내도 됩니다. 계속할까요?')) return;
+  const out = { sequence: fileName.replace(/\.[^.]+$/, ''), video: fileName, site: $('site').value, annotator: $('annotator').value || '이름없음',
+    created: new Date().toISOString(), duration_s: +(video.duration || 0).toFixed(2),
+    events: events.map((e) => ({ ...e, end_s: e.end_s ?? +(video.duration || 0).toFixed(2) })) };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
+  a.download = `${out.sequence}.${out.annotator}.json`; a.click();
+};
+document.addEventListener('keydown', (e) => {
+  if (['INPUT', 'SELECT'].includes(document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === ' ') { e.preventDefault(); $('play').click(); }
+  else if (k === 'arrowleft') step(e.shiftKey ? -1 : -0.2);
+  else if (k === 'arrowright') step(e.shiftKey ? 1 : 0.2);
+  else if (k === 'i') openEvent();
+  else if (k === 'o') closeEvent();
+  else if (k === 'b') setLabel('boundary_pass');
+  else if (k === 'u') setLabel('unsure');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+# Benchmark zones — one restricted floor area per site, normalised [x, y] (0..1, origin top-left).
+#
+# How they were drawn (after configs/bench/split.yaml was frozen, before anything was measured):
+#   * CAVIAR sites: on a median background of TRAIN/DEV clips, with the feet points of the hand-labelled
+#     people in TRAIN/DEV clips overlaid. Test clips were not looked at. Areas where people may sit still
+#     (CAVIAR lobby chairs and desk) were avoided because the INRIA ground truth leaves people who never move
+#     unboxed — a detector would be "wrong" there for no fault of its own.
+#   * Unseen test sites (MOT16-02, MOT16-09, MOT20 station): on the FIRST FRAME only, without any ground truth
+#     overlay — the way an operator draws a zone when installing a camera.
+#   * mot16-04 is train-only (boxes for fine-tuning), so it has no zone.
+# Rules are the product defaults (configs/edge.yaml): feet point inside for 0.3 s opens, outside for 0.8 s
+# closes, 5 s inside escalates to dwell, 1.5 s without a box closes as "track lost".
+rules:
+  entry_confirm_seconds: 0.3
+  exit_confirm_seconds: 0.8
+  dwell_seconds: 5
+  lost_grace_seconds: 1.5
+sites:
+  caviar-lobby:
+    description: "INRIA entrance lobby, top-down wide-angle (384x288, 25 fps)"
+    zones:
+      - zone_id: z-lobby-centre
+        name: "로비 중앙 바닥 (설치물 보호 구역 가정)"
+        polygon: [[0.36, 0.30], [0.70, 0.30], [0.70, 0.66], [0.36, 0.66]]
+  caviar-mall-cor:
+    description: "Lisbon shopping-centre hallway, view along the corridor (384x288, 25 fps)"
+    zones:
+      - zone_id: z-corridor-floor
+        name: "통로 바닥 작업 구역 (지게차 통로 가정)"
+        polygon: [[0.30, 0.50], [0.52, 0.50], [0.60, 0.85], [0.22, 0.85]]
+  caviar-mall-front:
+    description: "Lisbon shopping-centre hallway, frontal view of a shop (384x288, 25 fps)"
+    zones:
+      - zone_id: z-shop-inside
+        name: "매장 안쪽 (출입 통제 구역 가정)"
+        polygon: [[0.55, 0.24], [0.83, 0.24], [0.83, 0.49], [0.55, 0.49]]
+  mot16-02-square:
+    description: "Venice square, static camera at head height (1920x1080, 30 fps) — unseen site"
+    zones:
+      - zone_id: z-square-front
+        name: "광장 앞쪽 바닥 (행사 설치 구역 가정)"
+        polygon: [[0.30, 0.60], [0.70, 0.60], [0.75, 0.80], [0.25, 0.80]]

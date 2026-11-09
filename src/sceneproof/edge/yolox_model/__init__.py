@@ -1,7 +1,8 @@
-"""Vendored YOLOX (Apache-2.0, Megvii) — inference-only model definitions.
+"""Vendored YOLOX (Apache-2.0, Megvii) — model definitions plus the training losses.
 
-Only the model graph is vendored (darknet / PAFPN / head). Training code, data
-augmentation and the loguru dependency were removed. Weights are the official
+The model graph (darknet / PAFPN / head) and the head's training losses (losses.py, used by
+sceneproof.train for fine-tuning) are vendored. The official trainer, data augmentation and the
+loguru dependency are not. Weights are the official
 COCO checkpoints from the YOLOX GitHub releases (see scripts/fetch_models.sh).
 """
 
