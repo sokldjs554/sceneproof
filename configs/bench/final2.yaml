@@ -1,0 +1,32 @@
+# Candidates for the ONE measurement on the second held-out set (python -m sceneproof.eval.bench.run --split test2 --final).
+# Fixed before any model ran on MOT20-03 / MOT20-05. What is compared:
+#   * the product as it was at the first final measurement (tiny-coco, tiny-ft),
+#   * the retrained model (training-target fix, docs/dev-log.md L19), epoch chosen on DEV,
+#   * event rejoin (a new track id for the same person continues the episode), distance chosen on DEV.
+# Exclusion areas are not part of this comparison: neither site has a person-shaped object inside its zone.
+# Feeding low-score boxes to the tracker (track_conf 0.1) was rejected on DEV (more false alarms) and is not a candidate.
+candidates:
+  - name: tiny-coco
+    note: "product default before the changes: YOLOX-tiny COCO weights, no rejoin"
+    model: models/yolox_tiny.onnx
+    variant: yolox_tiny
+  - name: tiny-coco-rj
+    note: "same model + event rejoin (1.0 box height, walking-speed prediction)"
+    model: models/yolox_tiny.onnx
+    variant: yolox_tiny
+    rejoin: true
+    rejoin_dist: 1.0
+  - name: tiny-ft
+    note: "first fine-tuned model (reported in the first final measurement); onnx sha256[:12] dfe8f498fb02"
+    model: models/finetune/yolox_tiny_bench/best.onnx
+    variant: yolox_tiny
+  - name: tiny-ft2
+    note: "retrained with training targets clipped to the image (same data and settings), epoch 10 on DEV; onnx sha256[:12] 3042ef279eef"
+    model: models/finetune/yolox_tiny_bench_v2/best.onnx
+    variant: yolox_tiny
+  - name: tiny-ft2-rj
+    note: "retrained model + event rejoin — the proposed product setting"
+    model: models/finetune/yolox_tiny_bench_v2/best.onnx
+    variant: yolox_tiny
+    rejoin: true
+    rejoin_dist: 1.0

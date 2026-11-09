@@ -37,6 +37,11 @@ pipeline:
   rtsp_latency_ms: 200
   rtsp_protocols: tcp
 
+# Zone options besides the polygon and timing (defaults shown):
+#   rejoin: true          # the tracker gave the same person a new id (crowd, occlusion): continue the open event
+#   rejoin_dist_rel: 1.0  # ...if the new track appears within this many box heights of where the person should be
+#   exclude: []           # polygons inside the zone over person-shaped objects (mannequin, signboard, statue):
+#                         # feet there never open an event; an open event is kept while the person crosses them
 cameras:
   - camera_id: cam-worker
     name: "A동 자재창고 입구 (샘플)"

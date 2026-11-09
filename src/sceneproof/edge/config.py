@@ -26,7 +26,7 @@ class ZoneConfig(BaseModel):
     # person-shaped objects inside the zone (mannequin, signboard): feet there never open an episode
     exclude: list[list[tuple[float, float]]] = Field(default_factory=list)
     # continue an episode when the tracker starts a new id for the same person (crowds, occlusion)
-    rejoin: bool = False
+    rejoin: bool = True
     rejoin_dist_rel: float = Field(default=1.0, gt=0)
 
     @field_validator("polygon")
