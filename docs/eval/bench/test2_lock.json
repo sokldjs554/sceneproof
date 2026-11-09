@@ -14,7 +14,9 @@
     "tiny-ft2",
     "tiny-ft2-rj"
    ],
-   "reason": "first measurement"
+   "reason": "first measurement",
+   "completed": "2026-11-09T16:58:52",
+   "result_file": "docs/eval/bench/raw/bench_test2_final.json"
   }
  ]
 }
