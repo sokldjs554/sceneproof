@@ -41,3 +41,6 @@ data/gateway/
 
 # research benchmark (downloaded by scripts/fetch_bench.py; licences in configs/bench/sources.yaml)
 data/bench/
+
+# fine-tuned weights (non-commercial training data; regenerate with python -m sceneproof.train.finetune)
+models/finetune/
