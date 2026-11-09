@@ -123,15 +123,37 @@ def fetch_mot(seq: dict, zip_url: str) -> dict:
     pre = seq["zip_prefix"]
     with RemoteZip(zip_url) as z:
         names = [n for n in z.namelist() if n.startswith(pre)]
-        jpgs = sorted(n for n in names if n.startswith(pre + "img1/") and n.endswith(".jpg"))
-        gt_bytes = z.read(pre + "gt/gt.txt")
-        ini = z.read(pre + "seqinfo.ini").decode()
-        h = hashlib.sha256()
-        frames = []
-        for n in jpgs:
-            data = z.read(n)
-            h.update(data)
-            frames.append(cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR))
+    jpgs = sorted(n for n in names if n.startswith(pre + "img1/") and n.endswith(".jpg"))
+
+    # each worker keeps its own range-request reader; a dropped connection reopens it and retries the file
+    import threading
+
+    local = threading.local()
+
+    def read(name: str, tries: int = 6) -> bytes:
+        for i in range(tries):
+            try:
+                if getattr(local, "z", None) is None:
+                    local.z = RemoteZip(zip_url)
+                return local.z.read(name)
+            except Exception as e:
+                local.z = None
+                if i == tries - 1:
+                    raise
+                print(f"  retry {i + 1} {name}: {str(e)[:80]}", flush=True)
+                time.sleep(2 * (i + 1))
+        raise RuntimeError("unreachable")
+
+    gt_bytes = read(pre + "gt/gt.txt")
+    ini = read(pre + "seqinfo.ini").decode()
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        blobs = list(ex.map(read, jpgs))
+    h = hashlib.sha256()
+    frames = []
+    for data in blobs:
+        h.update(data)
+        frames.append(cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR))
+    del blobs
     seqlen = int(re.search(r"seqLength=(\d+)", ini).group(1))
     if len(frames) != seqlen:
         raise RuntimeError(f"{seq['id']}: {len(frames)} frames but seqinfo says {seqlen}")
@@ -157,8 +179,20 @@ def main() -> int:
     seqs = [s for s in src["sequences"] if (not args.only or s["dataset"] in args.only.split(","))
             and (not args.ids or s["id"] in args.ids.split(","))]
     manifest_path = OUT / "manifest.json"
-    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {"sequences": {}}
-    manifest["datasets"] = src["datasets"]
+
+    import threading
+
+    lock = threading.Lock()
+
+    def save(r: dict) -> None:
+        with lock:
+            cur = json.loads(manifest_path.read_text()) if manifest_path.exists() else {"sequences": {}}
+            cur["datasets"] = src["datasets"]
+            if not r.get("skipped"):
+                cur["sequences"][r["id"]] = r
+            cur["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            manifest_path.parent.mkdir(parents=True, exist_ok=True)
+            manifest_path.write_text(json.dumps(cur, indent=1, ensure_ascii=False))
 
     def work(seq: dict) -> dict:
         t0 = time.time()
@@ -170,6 +204,7 @@ def main() -> int:
         r.update({"site": seq["site"], "dataset": seq["dataset"], "group": seq["group"]})
         print(f"[bench] {seq['id']}: {'skipped (exists)' if r.get('skipped') else r.get('error') or str(r.get('frames')) + ' frames'}"
               f" ({time.time() - t0:.0f}s)", flush=True)
+        save(r)
         return r
 
     # MOT sequences are large single-zip reads: run them one at a time; CAVIAR in parallel
@@ -179,12 +214,6 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as ex:
         results += list(ex.map(work, cav))
     results += [work(s) for s in mot]
-    for r in results:
-        if not r.get("skipped"):
-            manifest["sequences"][r["id"]] = r
-    manifest["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
     bad = [r["id"] for r in results if r.get("error") or (not r.get("skipped") and not r.get("frames_match_gt", True))]
     print(f"[bench] done: {len(results)} sequences, problems: {bad or 'none'} -> {manifest_path}")
     return 1 if bad else 0
