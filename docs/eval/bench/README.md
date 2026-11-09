@@ -252,7 +252,7 @@ new_track = 새 추적을 시작하는 최소 점수(기본 0.6), buffer = 놓�
 ## 8. 재현
 
 ```bash
-python scripts/fetch_bench.py                      # 원 사이트에서 84편 다운로드·재인코딩 (약 2.3GB, 프레임 수 = 정답 프레임 수 검사)
+python scripts/fetch_bench.py                      # 원 사이트에서 86편 다운로드·재인코딩 (재인코딩한 영상 약 0.8GB, 프레임 수 = 정답 프레임 수 검사)
 python -m sceneproof.eval.bench.run --split dev --candidate tiny-coco:models/yolox_tiny.onnx \
     --candidate s-coco:models/yolox_s.onnx:yolox_s --out docs/eval/bench/raw/bench_dev_baseline.json
 python -m sceneproof.train.finetune --variant yolox_tiny --epochs 10   # CPU 4코어 약 1.7시간, 조정 분할로 회차 선택
@@ -261,6 +261,17 @@ python scripts/export_onnx.py --variant yolox_tiny --weights models/finetune/yol
 python -m sceneproof.eval.bench.run --split dev --candidate tiny-ft:models/finetune/yolox_tiny_bench/best.onnx:yolox_tiny \
     --out docs/eval/bench/raw/bench_dev_finetuned.json
 python -m sceneproof.eval.bench.run --split test --final   # configs/bench/final.yaml의 후보 전부, 한 번만 (이미 잠겨 있음)
+# 측정 뒤 보완 (6절)
+python -m sceneproof.train.finetune --out models/finetune/yolox_tiny_bench_v2   # 학습 정답 상자 수정 뒤 다시 학습
+python scripts/export_onnx.py --variant yolox_tiny --weights models/finetune/yolox_tiny_bench_v2/best.pth \
+    --out models/finetune/yolox_tiny_bench_v2/best.onnx
+python scripts/fetch_bench.py --ids mot20-03,mot20-05   # 두 번째 최종 분할 영상
+python -m sceneproof.eval.bench.run --split test2 --final  # configs/bench/final2.yaml, 한 번만 (이미 잠겨 있음)
+python -m sceneproof.eval.bench.replay cache --model models/finetune/yolox_tiny_bench_v2/best.onnx \
+    --ids mot16-04,mot20-01,mot20-02,mot16-02,mot16-09,@dev
+python -m sceneproof.eval.bench.replay sweep --model models/finetune/yolox_tiny_bench_v2/best.onnx \
+    --variants configs/bench/tracker_variants.json --group crowd=mot16-04,mot20-01,mot20-02,mot16-02,mot16-09 \
+    --group dev=@dev --out docs/eval/bench/raw/bench_tracker_sweep.json
 python scripts/bench_report.py
 ```
 
