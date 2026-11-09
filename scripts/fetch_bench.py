@@ -6,7 +6,8 @@ For every sequence:
   * frames are re-encoded to H.264 at the dataset frame rate so that decoded video frame i is exactly
     ground-truth frame i (CAVIAR's MPEG files differ from its JPEG/GT numbering by one frame),
   * the hand-made ground truth is stored next to it unchanged,
-  * data/bench/manifest.json records sizes, sha256 of what was downloaded, frame counts and licences.
+  * data/bench/manifest.json records sizes, sha256 of what was downloaded, frame counts and licences;
+    a sequence is skipped on a re-run only if its manifest entry is error-free and its frame count matches.
 
 Nothing here is committed: data/bench/ is git-ignored. Usage:
     python scripts/fetch_bench.py [--only caviar,mot16,mot20] [--ids id1,id2] [--jobs 4]
@@ -18,6 +19,7 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -55,19 +57,28 @@ def _encode(frames, fps: float, dst: Path) -> tuple[int, int]:
     first = next(it)
     h, w = first.shape[:2]
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # encode into a temporary file and rename only on success: an interrupted run never leaves a short video that a
+    # later run would mistake for a finished one
+    tmp = dst.with_name(dst.stem + ".partial.mp4")
     cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-           "-pix_fmt", "yuv420p", "-g", str(int(fps * 2)), "-movflags", "+faststart", "-an", str(dst)]
+           "-pix_fmt", "yuv420p", "-g", str(int(fps * 2)), "-movflags", "+faststart", "-an", str(tmp)]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     assert p.stdin is not None
-    p.stdin.write(first.tobytes())
-    for f in it:
-        if f.shape[:2] != (h, w):
-            f = cv2.resize(f, (w, h))
-        p.stdin.write(f.tobytes())
-    p.stdin.close()
-    if p.wait() != 0:
-        raise RuntimeError(f"ffmpeg failed for {dst}")
+    try:
+        p.stdin.write(first.tobytes())
+        for f in it:
+            if f.shape[:2] != (h, w):
+                f = cv2.resize(f, (w, h))
+            p.stdin.write(f.tobytes())
+        p.stdin.close()
+        if p.wait() != 0:
+            raise RuntimeError(f"ffmpeg failed for {dst}")
+    except BaseException:
+        p.kill()
+        tmp.unlink(missing_ok=True)
+        raise
+    os.replace(tmp, dst)
     return w, h
 
 
@@ -80,8 +91,6 @@ def _count_frames(path: Path) -> int:
 def fetch_caviar(seq: dict, base: str) -> dict:
     vid = OUT / "videos" / f"{seq['id']}.mp4"
     gt = OUT / "gt" / f"{seq['id']}.xml"
-    if vid.exists() and gt.exists():
-        return {"id": seq["id"], "skipped": True}
     tar_bytes = _get(base + seq["frames"])
     gt_bytes = _get(base + seq["gt"])
     folder = seq["frames"].rsplit("/", 2)[-2]
@@ -107,9 +116,9 @@ def fetch_caviar(seq: dict, base: str) -> dict:
             raise RuntimeError(f"{seq['id']}: JPEG numbering has gaps inside the ground-truth span ({idx[0]}..{idx[-1]})")
         note = f"kept frames {run[0]}..{run[n_gt - 1]} (the ground-truth span) of {len(idx)} JPEGs"
         idx = run[:n_gt]
+    _encode([frames[i] for i in idx], seq["fps"], vid)
     gt.parent.mkdir(parents=True, exist_ok=True)
     gt.write_bytes(gt_bytes)
-    _encode([frames[i] for i in idx], seq["fps"], vid)
     n_vid = _count_frames(vid)
     h, w = frames[idx[0]].shape[:2]
     return {"id": seq["id"], "frames": n_vid, "gt_frames": n_gt, "jpeg_first_index": idx[0], "width": w, "height": h,
@@ -123,8 +132,6 @@ def fetch_mot(seq: dict, zip_url: str) -> dict:
 
     vid = OUT / "videos" / f"{seq['id']}.mp4"
     gt = OUT / "gt" / f"{seq['id']}.txt"
-    if vid.exists() and gt.exists():
-        return {"id": seq["id"], "skipped": True}
     pre = seq["zip_prefix"]
     with RemoteZip(zip_url) as z:
         names = [n for n in z.namelist() if n.startswith(pre)]
@@ -159,12 +166,12 @@ def fetch_mot(seq: dict, zip_url: str) -> dict:
     seqlen = int(re.search(r"seqLength=(\d+)", ini).group(1))
     if len(blobs) != seqlen:
         raise RuntimeError(f"{seq['id']}: {len(blobs)} frames but seqinfo says {seqlen}")
-    gt.parent.mkdir(parents=True, exist_ok=True)
-    gt.write_bytes(gt_bytes)
-    (OUT / "gt" / f"{seq['id']}.seqinfo.ini").write_text(ini)
     # keep only the compressed JPEGs in memory (~0.4 MB each) and decode one frame at a time into ffmpeg
     ww, hh = _encode((cv2.imdecode(np.frombuffer(b, np.uint8), cv2.IMREAD_COLOR) for b in blobs), seq["fps"], vid)
     del blobs
+    gt.parent.mkdir(parents=True, exist_ok=True)
+    gt.write_bytes(gt_bytes)
+    (OUT / "gt" / f"{seq['id']}.seqinfo.ini").write_text(ini)
     n_vid = _count_frames(vid)
     return {"id": seq["id"], "frames": n_vid, "gt_frames": seqlen, "width": ww, "height": hh, "fps": seq["fps"],
             "duration_s": round(n_vid / seq["fps"], 2), "sha256_frames": h.hexdigest(),
@@ -195,17 +202,32 @@ def main() -> int:
                 cur["sequences"][r["id"]] = r
             cur["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
             manifest_path.parent.mkdir(parents=True, exist_ok=True)
-            manifest_path.write_text(json.dumps(cur, indent=1, ensure_ascii=False))
+            tmp = manifest_path.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(cur, indent=1, ensure_ascii=False))
+            os.replace(tmp, manifest_path)  # a crash mid-write cannot leave a truncated manifest
+
+    def verified(seq: dict) -> bool:
+        """Skip only a sequence whose video and GT exist AND whose manifest entry says it decoded completely."""
+        ext = "xml" if seq["dataset"] == "caviar" else "txt"
+        if not ((OUT / "videos" / f"{seq['id']}.mp4").exists() and (OUT / "gt" / f"{seq['id']}.{ext}").exists()):
+            return False
+        cur = json.loads(manifest_path.read_text()) if manifest_path.exists() else {"sequences": {}}
+        m = cur["sequences"].get(seq["id"], {})
+        return bool(m) and not m.get("error") and bool(m.get("frames_match_gt"))
 
     def work(seq: dict) -> dict:
         t0 = time.time()
         ds = src["datasets"][seq["dataset"]]
+        if verified(seq):
+            r = {"id": seq["id"], "skipped": True}
+            print(f"[bench] {seq['id']}: skipped (verified in manifest)", flush=True)
+            return r
         try:
             r = fetch_caviar(seq, ds["base_url"]) if seq["dataset"] == "caviar" else fetch_mot(seq, ds["zip_url"])
         except Exception as e:
             r = {"id": seq["id"], "error": str(e)[:300]}
         r.update({"site": seq["site"], "dataset": seq["dataset"], "group": seq["group"]})
-        print(f"[bench] {seq['id']}: {'skipped (exists)' if r.get('skipped') else r.get('error') or str(r.get('frames')) + ' frames'}"
+        print(f"[bench] {seq['id']}: {r.get('error') or str(r.get('frames')) + ' frames'}"
               f" ({time.time() - t0:.0f}s)", flush=True)
         save(r)
         return r

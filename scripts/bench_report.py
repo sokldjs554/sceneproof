@@ -69,6 +69,56 @@ def detection_table(results: dict, keys: list[str]) -> list[str]:
     return out
 
 
+def timing_by_close(results: dict) -> list[str]:
+    """End-time error of matched events, split by how the predicted event was closed (computed from per-sequence
+    records, so it works for result files written before this breakdown existed)."""
+    import statistics
+
+    close_ko = {"exited": "사람이 구역을 나가서 닫힘", "track_lost": "사람을 놓쳐서 닫힘", "stream_ended": "영상이 끝나서 닫힘"}
+    names = list(results)
+    out = ["| 사건이 닫힌 이유 | " + " | ".join(f"{n}: 건수 / 끝 시각 차이 중앙값(초) / 90% 범위(초)" for n in names) + " |",
+           "|---|" + "---|" * len(names)]
+    rows: dict[str, list[str]] = {}
+    for n in names:
+        by: dict[str, list[float]] = {}
+        for e in results[n]["per_sequence"].values():
+            if "outcome" not in e:
+                continue
+            pred = {x["id"]: x for x in e["predictions"]}
+            gt = {x["id"]: x for x in e["gt_events"]}
+            for pid, gid in e["outcome"]["tp"]:
+                by.setdefault(pred[pid]["close"], []).append(pred[pid]["end_s"] - gt[gid]["end_s"])
+        for k in close_ko:
+            v = by.get(k, [])
+            if not v:
+                rows.setdefault(k, []).append("—")
+                continue
+            a = sorted(abs(x) for x in v)
+            rows.setdefault(k, []).append(f"{len(v)} / {statistics.median(v):+.2f} / {a[min(len(a) - 1, int(0.9 * len(a)))]:.2f}")
+    for k, cells in rows.items():
+        out.append(f"| {close_ko[k]} | " + " | ".join(cells) + " |")
+    return out
+
+
+def final_provenance(final: dict, lock: dict | None) -> str:
+    """Which code ran the final measurement. Result files written before `started` was recorded stamp the HEAD at save
+    time (a later commit can land during an hour-long run); the lock entry records the commit at the start."""
+    run = next((r for r in (lock or {}).get("runs", []) if r.get("result_file", "").endswith("bench_test_final.json")), None)
+    n = len(lock["runs"]) if lock else "?"
+    if "started" in final:
+        when = f"측정 {final['started']} ~ {final['time']}, 시작 커밋 `{final['git']}`"
+        if final.get("uncommitted_changes"):
+            when += f" (커밋 안 된 변경 {len(final['uncommitted_changes'])}개 있음)"
+    elif run:
+        when = (f"측정 {run['opened']} ~ {run.get('completed', final['time'])}, 시작 커밋 `{run['git']}` "
+                f"(결과 파일의 `git: {final['git']}` 값은 저장 시점의 최신 커밋입니다. 측정 중에 들어간 커밋은 결과 저장 방식과 "
+                f"문서만 바꿨고 계산 코드는 그대로였습니다)")
+    else:
+        when = f"측정 {final['time']}, 커밋 `{final['git']}`"
+    return (f"{when}, 분할 해시 `{final['split_sha256_16']}`, 구역 파일 해시 `{final['zones_sha12']}`. "
+            f"측정 기록: `docs/eval/bench/test_lock.json` (측정 시작 {n}회, 이유는 파일에 기록).")
+
+
 def main() -> int:
     src = yaml.safe_load((ROOT / "configs" / "bench" / "sources.yaml").read_text())
     split = yaml.safe_load((ROOT / "configs" / "bench" / "split.yaml").read_text())
@@ -137,16 +187,22 @@ def main() -> int:
     lock = json.loads((BENCH / "test_lock.json").read_text()) if (BENCH / "test_lock.json").exists() else None
     if final:
         L += ["## 5. 최종 측정 (한 번만)", "",
-              f"측정 {final['time']}, 커밋 `{final['git']}`, 분할 해시 `{final['split_sha256_16']}`, 구역 파일 해시 `{final['zones_sha12']}`. "
-              f"측정 기록: `docs/eval/bench/test_lock.json` (측정 {len(lock['runs']) if lock else '?'}회).", "",
+              final_provenance(final, lock), "",
               "결과를 읽는 법과 소견(용어 설명, 장소 묶음별 해석, 한계, 다음 단계): [`findings.md`](findings.md).", "",
               "### 구역 사건", ""]
         keys = ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "mot16-02-square", "mot16-09-lowangle", "mot20-station",
                 "seen_sites", "unseen_sites", "all"]
         L += events_table(final["results"], keys)
+        L += ["", "### 사건이 끝난 시각의 정확도 (맞힌 사건만)", "",
+              "끝 시각 차이 = 프로그램이 정한 끝 − 정답의 끝(음수면 일찍 닫음). 사람이 나가서 닫힌 사건은 거의 정확하고, "
+              "사람을 놓쳐서 닫힌 사건은 일찍 닫히는 쪽으로 몇 초까지 어긋납니다. 결과 파일의 `end_mae_s`(평균 끝 시각 오차)는 이 두 경우를 섞은 값입니다.", ""]
+        L += timing_by_close(final["results"])
         L += ["", "### 사람 찾기 (상자 단위)", ""]
         L += detection_table(final["results"], [*keys[:6], "all"])
-        L += [""]
+        L += ["", "정답 상자 일부는 화면 밖까지 그려져 있습니다(화면 가장자리에서 잘린 사람의 몸 전체). 프로그램의 상자는 화면 안으로 "
+              "잘리므로, 화면 안쪽 부분과 겹침이 0.5 미만이라 어떤 상자로도 맞힐 수 없는 정답 상자가 최종 분할 40,503개 중 29개(0.07%)이고, "
+              "그중 22개가 저각도 거리 영상(766개 중 2.9%)입니다. 이 영상의 AP50은 최대 약 0.03 낮게 나왔을 수 있습니다. "
+              "점수 계산은 측정 당시 그대로 둡니다(다시 재지 않음).", ""]
     L += ["## 6. 두 사람 표시 일치도", "",
           "도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.", ""]
     agr = sorted((BENCH / "agreement").glob("*.json")) if (BENCH / "agreement").exists() else []

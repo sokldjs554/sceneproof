@@ -169,3 +169,46 @@ def test_second_final_run_needs_a_reason(monkeypatch, tmp_path, capsys):
     assert run.main() == 3
     assert lock.read_text() == before
     assert "--rerun-reason" in capsys.readouterr().err
+
+
+def test_final_run_refused_when_data_is_incomplete(monkeypatch, tmp_path, capsys):
+    """A final run that could not finish (missing video, frame-count mismatch) is refused before the lock is written,
+    so it cannot use up the one measurement."""
+    import sys
+
+    from sceneproof.eval.bench import run
+
+    seqs = {"a": Sequence("a", "caviar", "s", "g", 25.0, tmp_path / "a.mp4", tmp_path / "a.xml", 10, 100, 100,
+                          {"manifest": {"frames_match_gt": False}}),
+            "b": Sequence("b", "caviar", "s", "g", 25.0, tmp_path / "b.mp4", tmp_path / "b.xml")}
+    (tmp_path / "a.mp4").write_bytes(b"x")
+    (tmp_path / "a.xml").write_text("<x/>")
+    monkeypatch.setattr(run, "load_sequences", lambda require_data=False: seqs)
+    problems = run.preflight(["a", "b", "c"])
+    assert len(problems) == 3 and "frame count differs" in problems[0] and "missing" in problems[1]
+
+    lock = tmp_path / "test_lock.json"
+    monkeypatch.setattr(run, "LOCK", lock)
+    monkeypatch.setattr(run, "preflight", lambda ids: ["x: video or ground truth missing"])
+    monkeypatch.setattr(run, "_dirty", lambda: [])
+    monkeypatch.setattr(sys, "argv", ["run", "--split", "test", "--final"])
+    assert run.main() == 4
+    assert not lock.exists()
+    assert "refused before touching the lock" in capsys.readouterr().err
+
+
+def test_augment_clips_targets_to_the_image_not_the_padding():
+    """MOT boxes extend past the frame for people cut off at the edge; training targets must stop at the image edge
+    (the grey padding around a shrunken image is not part of the person)."""
+    import random
+
+    pytest.importorskip("torch")
+    from sceneproof.train.finetune import augment
+
+    img = np.zeros((100, 200, 3), np.uint8)  # black stays black under the HSV jitter; padding is 114
+    boxes = np.array([[10, 50, 40, 130], [150, -20, 180, 60]], np.float32)  # past the bottom / top edge
+    for seed in range(30):
+        canvas, b = augment(img, boxes, 160, random.Random(seed))
+        ys, xs = np.where(canvas[..., 0] == 0)
+        for x0, y0, x1, y1 in b:
+            assert xs.min() - 1 <= x0 and x1 <= xs.max() + 1 and ys.min() - 1 <= y0 and y1 <= ys.max() + 1

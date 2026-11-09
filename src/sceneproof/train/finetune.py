@@ -107,8 +107,10 @@ def augment(img: np.ndarray, boxes: np.ndarray, size: int, rng: random.Random) -
     if len(b):
         area0 = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1])
         b = b + np.array([ox, oy, ox, oy], np.float32)
-        b[:, [0, 2]] = b[:, [0, 2]].clip(0, size)
-        b[:, [1, 3]] = b[:, [1, 3]].clip(0, size)
+        # clip to the pasted image, not the canvas: MOT boxes of people cut off by the frame edge extend past the
+        # image, and clipping to the canvas would make the target cover grey padding (trains boxes into nothing)
+        b[:, [0, 2]] = b[:, [0, 2]].clip(dx0, dx0 + cw)
+        b[:, [1, 3]] = b[:, [1, 3]].clip(dy0, dy0 + ch)
         area1 = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1])
         keep = (area1 >= 0.4 * np.maximum(area0, 1e-6)) & (b[:, 2] - b[:, 0] >= 3) & (b[:, 3] - b[:, 1] >= 6)
         b = b[keep]

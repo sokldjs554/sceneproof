@@ -7,9 +7,14 @@ a box, the median distance between the two feet points is at most ``max_foot_dis
 Condition (3) is new: in crowded scenes two different people are often in the zone at the same time, and a
 time-only rule would credit a detection of person A to the ground truth of person B.
 
-Outcome per prediction: tp (first match of a GT intrusion), duplicate (another prediction of an already
-matched GT intrusion — usually a track split), neutral (matches a boundary_pass or ignore episode), fp.
-GT intrusions without a match are misses.
+Outcome per prediction: tp (the pair with the largest time overlap, then the smallest feet distance, wins; one
+prediction per GT intrusion), duplicate (another prediction of an already matched GT intrusion — usually a track
+split), neutral (matches a boundary_pass or ignore episode), fp. GT intrusions without a match are misses.
+
+The assignment is greedy, not a global optimum: when two people walk side by side and both predictions qualify for
+both GTs, a greedy pick can leave one pair unmatched that an optimal assignment would keep. The feet-distance gate
+(0.5 x GT height) makes such ties rare outside dense crowds. How often it happened in the reported results was
+not measured (result files keep episode times, not boxes); a crowded site's duplicate/miss counts can include it.
 """
 
 from __future__ import annotations
