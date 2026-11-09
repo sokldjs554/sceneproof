@@ -14,7 +14,10 @@ States per (track_id, zone_id):
 Two corrections for what the tracker and detector get wrong:
   * rejoin: in a crowd the tracker often loses a person and starts a NEW track id for the same person a moment
     later. While the old episode is still in its grace period, a track that first appeared after the loss, close
-    to where the person vanished and of similar size, continues that episode instead of opening a second one.
+    to where the person should be by now and of similar size, continues that episode instead of opening a second
+    one. Strict mode (default) does it only when the choice is unambiguous: exactly one visible person near the
+    expected spot, and that person is the new track, inside the zone. In a dense crowd a guess hands one person's
+    event to another (measured: more false alarms than the duplicates it removed), so no guess is made there.
   * exclude: polygons inside a zone where a person-shaped object stands (mannequin, signboard). A box whose feet
     are there cannot OPEN an episode; an already open episode is held (a real person walking past the spot is
     neither cut nor closed).
@@ -70,6 +73,9 @@ class ZoneSpec:
     exclude: list[list[tuple[float, float]]] = field(default_factory=list)  # normalized polygons (see module doc)
     rejoin: bool = False
     rejoin_dist_rel: float = 1.0  # max feet distance for a rejoin, in units of the person's box height
+    # strict rejoin (crowds): continue only when exactly ONE visible person is near where the lost one should be,
+    # and that person is a new track standing inside the zone; otherwise leave the episode to close as track lost
+    rejoin_strict: bool = True
 
     def polygon_px(self, w: int, h: int) -> list[tuple[float, float]]:
         return [(x * w, y * h) for x, y in self.polygon]
@@ -299,23 +305,37 @@ class ZoneMonitor:
         if not orphans:
             return
         pairs = []
-        for t in tracks:
-            st_new = self._state.get((t.track_id, zone.zone_id))
-            if st_new is not None and st_new.episode is not None:
+        for key, st in orphans:
+            ep = st.episode
+            h_old = ep.last_xyxy[3] - ep.last_xyxy[1]
+            if h_old <= 0:
                 continue
-            ax, ay = anchor_point(t.xyxy)
-            h_new = float(t.xyxy[3] - t.xyxy[1])
-            for key, st in orphans:
-                ep = st.episode
+            px, py = self._expected_feet(st, ep, meta.media_s)
+            near, cands = 0, []
+            for t in tracks:
+                ax, ay = anchor_point(t.xyxy)
+                h_new = float(t.xyxy[3] - t.xyxy[1])
+                if h_new <= 0 or math.hypot(ax - px, ay - py) / max(h_old, h_new) > zone.rejoin_dist_rel:
+                    continue
+                near += 1
+                st_new = self._state.get((t.track_id, zone.zone_id))
+                if st_new is not None and st_new.episode is not None:
+                    continue  # already has its own episode here
                 if self._first_seen.get(t.track_id, -1.0) <= ep.last_media_s:
                     continue  # this track existed while the person was still visible: a different person
-                h_old = ep.last_xyxy[3] - ep.last_xyxy[1]
-                if h_old <= 0 or h_new <= 0 or not 0.5 <= h_new / h_old <= 2.0:
+                if not 0.5 <= h_new / h_old <= 2.0:
                     continue
-                px, py = self._expected_feet(st, ep, meta.media_s)
-                d = math.hypot(ax - px, ay - py) / max(h_old, h_new)
-                if d <= zone.rejoin_dist_rel:
-                    pairs.append((d, t.track_id, key))
+                if zone.rejoin_strict and not zone.contains_px(ax, ay, meta.width, meta.height):
+                    continue  # continuing an intrusion means standing inside the zone
+                cands.append((math.hypot(ax - px, ay - py) / max(h_old, h_new), t.track_id))
+            if zone.rejoin_strict and (near != 1 or len(cands) != 1):
+                continue  # ambiguous: someone else is right there too
+            pairs += [(d, tid, key) for d, tid in cands]
+        if zone.rejoin_strict:  # a new track claimed by two vanished people is ambiguous as well
+            claims: dict[int, int] = {}
+            for _d, tid, _key in pairs:
+                claims[tid] = claims.get(tid, 0) + 1
+            pairs = [p for p in pairs if claims[p[1]] == 1]
         used_new, used_old = set(), set()
         for _d, tid, key in sorted(pairs):
             if tid in used_new or key in used_old:

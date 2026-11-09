@@ -217,3 +217,20 @@ def test_rejoin_expects_a_walking_person_further_along():
     ev = _run(ZoneMonitor([zone(rejoin=True, rejoin_dist_rel=0.5)], "cam"), frames)
     opened = [e for e in ev if e.transition == Transition.OPENED]
     assert len(opened) == 1 and opened[0].episode.rejoined_track_ids == [4] and not opened[0].episode.closed
+
+
+def test_strict_rejoin_makes_no_guess_in_a_crowd_or_outside_the_zone():
+    """Two new tracks appear near where person 1 vanished: ambiguous, so the episode closes as lost and is not handed
+    to either. A single new track standing OUTSIDE the zone does not continue an intrusion either."""
+    base = [(i, [T(1, 100, 100)]) for i in range(10)] + [(i, []) for i in range(10, 13)]
+    two = base + [(i, [T(7, 104, 100), T(8, 96, 100)]) for i in range(13, 25)]
+    ev = _run(ZoneMonitor([zone(rejoin=True)], "cam"), two)
+    ep1 = next(e.episode for e in ev if e.transition == Transition.OPENED and e.episode.track_id == 1)
+    assert ep1.rejoined_track_ids == [] and ep1.close_reason == CloseReason.TRACK_LOST
+    loose = _run(ZoneMonitor([zone(rejoin=True, rejoin_strict=False)], "cam"), two)
+    assert next(e.episode for e in loose if e.episode.track_id == 1).rejoined_track_ids in ([7], [8])
+    # person 1 vanished at the zone edge; the new track is just outside it (feet x=45 < 50)
+    edge = [(i, [T(1, 52, 100)]) for i in range(10)] + [(i, []) for i in range(10, 13)] \
+        + [(i, [T(9, 45, 100)]) for i in range(13, 20)]
+    ev = _run(ZoneMonitor([zone(rejoin=True)], "cam"), edge)
+    assert all(e.episode.rejoined_track_ids == [] for e in ev)
