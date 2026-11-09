@@ -32,9 +32,27 @@
 평가 영상의 정답(사건 시작·종료, 구역 정의, 정상 상황 기준)은 `data/ground_truth/`에 있으며,
 작성 방법과 남은 검수 작업은 `docs/eval/ground-truth.md`에 적습니다.
 
+## 연구용 벤치마크 (사람이 손으로 표시한 정답)
+
+위 6편과 별도로, **사람이 프레임마다 손으로 그린 사람 상자**가 있는 연구용 공개 데이터로 구역 사건 성능과 추가 학습 효과를 잽니다.
+목록·라이선스·제외 이유는 `configs/bench/sources.yaml`, 분할은 `configs/bench/split.yaml`(측정 전에 고정), 구역은 `configs/bench/zones.yaml`,
+결과는 `docs/eval/bench/README.md`에 있습니다.
+
+| 데이터 | 장소(카메라) | 편수 | 라이선스 | 정답 |
+|---|---|---|---|---|
+| CAVIAR 1차 (INRIA 로비) | 실내 로비, 위에서 내려다보는 광각 384×288·25fps | 27 | Creative Commons BY-SA, 출처 표기: EC Funded CAVIAR project/IST 2001 37540 | 손으로 그린 상자(움직이지 않는 사람은 표시 안 됨) |
+| CAVIAR 2차 (리스본 쇼핑몰) | 복도 방향·매장 정면 두 시점, 384×288·25fps | 26×2 | 같음 | 손으로 그린 상자 |
+| MOT16-02·04·09 | 광장·밤거리(높은 시점)·거리(낮은 각도), 1920×1080·30fps | 3 | CC BY-NC-SA 3.0 | MOT16 규약에 따른 수작업 상자 |
+| MOT20-01·02 | 혼잡한 실내 기차역, 1920×1080·25fps | 2 | CC BY-NC-SA 3.0 | 같음 |
+
+- 원본은 저장소에 올리지 않습니다. `python scripts/fetch_bench.py`가 원래 사이트에서 받아 `data/bench/`에 두고, 각 영상의 다운로드 해시와 프레임 수를 `data/bench/manifest.json`에 적습니다.
+- MOT 데이터는 비상업(NC) 조건이므로 이 데이터로 추가 학습한 가중치도 비상업·연구 용도로만 씁니다.
+- 제외: CHAD(상자를 사람이 아니라 YOLOv4가 만듦), VIRAT(사용 동의서 수락 필요 — 사용자 결정), CAVIAR `Fight_OneManDown`(정답 파일 3개가 서로 다름), MOT 이동 카메라 시퀀스(고정 구역을 정의할 수 없음).
+
 ## 재현
 
 ```bash
 bash scripts/fetch_data.sh        # 원본 다운로드 + 트랜스코딩 (ffmpeg 필요)
+python scripts/fetch_bench.py     # 연구용 벤치마크 (약 2.3 GB 전송, MOT는 필요한 시퀀스만 범위 요청)
 sha256sum -c data/videos/SHA256SUMS
 ```
