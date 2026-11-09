@@ -100,6 +100,71 @@ def timing_by_close(results: dict) -> list[str]:
     return out
 
 
+def followup_section() -> list[str]:
+    """Section 5-2..: what was fixed after the first final measurement, the DEV evidence for each choice, and the
+    second held-out measurement (MOT20-03/05) that compares the product before and after."""
+    L: list[str] = []
+    trk = load("bench_dev_tracking.json")
+    if trk:
+        merged = {}
+        for r in trk["runs"]:
+            merged.update(r["results"])
+        names = {"base": "현재 제품 (점수 0.4 이상 상자만 추적)", "base-ex": "+ 마네킹 제외 영역",
+                 "low": "낮은 점수 상자(0.1 이상)도 추적기에 넣기", "low-rj10": "낮은 점수 + 이어받기 1.0",
+                 "low-rj05": "낮은 점수 + 이어받기 0.5", "rj05": "이어받기 0.5", "rj075": "이어받기 0.75",
+                 "rj10": "이어받기 1.0", "ex-rj10": "제외 영역 + 이어받기 1.0"}
+        L += ["## 8. 측정 뒤 보완 (개발 일지 L19·L20)", "",
+              "### 8-1. 추적 끊김·마네킹 대응: 조정 분할에서 고르기", "",
+              "기본 작은 모델(tiny-coco)로 조정 분할 12편(정답 사건 70건)을 돌려 비교했습니다. 이어받기 = 추적기가 같은 사람에게 새 번호를 "
+              "붙였을 때, 사람이 사라진 뒤 예상 위치(걷던 속도로 옮긴 위치)에서 상자 높이 × 숫자 안에 나타난 새 추적이 열린 사건을 이어받음. "
+              "제외 영역 = 매장 정면의 마네킹 자리(조정 분할 잘못 울림 4건이 모두 같은 자리). 둘 다 프로그램 쪽에만 적용하고 정답에는 적용하지 않습니다.", "",
+              "| 설정 | 찾음 | 놓침 | 잘못 울림 | 중복(쪼개짐) |", "|---|---|---|---|---|"]
+        for k in ("base", "base-ex", "low", "low-rj10", "low-rj05", "rj05", "rj075", "rj10", "ex-rj10"):
+            e = merged.get(k, {}).get("events", {}).get("all")
+            if e:
+                L.append(f"| {names[k]} | {e['tp']} | {e['missed']} | {e['fp']} | {e['duplicates']} |")
+        L += ["", "고른 것: **이어받기 1.0 + 제외 영역**(설치 때 사람 모양 물체가 있으면 그림). 낮은 점수 상자를 추적기에 넣는 방식은 "
+              "잘못 울림이 늘어(매장 정면 4→7) 쓰지 않습니다. 1회째 비교는 커밋 `50a826c`로 "
+              "올린 코드를 커밋하기 직전에 돌려 결과 파일에 '커밋 안 된 변경'이 적혀 있습니다(같은 내용).", ""]
+    ft2 = load("finetune_log_v2.json")
+    if ft2:
+        ft1 = load("finetune_log.json")
+        L += ["### 8-2. 추가 학습 다시 하기 (학습 정답 상자를 사진 범위로 자르도록 고친 뒤)", "",
+              "같은 데이터·설정으로 다시 학습했습니다. 조정 분할 사람 찾기 점수(AP50:95):", "",
+              "| 회차 | 처음 학습 | 다시 학습 |", "|---|---|---|"]
+        e1 = {e["epoch"]: e for e in (ft1 or {}).get("epochs", [])}
+        for e in ft2["epochs"]:
+            mark = " ← 선택" if e["epoch"] == ft2.get("best_epoch") else ""
+            L.append(f"| {e['epoch']}{mark} | {f(e1.get(e['epoch'], {}).get('dev', {}).get('ap50_95'))} | {f(e['dev'].get('ap50_95'))} |")
+        L += [""]
+    dv2 = load("bench_dev_v2.json")
+    if dv2:
+        L += ["조정 분할에서 다시 학습한 모델(tiny-ft2)과 이어받기·제외 영역을 함께 쓴 결과:", ""]
+        L += events_table(dv2["results"], ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
+        L += [""]
+        L += detection_table(dv2["results"], ["caviar-lobby", "caviar-mall-cor", "caviar-mall-front", "all"])
+        L += [""]
+    t2 = load("bench_test2_final.json")
+    if t2:
+        lock2 = json.loads((BENCH / "test2_lock.json").read_text()) if (BENCH / "test2_lock.json").exists() else {}
+        run = (lock2.get("runs") or [{}])[0]
+        L += ["### 8-3. 두 번째 최종 측정 (새 장면 2곳, 한 번만)", "",
+              "첫 최종 측정 결과를 본 뒤에 바꾼 것(이어받기, 다시 학습)을 첫 최종 분할로 다시 재면 공정하지 않습니다. 그래서 어디에도 쓰지 않은 "
+              "MOT20-03(밤 광장)과 MOT20-05(아주 붐비는 광장)를 `configs/bench/split2.yaml`로 먼저 고정하고, 구역과 후보"
+              "(`configs/bench/final2.yaml`)도 모델을 돌리기 전에 커밋한 뒤 한 번 쟀습니다.", "",
+              f"측정 {t2.get('started', '?')} ~ {t2['time']}, 시작 커밋 `{t2['git']}`, 분할 해시 `{t2['split_sha256_16']}`, "
+              f"구역 파일 해시 `{t2['zones_sha12']}`, 측정 기록 `docs/eval/bench/test2_lock.json` (측정 시작 {len(lock2.get('runs', []))}회, "
+              f"이유: {run.get('reason', '?')}).", "", "#### 구역 사건", ""]
+        keys2 = ["mot20-03-plaza", "mot20-05-square", "all"]
+        L += events_table(t2["results"], keys2)
+        L += ["", "#### 사건이 끝난 시각의 정확도 (맞힌 사건만)", ""]
+        L += timing_by_close(t2["results"])
+        L += ["", "#### 사람 찾기 (상자 단위, 정답 상자는 화면 안으로 자름)", ""]
+        L += detection_table(t2["results"], keys2)
+        L += [""]
+    return L
+
+
 def final_provenance(final: dict, lock: dict | None) -> str:
     """Which code ran the final measurement. Result files written before `started` was recorded stamp the HEAD at save
     time (a later commit can land during an hour-long run); the lock entry records the commit at the start."""
@@ -203,6 +268,7 @@ def main() -> int:
               "잘리므로, 화면 안쪽 부분과 겹침이 0.5 미만이라 어떤 상자로도 맞힐 수 없는 정답 상자가 최종 분할 40,503개 중 29개(0.07%)이고, "
               "그중 22개가 저각도 거리 영상(766개 중 2.9%)입니다. 이 영상의 AP50은 최대 약 0.03 낮게 나왔을 수 있습니다. "
               "점수 계산은 측정 당시 그대로 둡니다(다시 재지 않음).", ""]
+    L += followup_section()
     L += ["## 6. 두 사람 표시 일치도", "",
           "도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.", ""]
     agr = sorted((BENCH / "agreement").glob("*.json")) if (BENCH / "agreement").exists() else []
