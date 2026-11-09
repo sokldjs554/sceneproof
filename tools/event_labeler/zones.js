@@ -84,6 +84,26 @@ window.BENCH_ZONES = {
        0.55,
        0.49
       ]
+     ],
+     "exclude": [
+      [
+       [
+        0.55,
+        0.34
+       ],
+       [
+        0.61,
+        0.34
+       ],
+       [
+        0.61,
+        0.41
+       ],
+       [
+        0.55,
+        0.41
+       ]
+      ]
      ]
     }
    ]
@@ -191,6 +211,82 @@ window.BENCH_ZONES = {
       [
        0.4,
        0.6
+      ]
+     ]
+    },
+    {
+     "zone_id": "z-sidewalk-left",
+     "name": "왼쪽 보도 (공사 구역 가정)",
+     "polygon": [
+      [
+       0.1,
+       0.2
+      ],
+      [
+       0.33,
+       0.2
+      ],
+      [
+       0.35,
+       0.6
+      ],
+      [
+       0.08,
+       0.6
+      ]
+     ]
+    }
+   ]
+  },
+  "mot20-03-plaza": {
+   "description": "Outdoor plaza at night, elevated camera (1173x880, 25 fps) — second held-out site",
+   "zones": [
+    {
+     "zone_id": "z-plaza-centre",
+     "name": "광장 가운데 바닥 (행사 설치 구역 가정)",
+     "polygon": [
+      [
+       0.3,
+       0.55
+      ],
+      [
+       0.6,
+       0.55
+      ],
+      [
+       0.62,
+       0.75
+      ],
+      [
+       0.28,
+       0.75
+      ]
+     ]
+    }
+   ]
+  },
+  "mot20-05-square": {
+   "description": "Very crowded square at night, elevated camera (1654x1080, 25 fps) — second held-out site",
+   "zones": [
+    {
+     "zone_id": "z-staff-area",
+     "name": "안전요원 대기 구역 (관계자 외 출입 통제 가정)",
+     "polygon": [
+      [
+       0.62,
+       0.7
+      ],
+      [
+       0.9,
+       0.7
+      ],
+      [
+       0.92,
+       0.92
+      ],
+      [
+       0.6,
+       0.92
       ]
      ]
     }
