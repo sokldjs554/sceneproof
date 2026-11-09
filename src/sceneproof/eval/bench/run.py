@@ -39,6 +39,13 @@ def _sha(path: Path, n: int = 12) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:n] if path.exists() else ""
 
 
+def _rel(p: Path) -> str:
+    try:
+        return str(p.relative_to(ROOT))
+    except ValueError:
+        return str(p)
+
+
 def _git() -> str:
     return subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
 
@@ -140,7 +147,7 @@ def main() -> int:
             lock = json.loads(LOCK.read_text())
             if not args.rerun_reason:
                 print(f"test split already measured at {lock['runs'][0]['opened']} — refusing. Pass --rerun-reason to "
-                      f"measure again (it will be recorded in {LOCK.relative_to(ROOT)}).", file=sys.stderr)
+                      f"measure again (it will be recorded in {_rel(LOCK)}).", file=sys.stderr)
                 return 3
         else:
             lock = {"policy": "the test split is measured once; every further run must give a reason", "runs": []}
@@ -173,7 +180,7 @@ def main() -> int:
     if args.split == "test":
         lock = json.loads(LOCK.read_text())
         lock["runs"][-1]["completed"] = out["time"]
-        lock["runs"][-1]["result_file"] = str(path.relative_to(ROOT))
+        lock["runs"][-1]["result_file"] = _rel(path)
         LOCK.write_text(json.dumps(lock, indent=1, ensure_ascii=False))
     for name, r in results.items():
         a = r["events"].get("all", {})

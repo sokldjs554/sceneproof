@@ -82,3 +82,14 @@ Event는 항상 **완전한 스냅샷**입니다. 소비자는 `(event_id, revis
 - HTTP API: [`src/sceneproof/server/api.py`](../src/sceneproof/server/api.py) (FastAPI, `/docs`에서 OpenAPI 확인).
 - VLM 출력 스키마: [`src/sceneproof/server/vlm/schema.py`](../src/sceneproof/server/vlm/schema.py) (schema_version 1).
 - 설정: [`configs/edge.yaml`](../configs/edge.yaml) (주석 포함).
+
+## 평가·학습 경로 (오프라인, 제품 실행과 분리)
+
+```
+연구용 데이터(사람이 그린 상자) ──▶ eval/bench/episodes.gt_episodes ──┐  (제품의 ZoneMonitor를 그대로 사용)
+같은 영상 ──▶ detector → ByteTrack → ZoneMonitor (eval/bench/episodes.run_analyzer) ──┴─▶ eval/bench/match (시간 + 같은 사람)
+                                                                                         └─▶ eval/bench/detection (사람 찾기 AP)
+학습 분할 상자 ──▶ train/finetune (YOLOX 원본 손실, CPU) ──▶ export_onnx ──▶ 위와 같은 경로로 조정·최종 분할 평가
+```
+
+평가 실행기는 제품의 탐지기·추적기·구역 판정 클래스를 프레임마다 직접 호출하고, 근거 영상 저장만 생략합니다. 분할·구역·후보 모델은 측정 전에 `configs/bench/`에 고정하고, 최종 분할은 `docs/eval/bench/test_lock.json`으로 한 번만 잽니다(D11).

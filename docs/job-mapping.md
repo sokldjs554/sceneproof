@@ -57,11 +57,11 @@
 
 | 공고 요건 | 프로젝트에서 보여줄 것 | 확인할 곳 | 검증 상태·한계 |
 |---|---|---|---|
-| AI Native 개발(설계 고도화·리팩토링) | 계약 우선 설계 후 에이전트 위임(Go 게이트웨이·콘솔), 발견한 실패와 수정 전후를 기록 | `docs/dev-log.md`(L1–L8, 리팩토링 절), 커밋 로그 | **문서화 완료** |
+| AI Native 개발(설계 고도화·리팩토링) | 계약 우선 설계 후 에이전트 위임(Go 게이트웨이·콘솔), 발견한 실패와 수정 전후를 기록 | `docs/dev-log.md`(L1–L18, 리팩토링 절), 커밋 로그 | **문서화 완료** |
 | CS/AI 전공 동등 역량, 모델+SW 공학 이해 | 모델 실행·최적화(탐지기 백엔드 추상화)와 시스템 설계(큐·WAL·상태머신·멱등) 양쪽 코드 | 전체 | — |
 | CV/VLM 이론·구현 이해, 정량·정성 검증 | 사건 단위 P/R/F1·FP/h·중복·놓침, 시작·종료 오차, PyTorch↔ONNX 수치 일치, VLM 구조화 출력 검증, 오탐 분석(경계 통과·가림 라벨), 사람 채점 루브릭 | `docs/eval/bench/README.md`·`findings.md`, `docs/eval/README.md`, `src/sceneproof/eval/*` | **연구용 벤치마크 실행 검증**: 사람이 손으로 그린 상자가 있는 CAVIAR·MOT 84편, 측정 전 분할 고정, 장소별·처음 보는 장소별 보고, 최종 분할 1회 측정(정답 사건 207건). 사건 비교에 '같은 사람' 조건 추가. 두 사람 표시 일치도는 도구만 있고 **사용자 표시 필요**. 처음 만든 4편 평가(정답 draft)는 점검용으로 유지. CV만 vs CV+VLM **CI에서 실행 검증**(Claude Opus 5.5, 19건: 프롬프트 v1.2는 정답 침입 10건 중 '확인 필요' 유지 4건 → assessment 정의 미흡을 발견 → 규칙을 명시한 v1.3에서 8건, '정상' 오판 0건; `docs/eval/vlm-findings.md`). 같은 사건 재측정이라 일반화 근거는 아님. 사람 채점 루브릭은 **사용자 채점 필요** |
 | Python·Linux, PyTorch/ONNX/TensorRT/vLLM 이해 | PyTorch 추론·내보내기·**추가 학습**(YOLOX 원본 학습 손실 SimOTA 복원, CPU 학습 → ONNX 내보내기 → 제품 경로로 평가), ONNX Runtime 서빙·최적화 비교, TensorRT EP 설정 경로, vLLM용 OpenAI 호환 VLM 클라이언트 | `detector.py`, `export_onnx.py`, `train/finetune.py`, `yolox_model/losses.py`, `vlm/openai_compat.py`, `docs/papers-and-docs.md` §2·§3·§8 | PyTorch/ONNX **실행 검증**. 추가 학습 **실행 검증**(4코어 CPU 1.7시간, 조정 분할 사람 찾기 AP50 0.71 → 0.85, 최종 분할 사건 찾은 비율 0.77 → 0.96). TensorRT·vLLM **미검증(장비)** |
-| 영문 문서·논문 읽고 재현·응용 | ByteTrack·YOLOX 재현 범위와 차이, GStreamer/ORT/gRPC/Claude 문서 적용 | `docs/papers-and-docs.md` | 원문 재다운로드는 네트워크 차단으로 못함 — 읽은 범위 명시 |
+| 영문 문서·논문 읽고 재현·응용 | ByteTrack·YOLOX 재현 범위와 차이, GStreamer/ORT/gRPC/Claude 문서 적용 | `docs/papers-and-docs.md` | 읽은 범위 명시. 데이터를 고를 때 CHAD 논문 본문에서 상자가 자동 생성(YOLOv4+HRNet)임을 확인해 제외, CAVIAR·MOT 데이터 페이지에서 라이선스·정답 작성 방식·정지/이동 카메라를 확인해 분할·구역 설계에 반영 |
 
 ### C. 우대사항
 
@@ -69,7 +69,7 @@
 |---|---|---|---|
 | 자료구조·알고리즘·설계 원리 | 유계 큐(폐기 vs 무손실), 시간 범위 링버퍼(pin), 상태 전이(구역·업링크), 헝가리안 매칭, 칼만 필터, WAL+CRC 복구, 병합 큐, 멱등 upsert, 동시성(스레드 경계·asyncio 워커) | `frames.py`, `zones.py`, `tracker.py`, `gateway/internal/queue`, `db.py` | **구현+테스트** |
 | CV/VLM 실험 운영 | 학습/조정/최종 분할을 측정 전에 고정(해시 검사)하고 최종 분할은 잠금 파일로 1회만 측정(재측정은 이유 기록 — 실제로 계산 버그로 1회 재측정, 기록 남김), 후보 모델 목록을 측정 전에 고정, 변형 3종×설정 반복 측정, 원시 결과 보존, 재채점 도구, VLM 프롬프트 버전(v1.2-ko→v1.3-ko)을 해석마다 저장하고 버전별 결과 파일 보존·비교표 자동 생성(`vlm_eval_v1.2-ko.json` vs `vlm_eval.json`), 유료 실행은 CI 워크플로에서 예산 상한과 함께 | `configs/bench/{split,final}.yaml`, `docs/eval/bench/test_lock.json`, `docs/eval/raw/*.json`, `rescore.py`, `.github/workflows/vlm-eval.yml` | **실행 검증** |
-| Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker 빌드·k8s(kind) **CI 실행 검증**. DeepStream **미적용** |
+| Docker/Kubernetes/DeepStream/GStreamer/Protobuf 스트리밍 파이프라인 | GStreamer(rtspsrc/appsink/rtsp-server), Protobuf 계약, Docker/k8s 파일, DeepStream은 미적용(장비) | `sources.py`, `src/sceneproof/tools/rtsp_sim.py`, `proto`, `deploy/` | GStreamer·Protobuf **실행 검증**. Docker 빌드·k8s(kind) **CI 실행 검증**. DeepStream **미적용** |
 | 엣지(Jetson) 최적화, gRPC/RTSP/MQTT 연동 | gRPC 양방향 계약(사건·근거 업로드·하트비트·명령), RTSP 입력·재연결, MQTT는 미채택(이유 기록) | `proto`, `gateway/`, `docs/design/decisions.md` | gRPC/RTSP **실행 검증**. Jetson **미검증(장비)**. MQTT **미적용** |
 | C/Go | Go 게이트웨이(내구 큐·업링크·업로드·상태) | `gateway/` | **구현+테스트+실행 검증** |
 
@@ -86,4 +86,5 @@
 
 ## 갱신 이력
 - 초안: 구현 중 작성.
-- 최종: 평가·벤치마크·장애 시나리오 실행 후 갱신(수치는 `docs/eval/README.md` 자동 생성 표와 일치). 저장소 `sokldjs554/sceneproof` 푸시 후 CI(k8s 포함) 결과 반영. VLM(API) 실행과 공개 URL은 사용자 조치 후 갱신 필요.
+- 최종: 평가·벤치마크·장애 시나리오 실행 후 갱신(수치는 `docs/eval/README.md` 자동 생성 표와 일치). 저장소 `sokldjs554/sceneproof` 푸시 후 CI(k8s 포함) 결과 반영. Claude API 실행(vlm-eval)과 공개 데모(GitHub Pages) 반영.
+- 2026-11-09: 연구용 벤치마크(사람이 그린 정답, 84편)·추가 학습·최종 1회 측정 결과 반영(`docs/eval/bench/`). 점검 후 매장 정면 헛알림 원인(마네킹) 확인 반영.

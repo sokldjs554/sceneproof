@@ -43,7 +43,7 @@ docker compose up --build        # rtsp-sim + server + gateway + edge
 
 ## Kubernetes (kind)
 
-`scripts/k8s_verify.sh`가 이미지 빌드 → kind 클러스터 → 배포 → 장치 온라인·사건 수신 확인 → 서버 파드 삭제 후 복구 → 엣지 파드 삭제 후 복구 → 중복 없음 검사까지 수행하고 `docs/evidence/k8s/`에 증적을 남깁니다. CI(`.github/workflows/k8s-runtime.yml`)에서 같은 스크립트가 돕니다.
+`scripts/k8s_verify.sh`가 이미지 빌드 → kind 클러스터 → 배포 → 장치 온라인·사건 수신 확인 → 서버 파드 삭제 후 복구 → 엣지 파드 삭제 후 복구 → 중복 없음 검사까지 수행하고 실행한 곳의 `docs/evidence/k8s/`에 증적을 남깁니다(저장소에는 커밋하지 않고, CI에서는 artifact `k8s-evidence`로 올림). CI(`.github/workflows/k8s-runtime.yml`)에서 같은 스크립트가 돕니다.
 
 ```bash
 kubectl -n sceneproof get pods -o wide

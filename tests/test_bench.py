@@ -142,3 +142,30 @@ def test_ap_ignore_region_can_differ_between_iou_thresholds():
     r = acc.result()
     assert r["gt_boxes"] == 3 and 0.0 < r["ap50_95"] < r["ap50"] <= 1.0
     assert all(len(acc.scores[t]) == len(acc.tp[t]) for t in acc.THRESHOLDS)
+
+
+def test_test_split_requires_final_flag(monkeypatch, capsys):
+    """The held-out split cannot be measured ad hoc: --split test without --final is refused before any work."""
+    import sys
+
+    from sceneproof.eval.bench import run
+
+    monkeypatch.setattr(sys, "argv", ["run", "--split", "test", "--candidate", "x:models/yolox_tiny.onnx"])
+    assert run.main() == 2
+    assert "only with --final" in capsys.readouterr().err
+
+
+def test_second_final_run_needs_a_reason(monkeypatch, tmp_path, capsys):
+    """With an existing lock, --final without --rerun-reason is refused and the lock file is left untouched."""
+    import sys
+
+    from sceneproof.eval.bench import run
+
+    lock = tmp_path / "test_lock.json"
+    lock.write_text(json.dumps({"policy": "x", "runs": [{"opened": "2026-01-01T00:00:00"}]}))
+    before = lock.read_text()
+    monkeypatch.setattr(run, "LOCK", lock)
+    monkeypatch.setattr(sys, "argv", ["run", "--split", "test", "--final"])
+    assert run.main() == 3
+    assert lock.read_text() == before
+    assert "--rerun-reason" in capsys.readouterr().err

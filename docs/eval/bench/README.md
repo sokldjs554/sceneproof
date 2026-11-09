@@ -122,3 +122,20 @@
 
 **아직 측정하지 않았습니다.** 사람 두 명이 같은 영상을 따로 표시해야 하므로 사용자가 해야 하는 작업입니다. 결과 JSON을 `docs/eval/bench/agreement/`에 넣고 이 스크립트를 다시 돌리면 이 절이 채워집니다.
 
+## 7. 재현
+
+```bash
+python scripts/fetch_bench.py                      # 원 사이트에서 84편 다운로드·재인코딩 (약 2.3GB, 프레임 수 = 정답 프레임 수 검사)
+python -m sceneproof.eval.bench.run --split dev --candidate tiny-coco:models/yolox_tiny.onnx \
+    --candidate s-coco:models/yolox_s.onnx:yolox_s --out docs/eval/bench/raw/bench_dev_baseline.json
+python -m sceneproof.train.finetune --variant yolox_tiny --epochs 10   # CPU 4코어 약 1.7시간, 조정 분할로 회차 선택
+python scripts/export_onnx.py --variant yolox_tiny --weights models/finetune/yolox_tiny_bench/best.pth \
+    --out models/finetune/yolox_tiny_bench/best.onnx
+python -m sceneproof.eval.bench.run --split dev --candidate tiny-ft:models/finetune/yolox_tiny_bench/best.onnx:yolox_tiny \
+    --out docs/eval/bench/raw/bench_dev_finetuned.json
+python -m sceneproof.eval.bench.run --split test --final   # configs/bench/final.yaml의 후보 전부, 한 번만 (이미 잠겨 있음)
+python scripts/bench_report.py
+```
+
+추가 학습은 스레드 순서 때문에 비트 단위로 같지 않을 수 있습니다. 최종 측정에 쓴 가중치는 `configs/bench/final.yaml`에 ONNX 해시로 적어 두었습니다.
+

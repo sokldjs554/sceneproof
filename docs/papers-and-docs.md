@@ -33,7 +33,7 @@
 
 ## 5. GStreamer — `rtspsrc`, `appsink`, `decodebin` 공식 문서
 - 링크: https://gstreamer.freedesktop.org/documentation/rtsp/rtspsrc.html · https://gstreamer.freedesktop.org/documentation/app/appsink.html · https://gstreamer.freedesktop.org/documentation/rtsp-server/
-- 적용: `sources.GStreamerSource`(`rtspsrc latency/protocols/tcp-timeout` → `decodebin` → `videoconvert` → `appsink emit-signals max-buffers drop`), 버스 메시지(EOS/ERROR)로 재연결 상태머신, `tools/rtsp_sim.py`(gst-rtsp-server, H.264 패스스루).
+- 적용: `sources.GStreamerSource`(`rtspsrc latency/protocols/tcp-timeout` → `decodebin` → `videoconvert` → `appsink emit-signals max-buffers drop`), 버스 메시지(EOS/ERROR)로 재연결 상태머신, `src/sceneproof/tools/rtsp_sim.py`(gst-rtsp-server, H.264 패스스루).
 - 배운 점(이 세션 실측): 파일 소스에 `sync=true`와 `drop=true`를 같이 쓰면 디코더가 앞서 가며 렌더 직전 버퍼가 계속 교체돼 4초에 2프레임만 전달됨(`sources.py` 주석). 라이브는 `sync=false drop=true`, 파일은 `sync=true drop=false`.
 - 읽은 범위: (1) `gst-inspect-1.0`로 요소 속성 확인, (2) 문서 본문.
 
