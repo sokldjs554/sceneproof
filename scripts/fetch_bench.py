@@ -48,22 +48,27 @@ def _get(url: str, tries: int = 5) -> bytes:
     raise RuntimeError("unreachable")
 
 
-def _encode(frames: list[np.ndarray], fps: float, dst: Path) -> None:
-    """Lossless-enough H.264 (crf 18) at a constant frame rate; one encoded frame per input frame."""
-    h, w = frames[0].shape[:2]
+def _encode(frames, fps: float, dst: Path) -> tuple[int, int]:
+    """Lossless-enough H.264 (crf 18) at a constant frame rate; one encoded frame per input frame.
+    ``frames`` may be a list or a generator (decoded lazily, so a 2,800-frame 1080p sequence never sits in RAM)."""
+    it = iter(frames)
+    first = next(it)
+    h, w = first.shape[:2]
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
            "-pix_fmt", "yuv420p", "-g", str(int(fps * 2)), "-movflags", "+faststart", "-an", str(dst)]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     assert p.stdin is not None
-    for f in frames:
+    p.stdin.write(first.tobytes())
+    for f in it:
         if f.shape[:2] != (h, w):
             f = cv2.resize(f, (w, h))
         p.stdin.write(f.tobytes())
     p.stdin.close()
     if p.wait() != 0:
         raise RuntimeError(f"ffmpeg failed for {dst}")
+    return w, h
 
 
 def _count_frames(path: Path) -> int:
@@ -149,20 +154,18 @@ def fetch_mot(seq: dict, zip_url: str) -> dict:
     with ThreadPoolExecutor(max_workers=8) as ex:
         blobs = list(ex.map(read, jpgs))
     h = hashlib.sha256()
-    frames = []
     for data in blobs:
         h.update(data)
-        frames.append(cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR))
-    del blobs
     seqlen = int(re.search(r"seqLength=(\d+)", ini).group(1))
-    if len(frames) != seqlen:
-        raise RuntimeError(f"{seq['id']}: {len(frames)} frames but seqinfo says {seqlen}")
+    if len(blobs) != seqlen:
+        raise RuntimeError(f"{seq['id']}: {len(blobs)} frames but seqinfo says {seqlen}")
     gt.parent.mkdir(parents=True, exist_ok=True)
     gt.write_bytes(gt_bytes)
     (OUT / "gt" / f"{seq['id']}.seqinfo.ini").write_text(ini)
-    _encode(frames, seq["fps"], vid)
+    # keep only the compressed JPEGs in memory (~0.4 MB each) and decode one frame at a time into ffmpeg
+    ww, hh = _encode((cv2.imdecode(np.frombuffer(b, np.uint8), cv2.IMREAD_COLOR) for b in blobs), seq["fps"], vid)
+    del blobs
     n_vid = _count_frames(vid)
-    hh, ww = frames[0].shape[:2]
     return {"id": seq["id"], "frames": n_vid, "gt_frames": seqlen, "width": ww, "height": hh, "fps": seq["fps"],
             "duration_s": round(n_vid / seq["fps"], 2), "sha256_frames": h.hexdigest(),
             "sha256_gt": hashlib.sha256(gt_bytes).hexdigest(), "frames_match_gt": n_vid == seqlen}
