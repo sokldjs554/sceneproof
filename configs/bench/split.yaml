@@ -1,0 +1,159 @@
+# FROZEN — generated once by `python -m sceneproof.eval.bench.split`; edits break the hash check.
+created: '2026-11-09T05:36:33'
+sha256_16: 56c1ec58729798c8
+seed: 20261109
+rules: "* whole groups move together (CAVIAR Lisbon corridor + front views of one take are one group),\n  * CAVIAR sites are\
+  \ split by group with a fixed seed: train (fine-tuning) / dev (error analysis, threshold\n    and training choices) / test\
+  \ (measured once),\n  * MOT16-04 is train only (adds a high-resolution street view to fine-tuning),\n  * MOT16-02, MOT16-09,\
+  \ MOT20-01, MOT20-02 are test only: sites nobody tuned or trained on (unseen sites)."
+unseen_sites:
+- mot16-02-square
+- mot16-09-lowangle
+- mot20-station
+groups:
+  caviar-lobby:Browse1: train
+  caviar-lobby:Browse2: train
+  caviar-lobby:Browse3: dev
+  caviar-lobby:Browse4: train
+  caviar-lobby:Browse_WhileWaiting1: train
+  caviar-lobby:Browse_WhileWaiting2: train
+  caviar-lobby:Fight_Chase: test
+  caviar-lobby:Fight_RunAway1: dev
+  caviar-lobby:Fight_RunAway2: test
+  caviar-lobby:LeftBag: train
+  caviar-lobby:LeftBag_AtChair: test
+  caviar-lobby:LeftBag_BehindChair: train
+  caviar-lobby:LeftBag_PickedUp: test
+  caviar-lobby:LeftBox: train
+  caviar-lobby:Meet_Crowd: train
+  caviar-lobby:Meet_Split_3rdGuy: train
+  caviar-lobby:Meet_WalkSplit: dev
+  caviar-lobby:Meet_WalkTogether1: test
+  caviar-lobby:Meet_WalkTogether2: dev
+  caviar-lobby:Rest_FallOnFloor: train
+  caviar-lobby:Rest_InChair: test
+  caviar-lobby:Rest_SlumpOnFloor: test
+  caviar-lobby:Rest_WiggleOnFloor: test
+  caviar-lobby:Split: test
+  caviar-lobby:Walk1: train
+  caviar-lobby:Walk2: test
+  caviar-lobby:Walk3: train
+  caviar-mall:EnterExitCrossingPaths1: test
+  caviar-mall:EnterExitCrossingPaths2: test
+  caviar-mall:OneLeaveShop1: train
+  caviar-mall:OneLeaveShop2: test
+  caviar-mall:OneLeaveShopReenter1: train
+  caviar-mall:OneLeaveShopReenter2: train
+  caviar-mall:OneShopOneWait1: train
+  caviar-mall:OneShopOneWait2: dev
+  caviar-mall:OneStopEnter1: train
+  caviar-mall:OneStopEnter2: train
+  caviar-mall:OneStopMoveEnter1: dev
+  caviar-mall:OneStopMoveEnter2: test
+  caviar-mall:OneStopMoveNoEnter1: test
+  caviar-mall:OneStopMoveNoEnter2: test
+  caviar-mall:OneStopNoEnter1: train
+  caviar-mall:OneStopNoEnter2: test
+  caviar-mall:ShopAssistant1: test
+  caviar-mall:ShopAssistant2: dev
+  caviar-mall:ThreePastShop1: train
+  caviar-mall:ThreePastShop2: train
+  caviar-mall:TwoEnterShop1: test
+  caviar-mall:TwoEnterShop2: train
+  caviar-mall:TwoEnterShop3: train
+  caviar-mall:TwoLeaveShop1: dev
+  caviar-mall:TwoLeaveShop2: train
+  caviar-mall:WalkByShop1: test
+  mot16-02: test
+  mot16-04: train
+  mot16-09: test
+  mot20-01: test
+  mot20-02: test
+sequences:
+  train:
+  - caviar-lobby-browse-while-waiting1
+  - caviar-lobby-browse-while-waiting2
+  - caviar-lobby-browse1
+  - caviar-lobby-browse2
+  - caviar-lobby-browse4
+  - caviar-lobby-left-bag
+  - caviar-lobby-left-bag-behind-chair
+  - caviar-lobby-left-box
+  - caviar-lobby-meet-crowd
+  - caviar-lobby-meet-split-3rd-guy
+  - caviar-lobby-rest-fall-on-floor
+  - caviar-lobby-walk1
+  - caviar-lobby-walk3
+  - caviar-mall-cor-one-leave-shop-reenter1
+  - caviar-mall-cor-one-leave-shop-reenter2
+  - caviar-mall-cor-one-leave-shop1
+  - caviar-mall-cor-one-shop-one-wait1
+  - caviar-mall-cor-one-stop-enter1
+  - caviar-mall-cor-one-stop-enter2
+  - caviar-mall-cor-one-stop-no-enter1
+  - caviar-mall-cor-three-past-shop1
+  - caviar-mall-cor-three-past-shop2
+  - caviar-mall-cor-two-enter-shop2
+  - caviar-mall-cor-two-enter-shop3
+  - caviar-mall-cor-two-leave-shop2
+  - caviar-mall-front-one-leave-shop-reenter1
+  - caviar-mall-front-one-leave-shop-reenter2
+  - caviar-mall-front-one-leave-shop1
+  - caviar-mall-front-one-shop-one-wait1
+  - caviar-mall-front-one-stop-enter1
+  - caviar-mall-front-one-stop-enter2
+  - caviar-mall-front-one-stop-no-enter1
+  - caviar-mall-front-three-past-shop1
+  - caviar-mall-front-three-past-shop2
+  - caviar-mall-front-two-enter-shop2
+  - caviar-mall-front-two-enter-shop3
+  - caviar-mall-front-two-leave-shop2
+  - mot16-04
+  dev:
+  - caviar-lobby-browse3
+  - caviar-lobby-fight-run-away1
+  - caviar-lobby-meet-walk-split
+  - caviar-lobby-meet-walk-together2
+  - caviar-mall-cor-one-shop-one-wait2
+  - caviar-mall-cor-one-stop-move-enter1
+  - caviar-mall-cor-shop-assistant2
+  - caviar-mall-cor-two-leave-shop1
+  - caviar-mall-front-one-shop-one-wait2
+  - caviar-mall-front-one-stop-move-enter1
+  - caviar-mall-front-shop-assistant2
+  - caviar-mall-front-two-leave-shop1
+  test:
+  - caviar-lobby-fight-chase
+  - caviar-lobby-fight-run-away2
+  - caviar-lobby-left-bag-at-chair
+  - caviar-lobby-left-bag-picked-up
+  - caviar-lobby-meet-walk-together1
+  - caviar-lobby-rest-in-chair
+  - caviar-lobby-rest-slump-on-floor
+  - caviar-lobby-rest-wiggle-on-floor
+  - caviar-lobby-split
+  - caviar-lobby-walk2
+  - caviar-mall-cor-enter-exit-crossing-paths1
+  - caviar-mall-cor-enter-exit-crossing-paths2
+  - caviar-mall-cor-one-leave-shop2
+  - caviar-mall-cor-one-stop-move-enter2
+  - caviar-mall-cor-one-stop-move-no-enter1
+  - caviar-mall-cor-one-stop-move-no-enter2
+  - caviar-mall-cor-one-stop-no-enter2
+  - caviar-mall-cor-shop-assistant1
+  - caviar-mall-cor-two-enter-shop1
+  - caviar-mall-cor-walk-by-shop1
+  - caviar-mall-front-enter-exit-crossing-paths1
+  - caviar-mall-front-enter-exit-crossing-paths2
+  - caviar-mall-front-one-leave-shop2
+  - caviar-mall-front-one-stop-move-enter2
+  - caviar-mall-front-one-stop-move-no-enter1
+  - caviar-mall-front-one-stop-move-no-enter2
+  - caviar-mall-front-one-stop-no-enter2
+  - caviar-mall-front-shop-assistant1
+  - caviar-mall-front-two-enter-shop1
+  - caviar-mall-front-walk-by-shop1
+  - mot16-02
+  - mot16-09
+  - mot20-01
+  - mot20-02

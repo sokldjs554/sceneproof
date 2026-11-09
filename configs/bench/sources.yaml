@@ -1,0 +1,114 @@
+# Benchmark sources: research-licensed datasets with HAND-LABELLED person boxes on static cameras.
+# Raw frames are never committed — scripts/fetch_bench.py downloads them from the original hosts and
+# re-encodes each sequence to H.264 so that video frame i == ground-truth frame i.
+# "group": sequences that show the same physical event (CAVIAR Lisbon corridor/front views of one take)
+# share a group; a split assigns whole groups, never single views (no leakage between splits).
+datasets:
+  caviar:
+    base_url: https://homepages.inf.ed.ac.uk/rbf/
+    license: "Creative Commons BY-SA (as stated on the CAVIAR data page)"
+    attribution: "EC Funded CAVIAR project/IST 2001 37540, http://homepages.inf.ed.ac.uk/rbf/CAVIAR/"
+    ground_truth: "per-frame person boxes found by hand-labelling the images (CVML XML); people who never move during a clip may be unboxed (INRIA set)"
+    page: https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/
+  mot16:
+    zip_url: https://motchallenge.net/data/MOT16.zip
+    license: "CC BY-NC-SA 3.0 (MOTChallenge)"
+    attribution: "Milan, Leal-Taixe, Reid, Roth, Schindler: MOT16: A Benchmark for Multi-Object Tracking, arXiv:1603.00831"
+    ground_truth: "per-frame boxes annotated by hand following the MOT16 protocol (all persons incl. occluded and static ones)"
+    page: https://motchallenge.net/data/MOT16/
+  mot20:
+    zip_url: https://motchallenge.net/data/MOT20.zip
+    license: "CC BY-NC-SA 3.0 (MOTChallenge)"
+    attribution: "Dendorfer et al.: MOT20: A benchmark for multi object tracking in crowded scenes, arXiv:2003.09003"
+    ground_truth: "per-frame boxes annotated by hand following the MOTChallenge protocol"
+    page: https://motchallenge.net/data/MOT20/
+excluded:
+  - {name: Fight_OneManDown, reason: "three different ground-truth files (Fight_OneManDown/fomdgt1.xml, Fight_OneManDown/fomdgt2.xml, Fight_OneManDown/fomdgt3.xml) with different person sets — ambiguous"}
+  - {name: CHAD, reason: "person boxes were produced by YOLOv4 + HRNet (paper §4), not by people — cannot serve as human ground truth"}
+  - {name: VIRAT Ground 2.0, reason: "hand-labelled and long, but download requires accepting the VIRAT Video Dataset Protection Agreement — left for the user to decide"}
+  - {name: MOT16 moving-camera sequences (05/10/11/13), reason: "zones are defined in image coordinates; a moving camera has no fixed zone"}
+sequences:
+  - {id: caviar-lobby-walk1, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Walk1", fps: 25, frames: CAVIARDATA1/Walk1/Walk1_jpg.tar.gz, gt: CAVIARDATA1/Walk1/wk1gt.xml}
+  - {id: caviar-lobby-walk2, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Walk2", fps: 25, frames: CAVIARDATA1/Walk2/Walk2_jpg.tar.gz, gt: CAVIARDATA1/Walk2/wk2gt.xml}
+  - {id: caviar-lobby-walk3, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Walk3", fps: 25, frames: CAVIARDATA1/Walk3/Walk3_jpg.tar.gz, gt: CAVIARDATA1/Walk3/wk3gt.xml}
+  - {id: caviar-lobby-browse1, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse1", fps: 25, frames: CAVIARDATA1/Browse1/Browse1_jpg.tar.gz, gt: CAVIARDATA1/Browse1/br1gt.xml}
+  - {id: caviar-lobby-browse2, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse2", fps: 25, frames: CAVIARDATA1/Browse2/Browse2_jpg.tar.gz, gt: CAVIARDATA1/Browse2/br2gt.xml}
+  - {id: caviar-lobby-browse3, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse3", fps: 25, frames: CAVIARDATA1/Browse3/Browse3_jpg.tar.gz, gt: CAVIARDATA1/Browse3/br3gt.xml}
+  - {id: caviar-lobby-browse4, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse4", fps: 25, frames: CAVIARDATA1/Browse4/Browse4_jpg.tar.gz, gt: CAVIARDATA1/Browse4/br4gt.xml}
+  - {id: caviar-lobby-browse-while-waiting1, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse_WhileWaiting1", fps: 25, frames: CAVIARDATA1/Browse_WhileWaiting1/Browse_WhileWaiting1_jpg.tar.gz, gt: CAVIARDATA1/Browse_WhileWaiting1/bww1gt.xml}
+  - {id: caviar-lobby-browse-while-waiting2, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Browse_WhileWaiting2", fps: 25, frames: CAVIARDATA1/Browse_WhileWaiting2/Browse_WhileWaiting2_jpg.tar.gz, gt: CAVIARDATA1/Browse_WhileWaiting2/bww2gt.xml}
+  - {id: caviar-lobby-rest-in-chair, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Rest_InChair", fps: 25, frames: CAVIARDATA1/Rest_InChair/Rest_InChair_jpg.tar.gz, gt: CAVIARDATA1/Rest_InChair/ricgt.xml}
+  - {id: caviar-lobby-rest-slump-on-floor, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Rest_SlumpOnFloor", fps: 25, frames: CAVIARDATA1/Rest_SlumpOnFloor/Rest_SlumpOnFloor_jpg.tar.gz, gt: CAVIARDATA1/Rest_SlumpOnFloor/rsfgt.xml}
+  - {id: caviar-lobby-rest-wiggle-on-floor, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Rest_WiggleOnFloor", fps: 25, frames: CAVIARDATA1/Rest_WiggleOnFloor/Rest_WiggleOnFloor_jpg.tar.gz, gt: CAVIARDATA1/Rest_WiggleOnFloor/rwgt.xml}
+  - {id: caviar-lobby-rest-fall-on-floor, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Rest_FallOnFloor", fps: 25, frames: CAVIARDATA1/Rest_FallOnFloor/Rest_FallOnFloor_jpg.tar.gz, gt: CAVIARDATA1/Rest_FallOnFloor/rffgt.xml}
+  - {id: caviar-lobby-left-bag, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:LeftBag", fps: 25, frames: CAVIARDATA1/LeftBag/LeftBag_jpg.tar.gz, gt: CAVIARDATA1/LeftBag/lb1gt.xml}
+  - {id: caviar-lobby-left-bag-at-chair, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:LeftBag_AtChair", fps: 25, frames: CAVIARDATA1/LeftBag_AtChair/LeftBag_AtChair_jpg.tar.gz, gt: CAVIARDATA1/LeftBag_AtChair/lb2gt.xml}
+  - {id: caviar-lobby-left-bag-behind-chair, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:LeftBag_BehindChair", fps: 25, frames: CAVIARDATA1/LeftBag_BehindChair/LeftBag_BehindChair_jpg.tar.gz, gt: CAVIARDATA1/LeftBag_BehindChair/lbbcgt.xml}
+  - {id: caviar-lobby-left-box, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:LeftBox", fps: 25, frames: CAVIARDATA1/LeftBox/LeftBox_jpg.tar.gz, gt: CAVIARDATA1/LeftBox/lbgt.xml}
+  - {id: caviar-lobby-left-bag-picked-up, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:LeftBag_PickedUp", fps: 25, frames: CAVIARDATA1/LeftBag_PickedUp/LeftBag_PickedUp_jpg.tar.gz, gt: CAVIARDATA1/LeftBag_PickedUp/lbpugt.xml}
+  - {id: caviar-lobby-meet-walk-together1, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Meet_WalkTogether1", fps: 25, frames: CAVIARDATA1/Meet_WalkTogether1/Meet_WalkTogether1_jpg.tar.gz, gt: CAVIARDATA1/Meet_WalkTogether1/mwt1gt.xml}
+  - {id: caviar-lobby-meet-walk-together2, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Meet_WalkTogether2", fps: 25, frames: CAVIARDATA1/Meet_WalkTogether2/Meet_WalkTogether2_jpg.tar.gz, gt: CAVIARDATA1/Meet_WalkTogether2/mwt2gt.xml}
+  - {id: caviar-lobby-meet-walk-split, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Meet_WalkSplit", fps: 25, frames: CAVIARDATA1/Meet_WalkSplit/Meet_WalkSplit_jpg.tar.gz, gt: CAVIARDATA1/Meet_WalkSplit/mws1gt.xml}
+  - {id: caviar-lobby-meet-split-3rd-guy, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Meet_Split_3rdGuy", fps: 25, frames: CAVIARDATA1/Meet_Split_3rdGuy/Meet_Split_3rdGuy_jpg.tar.gz, gt: CAVIARDATA1/Meet_Split_3rdGuy/ms3ggt.xml}
+  - {id: caviar-lobby-meet-crowd, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Meet_Crowd", fps: 25, frames: CAVIARDATA1/Meet_Crowd/Meet_Crowd_jpg.tar.gz, gt: CAVIARDATA1/Meet_Crowd/mc1gt.xml}
+  - {id: caviar-lobby-split, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Split", fps: 25, frames: CAVIARDATA1/Split/Split_jpg.tar.gz, gt: CAVIARDATA1/Split/spgt.xml}
+  - {id: caviar-lobby-fight-run-away1, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Fight_RunAway1", fps: 25, frames: CAVIARDATA1/Fight_RunAway1/Fight_RunAway1_jpg.tar.gz, gt: CAVIARDATA1/Fight_RunAway1/fra1gt.xml}
+  - {id: caviar-lobby-fight-run-away2, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Fight_RunAway2", fps: 25, frames: CAVIARDATA1/Fight_RunAway2/Fight_RunAway2_jpg.tar.gz, gt: CAVIARDATA1/Fight_RunAway2/fra2gt.xml}
+  - {id: caviar-lobby-fight-chase, dataset: caviar, site: caviar-lobby, group: "caviar-lobby:Fight_Chase", fps: 25, frames: CAVIARDATA1/Fight_Chase/Fight_Chase_jpg.tar.gz, gt: CAVIARDATA1/Fight_Chase/fcgt.xml}
+  - {id: caviar-mall-cor-walk-by-shop1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:WalkByShop1", fps: 25, frames: CAVIARDATA2/WalkByShop1cor/WalkByShop1cor.tar.gz, gt: CAVIARDATA2/WalkByShop1cor/cwbs1gt.xml}
+  - {id: caviar-mall-front-walk-by-shop1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:WalkByShop1", fps: 25, frames: CAVIARDATA2/WalkByShop1front/WalkByShop1front.tar.gz, gt: CAVIARDATA2/WalkByShop1front/fwbs1gt.xml}
+  - {id: caviar-mall-cor-enter-exit-crossing-paths1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:EnterExitCrossingPaths1", fps: 25, frames: CAVIARDATA2/EnterExitCrossingPaths1cor/EnterExitCrossingPaths1cor.tar.gz, gt: CAVIARDATA2/EnterExitCrossingPaths1cor/ceecp1gt.xml}
+  - {id: caviar-mall-front-enter-exit-crossing-paths1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:EnterExitCrossingPaths1", fps: 25, frames: CAVIARDATA2/EnterExitCrossingPaths1front/EnterExitCrossingPaths1front.tar.gz, gt: CAVIARDATA2/EnterExitCrossingPaths1front/feecp1gt.xml}
+  - {id: caviar-mall-cor-enter-exit-crossing-paths2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:EnterExitCrossingPaths2", fps: 25, frames: CAVIARDATA2/EnterExitCrossingPaths2cor/EnterExitCrossingPaths2cor.tar.gz, gt: CAVIARDATA2/EnterExitCrossingPaths2cor/ceecp2gt.xml}
+  - {id: caviar-mall-front-enter-exit-crossing-paths2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:EnterExitCrossingPaths2", fps: 25, frames: CAVIARDATA2/EnterExitCrossingPaths2front/EnterExitCrossingPaths2front.tar.gz, gt: CAVIARDATA2/EnterExitCrossingPaths2front/feecp2gt.xml}
+  - {id: caviar-mall-cor-one-leave-shop1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneLeaveShop1", fps: 25, frames: CAVIARDATA2/OneLeaveShop1cor/OneLeaveShop1cor.tar.gz, gt: CAVIARDATA2/OneLeaveShop1cor/cols1gt.xml}
+  - {id: caviar-mall-front-one-leave-shop1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneLeaveShop1", fps: 25, frames: CAVIARDATA2/OneLeaveShop1front/OneLeaveShop1front.tar.gz, gt: CAVIARDATA2/OneLeaveShop1front/fols1gt.xml}
+  - {id: caviar-mall-cor-one-leave-shop2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneLeaveShop2", fps: 25, frames: CAVIARDATA2/OneLeaveShop2cor/OneLeaveShop2cor.tar.gz, gt: CAVIARDATA2/OneLeaveShop2cor/cols2gt.xml}
+  - {id: caviar-mall-front-one-leave-shop2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneLeaveShop2", fps: 25, frames: CAVIARDATA2/OneLeaveShop2front/OneLeaveShop2front.tar.gz, gt: CAVIARDATA2/OneLeaveShop2front/fols2gt.xml}
+  - {id: caviar-mall-cor-one-leave-shop-reenter1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneLeaveShopReenter1", fps: 25, frames: CAVIARDATA2/OneLeaveShopReenter1cor/OneLeaveShopReenter1cor.tar.gz, gt: CAVIARDATA2/OneLeaveShopReenter1cor/colsr1gt.xml}
+  - {id: caviar-mall-front-one-leave-shop-reenter1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneLeaveShopReenter1", fps: 25, frames: CAVIARDATA2/OneLeaveShopReenter1front/OneLeaveShopReenter1front.tar.gz, gt: CAVIARDATA2/OneLeaveShopReenter1front/folsr1gt.xml}
+  - {id: caviar-mall-cor-one-leave-shop-reenter2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneLeaveShopReenter2", fps: 25, frames: CAVIARDATA2/OneLeaveShopReenter2cor/OneLeaveShopReenter2cor.tar.gz, gt: CAVIARDATA2/OneLeaveShopReenter2cor/colsr2gt.xml}
+  - {id: caviar-mall-front-one-leave-shop-reenter2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneLeaveShopReenter2", fps: 25, frames: CAVIARDATA2/OneLeaveShopReenter2front/OneLeaveShopReenter2front.tar.gz, gt: CAVIARDATA2/OneLeaveShopReenter2front/folsr2gt.xml}
+  - {id: caviar-mall-cor-one-shop-one-wait1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneShopOneWait1", fps: 25, frames: CAVIARDATA2/OneShopOneWait1cor/OneShopOneWait1cor.tar.gz, gt: CAVIARDATA2/OneShopOneWait1cor/cosow1gt.xml}
+  - {id: caviar-mall-front-one-shop-one-wait1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneShopOneWait1", fps: 25, frames: CAVIARDATA2/OneShopOneWait1front/OneShopOneWait1front.tar.gz, gt: CAVIARDATA2/OneShopOneWait1front/fosow1gt.xml}
+  - {id: caviar-mall-cor-one-shop-one-wait2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneShopOneWait2", fps: 25, frames: CAVIARDATA2/OneShopOneWait2cor/OneShopOneWait2cor.tar.gz, gt: CAVIARDATA2/OneShopOneWait2cor/cosow2gt.xml}
+  - {id: caviar-mall-front-one-shop-one-wait2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneShopOneWait2", fps: 25, frames: CAVIARDATA2/OneShopOneWait2front/OneShopOneWait2front.tar.gz, gt: CAVIARDATA2/OneShopOneWait2front/fosow2gt.xml}
+  - {id: caviar-mall-cor-one-stop-enter1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopEnter1", fps: 25, frames: CAVIARDATA2/OneStopEnter1cor/OneStopEnter1cor.tar.gz, gt: CAVIARDATA2/OneStopEnter1cor/cose1gt.xml}
+  - {id: caviar-mall-front-one-stop-enter1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopEnter1", fps: 25, frames: CAVIARDATA2/OneStopEnter1front/OneStopEnter1front.tar.gz, gt: CAVIARDATA2/OneStopEnter1front/fose1gt.xml}
+  - {id: caviar-mall-cor-one-stop-enter2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopEnter2", fps: 25, frames: CAVIARDATA2/OneStopEnter2cor/OneStopEnter2cor.tar.gz, gt: CAVIARDATA2/OneStopEnter2cor/cose2gt.xml}
+  - {id: caviar-mall-front-one-stop-enter2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopEnter2", fps: 25, frames: CAVIARDATA2/OneStopEnter2front/OneStopEnter2front.tar.gz, gt: CAVIARDATA2/OneStopEnter2front/fose2gt.xml}
+  - {id: caviar-mall-cor-one-stop-move-enter1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopMoveEnter1", fps: 25, frames: CAVIARDATA2/OneStopMoveEnter1cor/OneStopMoveEnter1cor.tar.gz, gt: CAVIARDATA2/OneStopMoveEnter1cor/cosme1gt.xml}
+  - {id: caviar-mall-front-one-stop-move-enter1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopMoveEnter1", fps: 25, frames: CAVIARDATA2/OneStopMoveEnter1front/OneStopMoveEnter1front.tar.gz, gt: CAVIARDATA2/OneStopMoveEnter1front/fosme1gt.xml}
+  - {id: caviar-mall-cor-one-stop-move-enter2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopMoveEnter2", fps: 25, frames: CAVIARDATA2/OneStopMoveEnter2cor/OneStopMoveEnter2cor.tar.gz, gt: CAVIARDATA2/OneStopMoveEnter2cor/cosme2gt.xml}
+  - {id: caviar-mall-front-one-stop-move-enter2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopMoveEnter2", fps: 25, frames: CAVIARDATA2/OneStopMoveEnter2front/OneStopMoveEnter2front.tar.gz, gt: CAVIARDATA2/OneStopMoveEnter2front/fosme2gt.xml}
+  - {id: caviar-mall-cor-one-stop-move-no-enter1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopMoveNoEnter1", fps: 25, frames: CAVIARDATA2/OneStopMoveNoEnter1cor/OneStopMoveNoEnter1cor.tar.gz, gt: CAVIARDATA2/OneStopMoveNoEnter1cor/cosmne1gt.xml}
+  - {id: caviar-mall-front-one-stop-move-no-enter1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopMoveNoEnter1", fps: 25, frames: CAVIARDATA2/OneStopMoveNoEnter1front/OneStopMoveNoEnter1front.tar.gz, gt: CAVIARDATA2/OneStopMoveNoEnter1front/fosmne1gt.xml}
+  - {id: caviar-mall-cor-one-stop-move-no-enter2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopMoveNoEnter2", fps: 25, frames: CAVIARDATA2/OneStopMoveNoEnter2cor/OneStopMoveNoEnter2cor.tar.gz, gt: CAVIARDATA2/OneStopMoveNoEnter2cor/cosmne2gt.xml}
+  - {id: caviar-mall-front-one-stop-move-no-enter2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopMoveNoEnter2", fps: 25, frames: CAVIARDATA2/OneStopMoveNoEnter2front/OneStopMoveNoEnter2front.tar.gz, gt: CAVIARDATA2/OneStopMoveNoEnter2front/fosmne2gt.xml}
+  - {id: caviar-mall-cor-one-stop-no-enter1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopNoEnter1", fps: 25, frames: CAVIARDATA2/OneStopNoEnter1cor/OneStopNoEnter1cor.tar.gz, gt: CAVIARDATA2/OneStopNoEnter1cor/cosne1gt.xml}
+  - {id: caviar-mall-front-one-stop-no-enter1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopNoEnter1", fps: 25, frames: CAVIARDATA2/OneStopNoEnter1front/OneStopNoEnter1front.tar.gz, gt: CAVIARDATA2/OneStopNoEnter1front/fosne1gt.xml}
+  - {id: caviar-mall-cor-one-stop-no-enter2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:OneStopNoEnter2", fps: 25, frames: CAVIARDATA2/OneStopNoEnter2cor/OneStopNoEnter2cor.tar.gz, gt: CAVIARDATA2/OneStopNoEnter2cor/cosne2gt.xml}
+  - {id: caviar-mall-front-one-stop-no-enter2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:OneStopNoEnter2", fps: 25, frames: CAVIARDATA2/OneStopNoEnter2front/OneStopNoEnter2front.tar.gz, gt: CAVIARDATA2/OneStopNoEnter2front/fosne2gt.xml}
+  - {id: caviar-mall-cor-shop-assistant1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:ShopAssistant1", fps: 25, frames: CAVIARDATA2/ShopAssistant1cor/ShopAssistant1cor.tar.gz, gt: CAVIARDATA2/ShopAssistant1cor/csa1gt.xml}
+  - {id: caviar-mall-front-shop-assistant1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:ShopAssistant1", fps: 25, frames: CAVIARDATA2/ShopAssistant1front/ShopAssistant1front.tar.gz, gt: CAVIARDATA2/ShopAssistant1front/fsa1gt.xml}
+  - {id: caviar-mall-cor-shop-assistant2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:ShopAssistant2", fps: 25, frames: CAVIARDATA2/ShopAssistant2cor/ShopAssistant2cor.tar.gz, gt: CAVIARDATA2/ShopAssistant2cor/csa2gt.xml}
+  - {id: caviar-mall-front-shop-assistant2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:ShopAssistant2", fps: 25, frames: CAVIARDATA2/ShopAssistant2front/ShopAssistant2front.tar.gz, gt: CAVIARDATA2/ShopAssistant2front/fsa2gt.xml}
+  - {id: caviar-mall-cor-three-past-shop1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:ThreePastShop1", fps: 25, frames: CAVIARDATA2/ThreePastShop1cor/ThreePastShop1cor.tar.gz, gt: CAVIARDATA2/ThreePastShop1cor/c3ps1gt.xml}
+  - {id: caviar-mall-front-three-past-shop1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:ThreePastShop1", fps: 25, frames: CAVIARDATA2/ThreePastShop1front/ThreePastShop1front.tar.gz, gt: CAVIARDATA2/ThreePastShop1front/f3ps1gt.xml}
+  - {id: caviar-mall-cor-three-past-shop2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:ThreePastShop2", fps: 25, frames: CAVIARDATA2/ThreePastShop2cor/ThreePastShop2cor.tar.gz, gt: CAVIARDATA2/ThreePastShop2cor/c3ps2gt.xml}
+  - {id: caviar-mall-front-three-past-shop2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:ThreePastShop2", fps: 25, frames: CAVIARDATA2/ThreePastShop2front/ThreePastShop2front.tar.gz, gt: CAVIARDATA2/ThreePastShop2front/f3ps2gt.xml}
+  - {id: caviar-mall-cor-two-enter-shop1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:TwoEnterShop1", fps: 25, frames: CAVIARDATA2/TwoEnterShop1cor/TwoEnterShop1cor.tar.gz, gt: CAVIARDATA2/TwoEnterShop1cor/c2es1gt.xml}
+  - {id: caviar-mall-front-two-enter-shop1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:TwoEnterShop1", fps: 25, frames: CAVIARDATA2/TwoEnterShop1front/TwoEnterShop1front.tar.gz, gt: CAVIARDATA2/TwoEnterShop1front/f2es1gt.xml}
+  - {id: caviar-mall-cor-two-enter-shop2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:TwoEnterShop2", fps: 25, frames: CAVIARDATA2/TwoEnterShop2cor/TwoEnterShop2cor.tar.gz, gt: CAVIARDATA2/TwoEnterShop2cor/c2es2gt.xml}
+  - {id: caviar-mall-front-two-enter-shop2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:TwoEnterShop2", fps: 25, frames: CAVIARDATA2/TwoEnterShop2front/TwoEnterShop2front.tar.gz, gt: CAVIARDATA2/TwoEnterShop2front/f2es2gt.xml}
+  - {id: caviar-mall-cor-two-enter-shop3, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:TwoEnterShop3", fps: 25, frames: CAVIARDATA2/TwoEnterShop3cor/TwoEnterShop3cor.tar.gz, gt: CAVIARDATA2/TwoEnterShop3cor/c2es3gt.xml}
+  - {id: caviar-mall-front-two-enter-shop3, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:TwoEnterShop3", fps: 25, frames: CAVIARDATA2/TwoEnterShop3front/TwoEnterShop3front.tar.gz, gt: CAVIARDATA2/TwoEnterShop3front/f2es3gt.xml}
+  - {id: caviar-mall-cor-two-leave-shop1, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:TwoLeaveShop1", fps: 25, frames: CAVIARDATA2/TwoLeaveShop1cor/TwoLeaveShop1cor.tar.gz, gt: CAVIARDATA2/TwoLeaveShop1cor/c2ls1gt.xml}
+  - {id: caviar-mall-front-two-leave-shop1, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:TwoLeaveShop1", fps: 25, frames: CAVIARDATA2/TwoLeaveShop1front/TwoLeaveShop1front.tar.gz, gt: CAVIARDATA2/TwoLeaveShop1front/f2ls1gt.xml}
+  - {id: caviar-mall-cor-two-leave-shop2, dataset: caviar, site: caviar-mall-cor, group: "caviar-mall:TwoLeaveShop2", fps: 25, frames: CAVIARDATA2/TwoLeaveShop2cor/TwoLeaveShop2cor.tar.gz, gt: CAVIARDATA2/TwoLeaveShop2cor/c2ls2gt.xml}
+  - {id: caviar-mall-front-two-leave-shop2, dataset: caviar, site: caviar-mall-front, group: "caviar-mall:TwoLeaveShop2", fps: 25, frames: CAVIARDATA2/TwoLeaveShop2front/TwoLeaveShop2front.tar.gz, gt: CAVIARDATA2/TwoLeaveShop2front/f2ls2gt.xml}
+  - {id: mot16-02, dataset: mot16, site: mot16-02-square, group: "mot16-02", fps: 30, zip_prefix: "train/MOT16-02/", note: "People walking around a large square (static camera)"}
+  - {id: mot16-04, dataset: mot16, site: mot16-04-street, group: "mot16-04", fps: 30, zip_prefix: "train/MOT16-04/", note: "Pedestrian street at night, elevated viewpoint (static camera)"}
+  - {id: mot16-09, dataset: mot16, site: mot16-09-lowangle, group: "mot16-09", fps: 30, zip_prefix: "train/MOT16-09/", note: "Pedestrian street filmed from a low angle (static camera)"}
+  - {id: mot20-01, dataset: mot20, site: mot20-station, group: "mot20-01", fps: 25, zip_prefix: "MOT20/train/MOT20-01/", note: "Crowded indoor train station"}
+  - {id: mot20-02, dataset: mot20, site: mot20-station, group: "mot20-02", fps: 25, zip_prefix: "MOT20/train/MOT20-02/", note: "Crowded indoor train station"}
