@@ -166,7 +166,10 @@ def vlm_section() -> str:
 
 def main() -> int:
     head = ["# 평가·실험 결과", "", "모든 표는 `scripts/eval_report.py`가 `docs/eval/raw/*.json`과 `docs/evidence/`에서 생성합니다(손으로 적은 숫자 없음). "
-            "목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.", ""]
+            "목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.", "",
+            "> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 84편으로, "
+            "장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다. 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안)는 "
+            "처음 만든 작은 점검용 세트로 남겨 둡니다. §2–§5(속도, 스트림 수, 장애, VLM)는 그대로 유효합니다.", ""]
     body = [event_section(), bench_section(), streams_section(), scenarios_section(), vlm_section()]
     tail = ["## 재현 절차", "", "```bash", "bash scripts/fetch_data.sh && bash scripts/fetch_models.sh",
             "# 1 사건 평가", "for v in yolox_nano yolox_tiny yolox_s; do python -m sceneproof.eval.run_eval --variant $v --out docs/eval/raw/event_eval_$v.json; done",

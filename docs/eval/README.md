@@ -2,6 +2,8 @@
 
 모든 표는 `scripts/eval_report.py`가 `docs/eval/raw/*.json`과 `docs/evidence/`에서 생성합니다(손으로 적은 숫자 없음). 목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.
 
+> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 84편으로, 장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다. 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안)는 처음 만든 작은 점검용 세트로 남겨 둡니다. §2–§5(속도, 스트림 수, 장애, VLM)는 그대로 유효합니다.
+
 ## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 draft)
 
 매칭 규칙·분모: `docs/eval/ground-truth.md`. 실행: `python -m sceneproof.eval.run_eval --variant <v>`; 재채점: `rescore.py`.
