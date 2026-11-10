@@ -22,6 +22,7 @@ import json
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import tarfile
@@ -40,10 +41,28 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "bench"
 
 
+def _ssl_context() -> ssl.SSLContext:
+    """System trust store PLUS certifi's: Python from python.org on macOS ships without access to the system
+    certificates until 'Install Certificates.command' is run, so plain urllib fails with CERTIFICATE_VERIFY_FAILED
+    (curl, which uses the system store, works on the same machine)."""
+    ctx = ssl.create_default_context()
+    try:
+        import certifi
+
+        ctx.load_verify_locations(certifi.where())
+    except Exception:
+        pass
+    return ctx
+
+
+_SSL = _ssl_context()
+
+
 def _get(url: str, tries: int = 5) -> bytes:
     for i in range(tries):
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "sceneproof-bench"}), timeout=120) as r:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "sceneproof-bench"}), timeout=120,
+                                        context=_SSL) as r:
                 return r.read()
         except Exception as e:
             if i == tries - 1:
@@ -253,8 +272,10 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as ex:
         results += list(ex.map(work, cav))
     results += [work(s) for s in mot]
-    bad = [r["id"] for r in results if r.get("error") or (not r.get("skipped") and not r.get("frames_match_gt", True))]
-    print(f"[bench] done: {len(results)} sequences, problems: {bad or 'none'} -> {manifest_path}")
+    bad = [r for r in results if r.get("error") or (not r.get("skipped") and not r.get("frames_match_gt", True))]
+    print(f"[bench] done: {len(results)} sequences, problems: {[r['id'] for r in bad] or 'none'} -> {manifest_path}")
+    for r in bad:
+        print(f"[bench]   {r['id']}: {r.get('error') or 'video frame count differs from ground truth'}")
     return 1 if bad else 0
 
 
