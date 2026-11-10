@@ -16,7 +16,8 @@ setup:  ## venv + 의존성 + 데이터 + 모델 + 게이트웨이 빌드 (다�
 	C="$$($(PYTHON) scripts/check_python.py --constraints)"; $(PYTHON) -m venv .venv && . .venv/bin/activate && pip install -U pip && \
 		pip install --prefer-binary -e ".[server,dev,bench]" $${C:+-c $$C}
 	@# optional parts: a missing one is skipped with a note, the rest of the setup still completes
-	C="$$($(PYTHON) scripts/check_python.py --constraints)"; . .venv/bin/activate && (pip install --prefer-binary -e ".[torch]" $${C:+-c $$C} || echo "[setup] PyTorch를 설치하지 못했습니다(예: 인텔 Mac에는 설치 파일이 없음). 추가 학습과 PyTorch 비교만 못 하고, 나머지는 공식 ONNX 모델로 동작합니다.")
+	@if [ "$$(uname)" = Darwin ] && [ "$$(uname -m)" = x86_64 ]; then echo "[setup] 인텔 Mac: PyTorch 설치 파일이 없어 건너뜁니다(추가 학습·PyTorch 비교만 못 함, 나머지는 공식 ONNX 모델로 동작)."; else \
+		C="$$($(PYTHON) scripts/check_python.py --constraints)"; . .venv/bin/activate && (pip install --prefer-binary -e ".[torch]" $${C:+-c $$C} || echo "[setup] PyTorch를 설치하지 못했습니다. 추가 학습과 PyTorch 비교만 못 하고, 나머지는 공식 ONNX 모델로 동작합니다."); fi
 	@if [ "$$(uname)" = Darwin ]; then echo "[setup] Mac: PyGObject(GStreamer)는 건너뜁니다(OpenCV로 영상을 읽음)."; else \
 		. .venv/bin/activate && (pip install --prefer-binary -e ".[gst]" || echo "[setup] PyGObject(GStreamer) 건너뜀: OpenCV로 영상을 읽습니다."); fi
 	. .venv/bin/activate && bash scripts/fetch_data.sh
