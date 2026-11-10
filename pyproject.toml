@@ -12,7 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "sokldjs554" }]
 dependencies = [
   "numpy>=1.26",
-  "opencv-python-headless>=4.9",
+  "opencv-python-headless>=4.8",
   "onnxruntime>=1.19",
   "scipy>=1.13",
   "grpcio>=1.66",
