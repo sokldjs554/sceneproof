@@ -1,12 +1,17 @@
 # SceneProof — common tasks. `make help` lists them.
 PY ?= .venv/bin/python
+# the Python that creates .venv (choose one, e.g. `make setup PYTHON=python3.12`; CI uses 3.12)
+PYTHON ?= python3
 SHELL := /bin/bash
 
 help:  ## 이 도움말
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS=":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-setup:  ## venv + 의존성 + 데이터 + 모델 + 게이트웨이 빌드
-	python -m venv .venv && . .venv/bin/activate && pip install -U pip && pip install -e ".[server,dev,torch]" && (pip install -e ".[gst]" || echo "PyGObject skipped (OpenCV backend will be used)")
+setup:  ## venv + 의존성 + 데이터 + 모델 + 게이트웨이 빌드 (다른 Python: make setup PYTHON=python3.12)
+	$(PYTHON) scripts/check_python.py
+	@if [ -x .venv/bin/python ] && [ "$$(.venv/bin/python -c 'import sys; print(sys.version_info[:2])')" != "$$($(PYTHON) -c 'import sys; print(sys.version_info[:2])')" ]; then \
+		echo "[setup] .venv 폴더가 다른 Python 버전으로 만들어져 있습니다. 이 폴더를 지운 뒤 다시 실행하세요."; exit 1; fi
+	$(PYTHON) -m venv .venv && . .venv/bin/activate && pip install -U pip && pip install -e ".[server,dev,torch]" && (pip install -e ".[gst]" || echo "PyGObject skipped (OpenCV backend will be used)")
 	bash scripts/fetch_data.sh
 	. .venv/bin/activate && bash scripts/fetch_models.sh
 	$(MAKE) -C gateway build

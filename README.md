@@ -32,9 +32,12 @@ RTSP/파일 → [엣지 분석기: GStreamer → YOLOX(ONNX Runtime) → ByteTra
 
 ## 바로 실행
 
+Python 3.11–3.13 권장(자동 검사는 3.12). 추론 라이브러리(onnxruntime)가 인텔 Mac에서는 Python 3.13까지만, 3.15 이상은 아직 설치 파일이 없습니다. `python3 scripts/check_python.py`가 미리 확인해 주고, `make setup PYTHON=python3.12`로 Python을 골라 한 번에 설치할 수 있습니다.
+
 ```bash
 git clone https://github.com/sokldjs554/sceneproof.git && cd sceneproof
-python -m venv .venv && . .venv/bin/activate
+python3 scripts/check_python.py               # 이 Python으로 설치 가능한지 확인
+python3 -m venv .venv && . .venv/bin/activate
 pip install -e ".[server,dev,torch]"          # PyGObject(GStreamer)는 선택: pip install -e ".[gst]"
 bash scripts/fetch_data.sh && bash scripts/fetch_models.sh
 (cd gateway && make build)                    # Go 1.24
