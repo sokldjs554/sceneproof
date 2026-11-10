@@ -33,11 +33,14 @@ fi
 
 # Working copies: H.264 (browser-playable, RTSP passthrough-friendly), constant frame rate,
 # capped at 1280x720 so a 4-vCPU box can decode + analyse in real time.
+# ffmpeg on PATH, else the binary bundled with `pip install imageio-ffmpeg` (no Homebrew build needed)
+FFMPEG="${FFMPEG:-$(command -v ffmpeg || python -m sceneproof.ffmpeg 2>/dev/null || true)}"
+[ -n "$FFMPEG" ] || { echo "[fetch] ffmpeg not found: install ffmpeg or run: pip install imageio-ffmpeg" >&2; exit 1; }
 transcode() {
   local src="$1" dst="$2" fps="$3"
   if [ -s "$dst" ]; then return; fi
   echo "[transcode] $(basename "$src") -> $(basename "$dst") @ ${fps}fps"
-  ffmpeg -v error -y -i "$src" -vf "scale='min(1280,iw)':-2" -r "$fps" -c:v libx264 -preset veryfast -crf 23 \
+  "$FFMPEG" -v error -y -i "$src" -vf "scale='min(1280,iw)':-2" -r "$fps" -c:v libx264 -preset veryfast -crf 23 \
     -pix_fmt yuv420p -g "$((fps * 2))" -an -movflags +faststart "$dst"
 }
 transcode "$RAW/worker-zone-detection.mp4"      "$OUT/worker-zone.mp4"        30

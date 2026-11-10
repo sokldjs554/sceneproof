@@ -1,0 +1,8 @@
+# Intel Mac on macOS 11 (Big Sur) with Python 3.11/3.12: the newest versions that still publish install files
+# (wheels) for this OS, and work together. Newer OpenCV needs macOS 12; OpenCV 4.9 needs numpy 1.x.
+# Applied automatically by `make setup` (scripts/check_python.py --constraints). Tested by running the unit tests
+# with exactly these versions.
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+onnxruntime==1.19.2
+scipy==1.13.1

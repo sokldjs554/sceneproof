@@ -32,7 +32,7 @@ RTSP/파일 → [엣지 분석기: GStreamer → YOLOX(ONNX Runtime) → ByteTra
 
 ## 바로 실행
 
-Python 3.11–3.13 권장(자동 검사는 3.12). 추론 라이브러리(onnxruntime)가 인텔 Mac에서는 Python 3.13까지만, 3.15 이상은 아직 설치 파일이 없습니다. `python3 scripts/check_python.py`가 미리 확인해 주고, `make setup PYTHON=python3.12`로 Python을 골라 한 번에 설치할 수 있습니다. 인텔 Mac에는 PyTorch 설치 파일이 없어, 설치는 PyTorch 없이 계속되고 모델은 YOLOX 공식 ONNX 파일을 받습니다(이 저장소에서 내보낸 것과 탐지 결과 동일, 점수 차이 0). 추가 학습과 PyTorch 비교만 못 합니다. Go가 없으면 게이트웨이 빌드만 건너뜁니다.
+Python 3.11–3.13 권장(자동 검사는 3.12). 추론 라이브러리(onnxruntime)가 인텔 Mac에서는 Python 3.13까지만(macOS 11–12는 3.12까지), 3.15 이상은 아직 설치 파일이 없습니다. macOS 11(Big Sur) 인텔 Mac은 함께 동작하는 이전 버전 묶음(`constraints/macos11-intel.txt`, 그 버전으로 단위 테스트 통과 확인)으로 자동 설치됩니다. ffmpeg가 없으면 pip로 받는 `imageio-ffmpeg`의 ffmpeg를 씁니다(Homebrew로 직접 빌드하지 않아도 됨). `python3 scripts/check_python.py`가 미리 확인해 주고, `make setup PYTHON=python3.12`로 Python을 골라 한 번에 설치할 수 있습니다. 인텔 Mac에는 PyTorch 설치 파일이 없어, 설치는 PyTorch 없이 계속되고 모델은 YOLOX 공식 ONNX 파일을 받습니다(이 저장소에서 내보낸 것과 탐지 결과 동일, 점수 차이 0). 추가 학습과 PyTorch 비교만 못 합니다. Go가 없으면 게이트웨이 빌드만 건너뜁니다.
 
 ```bash
 git clone https://github.com/sokldjs554/sceneproof.git && cd sceneproof

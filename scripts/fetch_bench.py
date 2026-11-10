@@ -21,6 +21,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -32,6 +33,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import yaml
+
+from sceneproof.ffmpeg import ffmpeg_exe
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "bench"
@@ -60,7 +63,10 @@ def _encode(frames, fps: float, dst: Path) -> tuple[int, int]:
     # encode into a temporary file and rename only on success: an interrupted run never leaves a short video that a
     # later run would mistake for a finished one
     tmp = dst.with_name(dst.stem + ".partial.mp4")
-    cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
+    exe = ffmpeg_exe()
+    if exe is None:
+        raise RuntimeError("ffmpeg not found: install ffmpeg or `pip install imageio-ffmpeg`")
+    cmd = [exe, "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
            "-pix_fmt", "yuv420p", "-g", str(int(fps * 2)), "-movflags", "+faststart", "-an", str(tmp)]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
@@ -83,9 +89,17 @@ def _encode(frames, fps: float, dst: Path) -> tuple[int, int]:
 
 
 def _count_frames(path: Path) -> int:
-    out = subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
-                          "stream=nb_read_frames", "-of", "csv=p=0", str(path)], capture_output=True, text=True).stdout
-    return int(out.strip().split(",")[0])
+    """Decoded frame count: ffprobe when installed, else decode with OpenCV (the bundled ffmpeg has no ffprobe)."""
+    if shutil.which("ffprobe"):
+        out = subprocess.run(["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                              "stream=nb_read_frames", "-of", "csv=p=0", str(path)], capture_output=True, text=True).stdout
+        return int(out.strip().split(",")[0])
+    cap = cv2.VideoCapture(str(path))
+    n = 0
+    while cap.grab():
+        n += 1
+    cap.release()
+    return n
 
 
 def fetch_caviar(seq: dict, base: str) -> dict:

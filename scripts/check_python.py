@@ -30,10 +30,12 @@ def problem() -> str | None:
         intel = machine in ("x86_64", "amd64")
         # newest Python that has onnxruntime (and OpenCV) install files for this macOS / CPU
         if intel:
-            if mac and mac < (12, 0):
-                return f"macOS {platform.mac_ver()[0]}입니다. 인텔 Mac은 macOS 12 이상이 필요합니다(영상 라이브러리 OpenCV)."
+            if mac and mac < (11, 0):
+                return f"macOS {platform.mac_ver()[0]}입니다. macOS 11 이상이 필요합니다(onnxruntime)."
             newest = (3, 12) if mac and mac < (13, 0) else (3, 13)
         else:
+            if mac and mac < (12, 0):
+                return f"Apple 칩 Mac, macOS {platform.mac_ver()[0]}입니다. 계산 라이브러리 scipy가 macOS 12 이상을 요구합니다."
             newest = (3, 12) if mac and mac < (13, 0) else (3, 13) if mac and mac < (14, 0) else (3, 14)
         if v > newest:
             return (f"{'인텔' if intel else 'Apple 칩'} Mac, macOS {platform.mac_ver()[0]}에서는 onnxruntime 설치 파일이 "
@@ -41,13 +43,26 @@ def problem() -> str | None:
     return None
 
 
+def constraints() -> str | None:
+    """Pinned versions for setups where pip's newest choices would not work together (see the file's comment)."""
+    mac = tuple(int(x) for x in (platform.mac_ver()[0] or "0").split(".")[:2])
+    if platform.system() == "Darwin" and platform.machine().lower() in ("x86_64", "amd64") and mac and mac < (12, 0):
+        return "constraints/macos11-intel.txt"
+    return None
+
+
 def main() -> int:
+    if "--constraints" in sys.argv:  # used by `make setup`: prints the constraints file to apply, or nothing
+        print(constraints() or "")
+        return 0
     v = sys.version_info
     where = f"Python {v.major}.{v.minor}.{v.micro} · {platform.system()} {platform.mac_ver()[0] or platform.release()} · {platform.machine()}"
     p = problem()
     if p is None:
         note = "" if (v.major, v.minor) == TESTED else f" (자동 검사는 Python {TESTED[0]}.{TESTED[1]}로 합니다)"
         print(f"[check_python] OK: {where}{note}")
+        if constraints():
+            print(f"[check_python] macOS 11 인텔 Mac: 이 Mac에서 함께 동작하는 버전 묶음({constraints()})으로 설치합니다.")
         if platform.system() == "Darwin" and platform.machine().lower() in ("x86_64", "amd64"):
             print("[check_python] 인텔 Mac: PyTorch 설치 파일이 없어 추가 학습·PyTorch 비교는 못 합니다. "
                   "나머지(분석·평가·검토 도구)는 공식 ONNX 모델로 동작합니다.")

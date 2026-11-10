@@ -10,7 +10,6 @@ is decoded twice. H.264 is used when libx264 is present (browser-playable); mpeg
 from __future__ import annotations
 
 import json
-import shutil
 import subprocess
 import threading
 import time
@@ -20,6 +19,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from ..ffmpeg import ffmpeg_exe
 from .frames import FrameRing, RingEntry
 from .zones import Episode, ZoneSpec
 
@@ -51,8 +51,11 @@ class ClipOut:
 
 
 def _ffmpeg_codec() -> str:
+    exe = ffmpeg_exe()
+    if exe is None:
+        return "none"
     try:
-        out = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True, timeout=10).stdout
+        out = subprocess.run([exe, "-hide_banner", "-encoders"], capture_output=True, text=True, timeout=10).stdout
     except (OSError, subprocess.SubprocessError):
         return "none"
     if "libx264" in out:
@@ -162,7 +165,8 @@ class EvidenceWriter:
         d.mkdir(parents=True, exist_ok=True)
         path = d / "clip.mp4"
         t0 = time.perf_counter()
-        if self.codec == "none" or shutil.which("ffmpeg") is None:
+        exe = ffmpeg_exe()
+        if self.codec == "none" or exe is None:
             # last resort: MJPEG via OpenCV (not browser-playable but keeps the evidence)
             path = d / "clip.avi"
             w, h = picked[0].width, picked[0].height
@@ -174,7 +178,7 @@ class EvidenceWriter:
         else:
             codec = self.codec
             vf = "scale=trunc(iw/2)*2:trunc(ih/2)*2"
-            cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-vcodec", "mjpeg",
+            cmd = [exe, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-vcodec", "mjpeg",
                    "-framerate", f"{self.clip_fps}", "-i", "-", "-vf", vf, "-c:v", codec]
             if codec == "libx264":
                 cmd += ["-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p", "-movflags", "+faststart"]

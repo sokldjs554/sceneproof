@@ -11,11 +11,15 @@ setup:  ## venv + 의존성 + 데이터 + 모델 + 게이트웨이 빌드 (다�
 	$(PYTHON) scripts/check_python.py
 	@if [ -x .venv/bin/python ] && [ "$$(.venv/bin/python -c 'import sys; print(sys.version_info[:2])')" != "$$($(PYTHON) -c 'import sys; print(sys.version_info[:2])')" ]; then \
 		echo "[setup] .venv 폴더가 다른 Python 버전으로 만들어져 있습니다. 이 폴더를 지운 뒤 다시 실행하세요."; exit 1; fi
-	$(PYTHON) -m venv .venv && . .venv/bin/activate && pip install -U pip && pip install -e ".[server,dev,bench]"
+	@# --prefer-binary: take an older ready-made package rather than compiling a newer one from source (hours on
+	@# older Macs); on Big Sur Intel Macs a tested set of versions is pinned (scripts/check_python.py --constraints)
+	C="$$($(PYTHON) scripts/check_python.py --constraints)"; $(PYTHON) -m venv .venv && . .venv/bin/activate && pip install -U pip && \
+		pip install --prefer-binary -e ".[server,dev,bench]" $${C:+-c $$C}
 	@# optional parts: a missing one is skipped with a note, the rest of the setup still completes
-	. .venv/bin/activate && (pip install -e ".[torch]" || echo "[setup] PyTorch를 설치하지 못했습니다(예: 인텔 Mac에는 설치 파일이 없음). 추가 학습과 PyTorch 비교만 못 하고, 나머지는 공식 ONNX 모델로 동작합니다.")
-	. .venv/bin/activate && (pip install -e ".[gst]" || echo "[setup] PyGObject(GStreamer) 건너뜀: OpenCV로 영상을 읽습니다.")
-	bash scripts/fetch_data.sh
+	C="$$($(PYTHON) scripts/check_python.py --constraints)"; . .venv/bin/activate && (pip install --prefer-binary -e ".[torch]" $${C:+-c $$C} || echo "[setup] PyTorch를 설치하지 못했습니다(예: 인텔 Mac에는 설치 파일이 없음). 추가 학습과 PyTorch 비교만 못 하고, 나머지는 공식 ONNX 모델로 동작합니다.")
+	@if [ "$$(uname)" = Darwin ]; then echo "[setup] Mac: PyGObject(GStreamer)는 건너뜁니다(OpenCV로 영상을 읽음)."; else \
+		. .venv/bin/activate && (pip install --prefer-binary -e ".[gst]" || echo "[setup] PyGObject(GStreamer) 건너뜀: OpenCV로 영상을 읽습니다."); fi
+	. .venv/bin/activate && bash scripts/fetch_data.sh
 	. .venv/bin/activate && bash scripts/fetch_models.sh
 	@if command -v go >/dev/null; then $(MAKE) -C gateway build; else echo "[setup] Go가 없어 게이트웨이 빌드를 건너뜁니다(실시간 데모에만 필요)."; fi
 
