@@ -32,6 +32,7 @@ server = [
   "anthropic>=0.40",
 ]
 torch = ["torch>=2.4", "onnx>=1.16"]
+bench = ["remotezip>=0.12"]  # scripts/fetch_bench.py reads only the needed sequences out of the MOT zips
 gst = ["pygobject>=3.50", "pycairo>=1.26"]
 vlm-local = ["transformers>=4.46", "torch>=2.4", "pillow>=10"]
 dev = [
