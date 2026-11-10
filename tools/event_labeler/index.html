@@ -54,6 +54,13 @@
       <label>속도 <select id="rate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option></select></label>
       <span id="time" class="muted">0.00초</span>
     </div>
+    <div class="row">
+      <button id="btn-in" class="primary">들어감 <kbd>I</kbd></button>
+      <button id="btn-out">나감 <kbd>O</kbd></button>
+      <button id="btn-b">경계 통과로 <kbd>B</kbd></button>
+      <button id="btn-u">불확실로 <kbd>U</kbd></button>
+      <span id="flash" class="muted"></span>
+    </div>
     <div class="card">
       <b>표시 방법</b>
       <ol>
@@ -94,6 +101,7 @@ $('file').addEventListener('change', (e) => {
   const site = Object.keys(sites).find((s) => stem.startsWith(s));
   if (site) $('site').value = site;
   $('hint').textContent = `영상: ${f.name}`;
+  e.target.blur(); $('play').focus();  // otherwise the file input keeps focus and swallows I / O / Space
 });
 $('site').addEventListener('change', draw);
 function status(text, cls) { $('status').textContent = text; $('status').className = cls || ''; }
@@ -123,10 +131,16 @@ function draw() {
   }
 }
 function step(d) { video.pause(); video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + d)); }
-function openEvent() { events.push({ start_s: +video.currentTime.toFixed(2), end_s: null, label: 'intrusion', note: '' }); render(); }
+function flash(t) { $('flash').textContent = t; clearTimeout(flash.t); flash.t = setTimeout(() => { $('flash').textContent = ''; }, 2500); }
+function openEvent() {
+  if (!video.src) { flash('먼저 영상을 고르세요'); return; }
+  events.push({ start_s: +video.currentTime.toFixed(2), end_s: null, label: 'intrusion', note: '' }); render();
+  flash(`들어감 표시: ${video.currentTime.toFixed(2)}초`);
+}
 function closeEvent(i) {
   const idx = i ?? events.map((e) => e.end_s === null).lastIndexOf(true);
-  if (idx < 0) return; events[idx].end_s = +video.currentTime.toFixed(2); render();
+  if (idx < 0) { flash('아직 "들어감"을 표시한 사람이 없습니다'); return; }
+  events[idx].end_s = +video.currentTime.toFixed(2); render(); flash(`나감 표시: ${video.currentTime.toFixed(2)}초`);
 }
 function setLabel(lab) { const e = events[events.length - 1]; if (e) { e.label = lab; render(); } }
 function render() {
@@ -149,7 +163,10 @@ function render() {
 $('play').onclick = () => (video.paused ? video.play() : video.pause());
 $('back').onclick = () => step(-0.2); $('fwd').onclick = () => step(0.2);
 $('clear').onclick = () => { if (confirm('표시한 사건을 모두 지울까요?')) { events = []; render(); } };
+$('btn-in').onclick = () => openEvent(); $('btn-out').onclick = () => closeEvent();
+$('btn-b').onclick = () => setLabel('boundary_pass'); $('btn-u').onclick = () => setLabel('unsure');
 $('export').onclick = () => {
+  if (!events.length && !confirm('표시한 사건이 0건입니다. 이 영상에서 정말 아무도 구역에 들어가지 않았나요? (들어갔다면 "취소"를 누르고 표시하세요)')) return;
   if (events.some((e) => e.end_s === null) && !confirm('아직 "나감"을 누르지 않은 사건이 있습니다. 영상 끝까지 구역 안에 있었다면 그대로 내보내도 됩니다. 계속할까요?')) return;
   const out = { sequence: fileName.replace(/\.[^.]+$/, ''), video: fileName, site: $('site').value, annotator: $('annotator').value || '이름없음',
     created: new Date().toISOString(), duration_s: +(video.duration || 0).toFixed(2),
@@ -159,9 +176,10 @@ $('export').onclick = () => {
   a.download = `${out.sequence}.${out.annotator}.json`; a.click();
 };
 document.addEventListener('keydown', (e) => {
-  if (['INPUT', 'SELECT'].includes(document.activeElement.tagName)) return;
+  const ae = document.activeElement;
+  if (ae && (ae.tagName === 'SELECT' || (ae.tagName === 'INPUT' && ae.type !== 'file'))) return;  // typing a name / choosing
   const k = e.key.toLowerCase();
-  if (k === ' ') { e.preventDefault(); $('play').click(); }
+  if (k === ' ') { e.preventDefault(); if (ae) ae.blur(); $('play').click(); }
   else if (k === 'arrowleft') step(e.shiftKey ? -1 : -0.2);
   else if (k === 'arrowright') step(e.shiftKey ? 1 : 0.2);
   else if (k === 'i') openEvent();
