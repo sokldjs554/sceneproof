@@ -44,43 +44,217 @@ CAMS = {"eval-campus": "campus-walkway.mp4", "eval-indoor": "people-indoor.mp4",
 
 # --------------------------------------------------------------------------- ground-truth questions
 NOW = " — 지금 정답"
+# (id, camera, frame times, question, choices, people to box: [(label, how to find, (from_s, to_s))])
+#   how to find — "inside": the track whose feet are inside the zone for the most frames in the interval;
+#   "edge": the track whose feet stay closest to the zone border in the interval; "green": the track with the most
+#   green clothing; "near": the track (other than those already boxed) whose box overlaps the zone area most often;
+#   ("at", t, x, y): the person whose box contains the point (x, y) (fraction of width / height) at t seconds — picked by
+#   looking at the frames where several people stand close together (store).
 GT_ITEMS = [
-    ("campus-e01", "eval-campus", [0.2, 0.5, 0.9], "검은 재킷 보행자(e01)의 발이 잔디(빨간 구역) 안으로 들어갔나요?",
-     ["선 위나 밖을 따라 걸음(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"]),
-    ("campus-e04", "eval-campus", [74.7, 76.5, 78.5], "빨간 재킷 보행자(e04)의 발이 잔디 안으로 들어갔나요?",
-     ["선 위나 밖을 따라 걸음(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"]),
+    ("campus-e01", "eval-campus", [0.2, 0.5, 0.9],
+     "노란 상자로 표시한 사람(검은 재킷, 영상 맨 처음 잔디 경계선 근처)의 발이 잔디(빨간 구역) 안으로 들어갔나요?",
+     ["선 위나 밖을 따라 걸음(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"], [("e01", "edge", (0.0, 0.9))]),
+    ("campus-e04", "eval-campus", [74.7, 76.5, 78.5],
+     "노란 상자로 표시한 사람(빨간 재킷, 잔디 경계선을 따라 보도 쪽으로 걷는 사람)의 발이 잔디 안으로 들어갔나요?",
+     ["선 위나 밖을 따라 걸음(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"], [("e04", "edge", (74.7, 79.0))]),
     ("campus-e03-gap", "eval-campus", [57.0, 59.0, 61.0, 62.5],
-     "자주색 재킷 보행자(e03)는 발이 화면 아래로 잘린 동안(58~62초)에도 잔디 위에 계속 있었다고 봐도 되나요?",
-     ["계속 잔디 위(한 사건)" + NOW, "잔디 밖으로 나갔다 들어옴(두 사건)", "판단 불가"]),
+     "노란 상자로 표시한 사람(흰 머리·자주색 재킷, 잔디 왼쪽 아래)은 발이 화면 아래로 잘린 동안(58~62초)에도 "
+     "잔디 위에 계속 있었다고 봐도 되나요?",
+     ["계속 잔디 위(한 사건)" + NOW, "잔디 밖으로 나갔다 들어옴(두 사건)", "판단 불가"], [("e03", "inside", (53.4, 64.0))]),
     ("campus-third", "eval-campus", [52.5, 55.0, 57.5, 60.0],
-     "이 시간대에 빨간 재킷·자주색 재킷 두 사람 말고 잔디에 발을 디딘 사람이 있나요?",
-     ["없음" + NOW, "있음(사건을 더해야 함)", "판단 불가"]),
+     "상자로 표시한 두 사람(노랑 = 흰 머리·자주색 재킷, 하늘색 = 빨간 재킷) 말고 잔디에 발을 디딘 사람이 또 있나요?",
+     ["없음" + NOW, "있음(사건을 더해야 함)", "판단 불가"],
+     [("e03", "inside", (53.4, 64.0)), ("e02", "inside", (52.5, 60.2))]),
     ("indoor-e04-start", "eval-indoor", [44.9, 45.2, 45.5, 45.8, 46.1],
-     "사람(e04)의 발이 빨간 구역 안에 처음 들어간 사진은 몇 번인가요? (지금 정답: ②, 45.2초)",
-     ["①", "②" + NOW, "③", "④", "⑤", "판단 불가"]),
+     "노란 상자로 표시한 사람(뛰어서 왼쪽 출입문으로 나가는 사람, 흐릿하게 보임)의 발이 빨간 구역 안에 처음 들어간 사진은 "
+     "몇 번인가요? (지금 정답: ②, 45.2초)",
+     ["①", "②" + NOW, "③", "④", "⑤", "판단 불가"], [("e04", "inside", (45.2, 46.5))]),
     ("store-gap", "eval-store", [42.0, 43.5, 45.0, 46.5, 48.0],
-     "42.7~47.9초 사이에 그 사람이 구역(통로 안쪽) 밖으로 나갔나요?",
-     ["나갔다 다시 들어옴(두 사건)" + NOW, "계속 구역 안(한 사건으로 합침)", "판단 불가"]),
-    ("store-e03", "eval-store", [52.0, 56.0, 60.0, 64.0], "선반에 가려진 사람(e03)의 발이 구역 안에 있나요?",
-     ["안(침입)", "밖", "가려서 판단 불가" + NOW]),
+     "①의 노란 상자 사람(자주색·갈색 상의, 통로 맨 끝에 서 있음)이 42.7~47.9초 사이에 구역(통로 안쪽) 밖으로 나갔나요? "
+     "②~⑤에서는 프로그램이 이 사람을 찾지 못해 상자가 없습니다. ①의 상자 자리(통로 맨 끝)를 보고 판단해 주세요.",
+     ["나갔다 다시 들어옴(두 사건)" + NOW, "계속 구역 안(한 사건으로 합침)", "판단 불가"], [("e01/e02", ("at", 42.0, 0.555, 0.13), (41.0, 49.0))]),
+    ("store-e03", "eval-store", [52.0, 56.0, 60.0, 64.0],
+     "하늘색 상자로 표시한 사람(금발 여성, 어두운 상의, 통로 가운데 왼쪽에 서 있음)의 발이 구역 안에 있나요? "
+     "발이 접시 더미에 가려 있을 수 있습니다. (노란 상자는 통로 맨 끝의 자주색·갈색 상의 사람. 초안 메모에는 이 사람이 '파란 재킷·금발'로 적혀 있습니다)",
+     ["안(침입)", "밖", "가려서 판단 불가" + NOW], [("e02", ("at", 56.0, 0.535, 0.25), (50.0, 65.0)), ("e03", ("at", 56.0, 0.29, 0.32), (50.0, 65.0))]),
     ("store-green", "eval-store", [30.0, 38.0, 46.0, 54.0, 62.0],
-     "오른쪽 선반 쪽 초록 상의 사람의 발이 구역에 닿은 적이 있나요?", ["없음" + NOW, "있음(사건을 더해야 함)", "판단 불가"]),
+     "노란 상자로 표시한 사람(청록색 상의·붉은 머리 여성, 오른쪽 선반 앞에서 접시를 고름)의 발이 구역(빨간 칸)에 닿은 적이 있나요?",
+     ["없음" + NOW, "있음(사건을 더해야 함)", "판단 불가"], [("green", ("at", 56.0, 0.69, 0.41), (28.0, 65.0))]),
     ("store-zone-meaning", "eval-store", [35.0],
      "이 구역(통로 안쪽 재고 구역)을 '직원만 들어가는 곳'으로 볼까요? Claude는 구역 안의 고객을 보고 '정상일 가능성 높음'으로 판단했습니다.",
-     ["직원 전용(고객이 들어가도 알림)" + NOW, "고객도 다니는 통로(이 구역은 평가에서 뺌)", "잘 모르겠음"]),
-    ("parking-e02", "eval-parking", [44.4, 45.0, 45.6], "보행자(e02)의 발이 빨간 구역 안에 들어갔나요? (사진을 누르면 크게 보입니다)",
-     ["선 위나 밖(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"]),
+     ["직원 전용(고객이 들어가도 알림)" + NOW, "고객도 다니는 통로(이 구역은 평가에서 뺌)", "잘 모르겠음"], []),
+    ("parking-e02", "eval-parking", [44.4, 45.0, 45.6],
+     "노란 상자로 표시한 보행자(구역 왼쪽 위 경계선 근처를 걷는 사람)의 발이 빨간 구역 안에 들어갔나요? (사진을 누르면 크게 보입니다)",
+     ["선 위나 밖(경계 통과)" + NOW, "안으로 들어감(침입)", "판단 불가"], [("e02", "edge", (44.4, 45.8))]),
     ("parking-e01-start", "eval-parking", [26.4, 26.7, 27.0, 27.3, 27.6],
-     "자전거 탄 사람(e01)이 구역 안에 처음 들어간 사진은? (지금 정답: ③, 27.0초)", ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"]),
+     "노란 상자로 표시한 자전거 탄 사람(구역 위쪽을 왼쪽에서 오른쪽으로 지나감)이 구역 안에 처음 들어간 사진은? (지금 정답: ③, 27.0초)",
+     ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"], [("e01", "inside", (26.4, 29.0))]),
     ("parking-e01-end", "eval-parking", [28.5, 29.0, 29.5, 30.0, 30.5],
-     "자전거 탄 사람(e01)이 구역 밖으로 나간(또는 화면에서 사라진) 첫 사진은? (지금 정답: ②, 29.0초) "
-     "— CV가 28.8초부터 낸 사건을 '잘못 울림'으로 채점했는데, Claude는 이때 구역 안에 사람이 있다고 봤습니다.",
-     ["①", "②" + NOW, "③", "④", "⑤", "판단 불가"]),
+     "노란 상자로 표시한 자전거 탄 사람이 구역 밖으로 나간(또는 화면 오른쪽으로 사라진) 첫 사진은? (지금 정답: ②, 29.0초) "
+     "— 프로그램이 28.8초부터 낸 사건을 '잘못 울림'으로 채점했는데, Claude는 이때 구역 안에 사람이 있다고 봤습니다.",
+     ["①", "②" + NOW, "③", "④", "⑤", "판단 불가"], [("e01", "inside", (27.0, 30.5))]),
     ("parking-e03-start", "eval-parking", [45.2, 45.5, 45.8, 46.1, 46.4],
-     "사람(e03)이 구역 안에 처음 들어간 사진은? (지금 정답: ③, 45.8초)", ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"]),
+     "노란 상자로 표시한 자전거 탄 사람(다시 구역 위쪽을 가로지름)이 구역 안에 처음 들어간 사진은? (지금 정답: ③, 45.8초)",
+     ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"], [("e03", "inside", (45.8, 49.2))]),
     ("parking-e03-end", "eval-parking", [48.6, 48.9, 49.2, 49.5, 49.8],
-     "사람(e03)이 구역 밖으로 나간 첫 사진은? (지금 정답: ③, 49.2초)", ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"]),
+     "노란 상자로 표시한 자전거 탄 사람이 구역 밖으로 나간 첫 사진은? (지금 정답: ③, 49.2초)",
+     ["①", "②", "③" + NOW, "④", "⑤", "판단 불가"], [("e03", "inside", (45.8, 49.8))]),
 ]
+
+
+COLORS = [(0, 220, 255), (255, 200, 60)]  # BGR: yellow, sky blue
+_DET = None
+_TRACK_CACHE: dict = {}
+
+
+def _detector():
+    global _DET
+    if _DET is None:
+        from sceneproof.edge.detector import build_detector
+
+        _DET = build_detector({"variant": "yolox_s", "model": str(ROOT / "models" / "yolox_s.onnx"), "conf_threshold": 0.3})
+    return _DET
+
+
+def _green(img: np.ndarray, box) -> float:
+    """Share of clearly green pixels in the upper 60 % of a person box (clothing colour)."""
+    x1, y1, x2, y2 = (int(max(0, v)) for v in box)
+    crop = img[y1:y1 + int(0.6 * (y2 - y1)), x1:x2]
+    if crop.size == 0:
+        return 0.0
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+    m = (hsv[..., 0] >= 35) & (hsv[..., 0] <= 85) & (hsv[..., 1] > 60) & (hsv[..., 2] > 40)
+    return float(m.mean())
+
+
+def _tracks(cam: str, t0: float, t1: float):
+    """Person detector (YOLOX-s) + the product's tracker over [t0, t1]: ({frame: {track: box}}, {track: [green]})."""
+    key = (cam, round(t0, 2), round(t1, 2))
+    if key in _TRACK_CACHE:
+        return _TRACK_CACHE[key]
+    from sceneproof.edge.tracker import ByteTracker, TrackerParams
+
+    fps = yaml.safe_load((GT_DIR / f"{cam}.yaml").read_text())["fps"]
+    cap = cv2.VideoCapture(str(ROOT / "data" / "videos" / CAMS[cam]))
+    f0, f1 = max(0, round(t0 * fps)), round(t1 * fps)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, f0)
+    trk = ByteTracker(TrackerParams(track_buffer=int(2 * fps)))
+    per_frame: dict[int, dict[int, tuple]] = {}
+    green: dict[int, list[float]] = {}
+    for f in range(f0, f1 + 1):
+        ok, img = cap.read()
+        if not ok:
+            break
+        d = _detector().detect(img)
+        per_frame[f] = {}
+        for t in trk.update(d.boxes, d.scores):
+            per_frame[f][t.track_id] = tuple(float(v) for v in t.xyxy)
+            if f % 5 == 0:
+                green.setdefault(t.track_id, []).append(_green(img, t.xyxy))
+    cap.release()
+    _TRACK_CACHE[key] = (per_frame, green, fps)
+    return _TRACK_CACHE[key]
+
+
+def _edge_dist(x: float, y: float, poly) -> float:
+    best = 1e9
+    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1], strict=True):
+        dx, dy = bx - ax, by - ay
+        t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / ((dx * dx + dy * dy) or 1e-12)))
+        best = min(best, ((x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2) ** 0.5)
+    return best
+
+
+def _pick(cam: str, rule, interval: tuple[float, float], window: tuple[float, float], exclude: set) -> int | None:
+    from sceneproof.edge.zones import point_in_polygon
+
+    per_frame, green, fps = _tracks(cam, *window)
+    w = int(cv2.VideoCapture(str(ROOT / "data" / "videos" / CAMS[cam])).get(cv2.CAP_PROP_FRAME_WIDTH))
+    h = int(cv2.VideoCapture(str(ROOT / "data" / "videos" / CAMS[cam])).get(cv2.CAP_PROP_FRAME_HEIGHT))
+    if isinstance(rule, tuple) and rule[0] == "at":  # the person at a given point and time
+        _, t, x, y = rule
+        boxes = {tid: b for tid, b in per_frame.get(round(t * fps), {}).items() if tid not in exclude}
+        inside = [tid for tid, b in boxes.items() if b[0] <= x * w <= b[2] and b[1] <= y * h <= b[3]]
+        pool = inside or list(boxes)
+        return min(pool, key=lambda tid: ((boxes[tid][0] + boxes[tid][2]) / 2 - x * w) ** 2
+                   + ((boxes[tid][1] + boxes[tid][3]) / 2 - y * h) ** 2) if pool else None
+    poly = _zone(cam)
+    xs, ys = [p[0] for p in poly], [p[1] for p in poly]
+    frames = [f for f in per_frame if round(interval[0] * fps) <= f <= round(interval[1] * fps)]
+    score: dict[int, list[float]] = {}
+    for f in frames:
+        for tid, b in per_frame[f].items():
+            if tid in exclude:
+                continue
+            fx, fy = (b[0] + b[2]) / 2 / w, b[3] / h
+            if rule == "inside":
+                score.setdefault(tid, []).append(1.0 if point_in_polygon(fx, fy, poly) else 0.0)
+            elif rule == "edge":
+                score.setdefault(tid, []).append(-_edge_dist(fx, fy, poly))
+            elif rule == "near":
+                over = b[2] / w > min(xs) and b[0] / w < max(xs) and b[3] / h > min(ys) and b[1] / h < max(ys)
+                score.setdefault(tid, []).append(1.0 if over else 0.0)
+    if rule == "green":
+        cands = {t: float(np.mean(v)) for t, v in green.items() if t not in exclude and len(v) >= 3}
+        return max(cands, key=cands.get) if cands else None
+    if rule == "edge":  # present for at least 40 % of the interval, then closest to the border on average
+        cands = {t: float(np.mean(v)) for t, v in score.items() if len(v) >= 0.4 * max(1, len(frames))}
+    else:
+        cands = {t: float(np.sum(v)) for t, v in score.items()}
+    return max(cands, key=cands.get) if cands else None
+
+
+def _target_boxes(cam: str, times: list[float], targets: list) -> list[list]:
+    """For each frame time: [(box, label, colour)] of the people the question is about."""
+    if not targets:
+        return [[] for _ in times]
+    lo = min([times[0]] + [iv[0] for _, _, iv in targets]) - 1.0
+    hi = max([times[-1]] + [iv[1] for _, _, iv in targets]) + 1.0
+    per_frame, _, fps = _tracks(cam, lo, hi)
+    frags: dict[int, list[int]] = {}
+    for f in sorted(per_frame):
+        for tid in per_frame[f]:
+            frags.setdefault(tid, []).append(f)
+
+    def link(a_box, b_box) -> bool:  # same person? close feet, similar height
+        ha, hb = a_box[3] - a_box[1], b_box[3] - b_box[1]
+        d = (((a_box[0] + a_box[2]) - (b_box[0] + b_box[2])) / 2) ** 2 + (a_box[3] - b_box[3]) ** 2
+        return ha > 0 and hb > 0 and 0.5 <= hb / ha <= 2.0 and d ** 0.5 <= 1.0 * max(ha, hb)
+
+    def chain(tid: int, taken: set) -> set:
+        """Track pieces of the same person: the tracker gives a new number after losing someone (crowds, blur)."""
+        ids, gap = {tid}, round(3 * fps)
+        for forward in (True, False):
+            cur = tid
+            while True:
+                end = frags[cur][-1] if forward else frags[cur][0]
+                cands = [t for t in frags if t not in ids | taken
+                         and (0 < frags[t][0] - end <= gap if forward else 0 < end - frags[t][-1] <= gap)
+                         and link(per_frame[end][cur], per_frame[frags[t][0] if forward else frags[t][-1]][t])]
+                if not cands:
+                    break
+                cur = min(cands, key=lambda t: abs((frags[t][0] if forward else frags[t][-1]) - end))
+                ids.add(cur)
+        return ids
+
+    chosen, used = [], set()
+    for k, (label, rule, interval) in enumerate(targets):
+        tid = _pick(cam, rule, interval, (lo, hi), used)
+        if tid is not None:
+            ids = chain(tid, used)
+            used |= ids
+            chosen.append((ids, label, COLORS[k % len(COLORS)]))
+    out = []
+    for t in times:
+        f = round(t * fps)
+        row = []
+        for ids, label, color in chosen:
+            near = [(g, i) for g in per_frame for i in ids if i in per_frame[g] and abs(g - f) <= max(1, round(0.15 * fps))]
+            if near:
+                g, i = min(near, key=lambda gi: abs(gi[0] - f))
+                row.append((per_frame[g][i], label, color))
+        out.append(row)
+    return out
 
 
 def _zone(cam: str) -> list[tuple[float, float]]:
@@ -98,18 +272,19 @@ def _frame(video: Path, idx: int) -> np.ndarray:
     return img
 
 
-def _draw(img: np.ndarray, poly, box=None, label: str = "") -> np.ndarray:
+def _draw(img: np.ndarray, poly, box=None, label: str = "", extra: list | None = None) -> np.ndarray:
     h, w = img.shape[:2]
     pts = np.array([[x * w, y * h] for x, y in poly], np.int32)
     over = img.copy()
     cv2.fillPoly(over, [pts], (48, 59, 255))
     img = cv2.addWeighted(over, 0.15, img, 0.85, 0)
     cv2.polylines(img, [pts], True, (48, 59, 255), 3)
-    if box is not None:
-        x1, y1, x2, y2 = (int(v) for v in box)
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 220, 255), 2)
-        if label:
-            cv2.putText(img, label, (x1, max(12, y1 - 4)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 220, 255), 1, cv2.LINE_AA)
+    boxes = ([(box, label, (0, 220, 255))] if box is not None else []) + (extra or [])
+    for b, lab, color in boxes:
+        x1, y1, x2, y2 = (int(v) for v in b)
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, 3)
+        if lab:
+            cv2.putText(img, lab, (x1, max(14, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2, cv2.LINE_AA)
     return img
 
 
@@ -202,19 +377,22 @@ def _opts(item: str, field: str, choices: list[str]) -> str:
 
 def build_gt_page() -> str:
     cards = []
-    for n, (item, cam, times, q, choices) in enumerate(GT_ITEMS, 1):
+    for n, (item, cam, times, q, choices, targets) in enumerate(GT_ITEMS, 1):
         fps = yaml.safe_load((GT_DIR / f"{cam}.yaml").read_text())["fps"]
         poly = _zone(cam)
+        boxes = _target_boxes(cam, times, targets)
         figs = []
         for k, t in enumerate(times, 1):
-            img = _draw(_frame(ROOT / "data" / "videos" / CAMS[cam], round(t * fps)), poly)
+            img = _draw(_frame(ROOT / "data" / "videos" / CAMS[cam], round(t * fps)), poly, extra=boxes[k - 1])
             num = "①②③④⑤⑥"[k - 1] if len(times) > 1 else ""
-            figs.append(f"<figure><img src='{_b64(img)}' alt='{cam} {t}s'><figcaption>{num} {t:.1f}초</figcaption></figure>")
+            miss = " (상자 없음: 화면 밖이거나 가려져 프로그램이 못 찾음)" if targets and len(boxes[k - 1]) < len(targets) else ""
+            figs.append(f"<figure><img src='{_b64(img)}' alt='{cam} {t}s'><figcaption>{num} {t:.1f}초{miss}</figcaption></figure>")
         cards.append(f"<div class='card' data-id='{item}'><div class='muted'>{n}. {cam} ({CAMS[cam]})</div>"
                      f"<div class='imgs'>{''.join(figs)}</div><div class='q'>{html.escape(q)}</div>{_opts(item, 'choice', choices)}"
                      f"<textarea data-id='{item}' data-field='note' placeholder='메모(선택)'></textarea></div>")
     intro = ("처음 만든 평가 영상 4편의 정답 초안(Claude가 만든 것) 중 사람이 확인해야 할 14곳입니다. 빨간 칸이 구역이고, "
-             "<b>사람의 발(신발 밑)</b>이 빨간 칸 안에 있으면 '들어감'입니다. 사진을 누르면 크게 보입니다. 답은 이 브라우저에 자동으로 남고, "
+             "<b>사람의 발(신발 밑)</b>이 빨간 칸 안에 있으면 '들어감'입니다. 질문 대상인 사람은 <b>노란 상자</b>(둘이면 하늘색 상자도)로 "
+             "표시했습니다. 상자는 프로그램이 자동으로 찾은 것이라, 다른 사람에게 붙어 있으면 메모에 적어 주세요. 사진을 누르면 크게 보입니다. 답은 이 브라우저에 자동으로 남고, "
              "다 끝나면 위의 <b>내보내기</b>를 눌러 파일을 저장해 올려 주세요. '— 지금 정답'이 붙은 답이 현재 초안입니다.")
     return _page("평가 영상 정답 검수", "gt_review", intro, cards)
 
