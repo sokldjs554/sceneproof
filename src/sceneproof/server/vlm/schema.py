@@ -15,6 +15,17 @@ from pydantic import BaseModel, Field, ValidationError
 
 SCHEMA_VERSION = "1"
 
+# The one definition of ``assessment``. It is written into the field description (which is part of the schema the
+# model receives) and into the English system prompt; the Korean system prompt states the same three cases
+# (tests/test_vlm_contract.py). Added to the schema in prompt v1.4 after v1.2 showed that listing the values
+# without saying when to use them made the model answer "does this look dangerous?" (docs/eval/vlm-findings.md §3).
+ASSESSMENT_RULE = (
+    "needs_attention when a person is confirmed inside the restricted zone (red polygon) in the frames, regardless of "
+    "whether the activity looks dangerous or ordinary; unclear when near the boundary or inside/outside cannot be "
+    "settled; likely_benign only when the person is outside the zone or a tracking error (non-person, misplaced box) "
+    "is evident. Opinions about risk go in reasons only."
+)
+
 
 class Observation(BaseModel):
     frame: str = Field(description="which key frame: context_before|entry|dwell|exit|context_after|all")
@@ -34,7 +45,7 @@ class ExplanationV1(BaseModel):
     person: PersonInfo = PersonInfo()
     activity: str = Field(min_length=1, max_length=120, description="short label of what the person is doing")
     zone_relation: Literal["clearly_inside", "near_boundary", "outside", "unclear"]
-    assessment: Literal["needs_attention", "likely_benign", "unclear"]
+    assessment: Literal["needs_attention", "likely_benign", "unclear"] = Field(description=ASSESSMENT_RULE)
     reasons: list[str] = Field(default_factory=list, max_length=8)
     uncertainties: list[str] = Field(default_factory=list, max_length=8, description="what cannot be determined from the frames")
     operator_question: str | None = Field(default=None, max_length=300)

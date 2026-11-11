@@ -6,9 +6,10 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from .schema import json_schema
+from .schema import ASSESSMENT_RULE, json_schema
 
-PROMPT_VERSION = "v1.3-ko"  # v1.2 → v1.3: assessment 규칙 명시 (docs/eval/vlm-findings.md §4)
+PROMPT_VERSION = "v1.4-ko"  # v1.2 → v1.3: assessment 규칙 명시 (docs/eval/vlm-findings.md §4); v1.3 → v1.4: 같은 규칙을
+# 스키마의 assessment 설명에도 넣음(schema.ASSESSMENT_RULE). 측정한 결과는 v1.3이며 v1.4는 아직 측정하지 않았습니다.
 
 SYSTEM_KO = """당신은 산업현장 CCTV 사건 검토를 돕는 보조자입니다. 입력으로 한 사건의 전후 프레임(주석 버전에는
 붉은 다각형 = 제한구역, 노란 상자 = 추적 중인 사람)이 주어집니다. 규칙:
@@ -21,14 +22,11 @@ SYSTEM_KO = """당신은 산업현장 CCTV 사건 검토를 돕는 보조자입�
 4. 사람을 특정하는 표현(이름, 신원 추정)은 쓰지 않습니다. 외형은 복장·장비 수준에서만 기술합니다.
 5. 출력은 반드시 아래 JSON 스키마를 따르는 JSON 객체 하나만 반환합니다. 설명 문장은 한국어로 씁니다."""
 
-SYSTEM_EN = """You assist with reviewing industrial CCTV events. You receive key frames around one event
+SYSTEM_EN = f"""You assist with reviewing industrial CCTV events. You receive key frames around one event
 (annotated frames: red polygon = restricted zone, yellow box = the tracked person). Rules:
 1. Describe only what is directly visible. Never assert identity, intent, off-screen context or sound.
 2. When unsure say "unclear" and list what is uncertain under uncertainties.
-3. No probabilities or confidence numbers. assessment rule: needs_attention when a person is confirmed inside the
-   restricted zone (red polygon) in the frames — regardless of whether the activity looks dangerous or ordinary;
-   unclear when near the boundary or inside/outside cannot be settled; likely_benign only when the person is
-   outside the zone or a tracking error (non-person, misplaced box) is evident. Opinions about risk go in reasons only.
+3. No probabilities or confidence numbers. assessment rule: {ASSESSMENT_RULE}
 4. Do not identify people; describe clothing/equipment only.
 5. Return exactly one JSON object following the schema below."""
 
