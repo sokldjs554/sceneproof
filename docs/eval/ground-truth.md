@@ -33,6 +33,8 @@
 
 ## 남은 검수 작업(사용자)
 
+아래 항목을 사진과 버튼으로 답하는 페이지: [`tools/review/gt_review.html`](../../tools/review/gt_review.html) (브라우저로 열기, 설치 불필요).
+
 | 영상 | 확인할 것 | 방법 |
 |---|---|---|
 | campus | e01·e04 경계 통과 vs 침입, e03의 58–62s(발이 화면 밖) 처리, 52–60s 세 번째 인물 | `data/videos/campus-walkway.mp4`를 0.2·0.9·57·74.7·79초에서 정지해 발 위치 확인 |
