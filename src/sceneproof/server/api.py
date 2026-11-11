@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from sceneproof import __version__
 
 from .db import Store
+from .groups import concurrent_groups
 
 REVIEW_STATES = ("needs_review", "in_review", "resolved")
 ALLOWED_TRANSITIONS = {
@@ -137,6 +138,10 @@ def build_router(app_state: Any) -> APIRouter:
         expl = store.latest_explanation_map([x["event_id"] for x in rows])
         devs = devices_view()
         items = [_event_view(store, x, expl.get(x["event_id"]), devs) for x in rows]
+        # events of this response that were inside the same zone at the same time (groups.py); None when alone
+        groups = concurrent_groups(items)
+        for it in items:
+            it["concurrent"] = groups.get(it["event_id"])
         for it in items:  # list view: keep payload small
             it.pop("trajectory", None)
             if it["explanation"]:

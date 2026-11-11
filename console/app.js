@@ -189,7 +189,8 @@ const state = {
   commands: {},           // camera_id -> {phase:'wait'|'ok'|'err', id, message}
   auditOpen: false, audit: [], auditSig: '',
   displayed: new Set(),   // event ids already reported via /displayed in this session
-  form: { open: false, resolution: 'confirmed', note: '' },
+  form: { open: false, resolution: 'confirmed', note: '', group: null },
+  collapsedGroups: new Set(), // group ids folded in the list (all groups start unfolded: nothing is hidden by default)
   actor: '담당자', reviewError: null, reviewBusy: false, explainBusy: false,
 };
 const sigOf = (ev) => [ev.event_id, ev.revision, ev.review && ev.review.state, ev.explanation ? ev.explanation.status : 'none', ev.evidence_ready ? 1 : 0, ev.evidence && ev.evidence.clip_available ? 1 : 0].join('|');
@@ -219,6 +220,22 @@ function filteredEvents() {
     && (!f.kind || e.kind === f.kind)
     && (!q || (e.zone_name || '').toLowerCase().includes(q) || e.event_id.toLowerCase().includes(q) || (e.camera_name || '').toLowerCase().includes(q)));
 }
+/** Group of events that were inside the same zone at the same time (server: groups.py), from the list data. */
+function groupOf(id) { const e = state.eventsById.get(id); const g = e && e.concurrent; return g && g.size > 1 ? g : null; }
+const groupMembers = (g) => g.event_ids.map((id) => state.eventsById.get(id)).filter(Boolean);
+/** List order with concurrent events placed together where the first of them appears: [{ev} | {group, members}]. */
+function displayItems(visible) {
+  const vis = new Set(visible.map((e) => e.event_id)); const done = new Set(); const out = [];
+  for (const ev of visible) {
+    if (done.has(ev.event_id)) continue;
+    const g = groupOf(ev.event_id);
+    const members = g ? groupMembers(g).filter((m) => vis.has(m.event_id)) : [];
+    if (members.length > 1) { members.forEach((m) => done.add(m.event_id)); out.push({ group: g, members }); }
+    else { done.add(ev.event_id); out.push({ ev }); }
+  }
+  return out;
+}
+const displayOrder = (visible) => displayItems(visible).flatMap((it) => (it.group ? it.members : [it.ev]));
 /** Cameras known from device heartbeats plus cameras seen in events. */
 function cameraIndex() {
   const map = new Map();
@@ -526,6 +543,30 @@ function buildRow(ev) {
   }
   return row;
 }
+function groupStateCounts(members) {
+  const c = {}; for (const m of members) c[m.review.state] = (c[m.review.state] || 0) + 1; return c;
+}
+function buildGroup(item, rows) {
+  const { group: g, members } = item; const folded = state.collapsedGroups.has(g.group_id);
+  const first = members[0]; const end = Math.max(...members.map((m) => num(m.media_exit_s ?? m.media_entry_s)));
+  const counts = groupStateCounts(members);
+  const head = h('div', { class: 'ev-group-h', role: 'button', tabindex: '0', 'aria-expanded': folded ? 'false' : 'true',
+    title: '같은 구역에 같은 시간 동안 있던 사건입니다. 여러 명이 함께 있었거나, 한 사람의 추적 번호가 바뀌어 둘로 나뉘었을 수 있습니다. '
+      + '사건을 합치지 않으며 각자 처리 상태를 가집니다. 누르면 접거나 펼칩니다.',
+    onclick: () => toggleGroup(g.group_id),
+    onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGroup(g.group_id); } } },
+  h('span', { class: 'caret' }, folded ? '▸' : '▾'),
+  h('b', null, `동시에 구역 안 ${g.size}건`), members.length < g.size ? h('span', { class: 'muted small' }, `(${members.length}건 표시)`) : null,
+  h('span', { class: 'ev-media' }, `영상 ${fmtMedia(first.media_entry_s)}–${fmtMedia(end)}`),
+  h('span', { class: 'grp-states' }, ['needs_review', 'in_review', 'resolved'].filter((k) => counts[k])
+    .map((k) => h('span', { class: `chip st-${k}` }, `${L.review[k]} ${counts[k]}`))));
+  return h('div', { class: `ev-group${folded ? ' folded' : ''}`, dataset: { gid: g.group_id } }, head, h('div', { class: 'ev-group-body' }, ...rows));
+}
+function toggleGroup(gid, open) {
+  const folded = state.collapsedGroups.has(gid);
+  if (open === true || (open === undefined && folded)) state.collapsedGroups.delete(gid); else state.collapsedGroups.add(gid);
+  renderList();
+}
 function renderList() {
   const list = $('#event-list'); if (!state.loaded) return;
   const visible = filteredEvents();
@@ -543,14 +584,22 @@ function renderList() {
   }
   list.dataset.sig = 'rows';
   const existing = new Map();
-  for (const el of list.children) if (el.dataset && el.dataset.id) existing.set(el.dataset.id, el);
-  const rows = visible.map((ev) => {
-    const old = existing.get(ev.event_id);
-    return old && old.dataset.sig === sigOf(ev) ? old : buildRow(ev);
+  for (const el of list.querySelectorAll('.ev-row')) if (el.dataset && el.dataset.id) existing.set(el.dataset.id, el);
+  const oldGroups = new Map();
+  for (const el of list.children) if (el.dataset && el.dataset.gid) oldGroups.set(el.dataset.gid, el);
+  const rowFor = (ev) => { const old = existing.get(ev.event_id); return old && old.dataset.sig === sigOf(ev) ? old : buildRow(ev); };
+  const nodes = displayItems(visible).map((it) => {
+    if (!it.group) return rowFor(it.ev);
+    const rows = it.members.map(rowFor);
+    const gsig = JSON.stringify([it.members.map(sigOf), state.collapsedGroups.has(it.group.group_id), it.group.size]);
+    const old = oldGroups.get(it.group.group_id);
+    const body = old && old.querySelector('.ev-group-body');
+    if (old && old.dataset.gsig === gsig && body && rows.length === body.children.length && rows.every((n, i) => n === body.children[i])) return old;
+    const g = buildGroup(it, rows); g.dataset.gsig = gsig; return g;
   });
-  const same = rows.length === list.children.length && rows.every((n, i) => n === list.children[i]);
-  if (!same) { const top = list.scrollTop; list.replaceChildren(...rows); list.scrollTop = top; }
-  for (const n of rows) {
+  const same = nodes.length === list.children.length && nodes.every((n, i) => n === list.children[i]);
+  if (!same) { const top = list.scrollTop; list.replaceChildren(...nodes); list.scrollTop = top; }
+  for (const n of list.querySelectorAll('.ev-row')) {
     const sel = n.dataset.id === state.selectedId;
     n.classList.toggle('selected', sel); n.setAttribute('aria-selected', sel ? 'true' : 'false');
   }
@@ -808,7 +857,8 @@ function renderDetail() {
   }
   const full = hasFullDetail(ev);
   const prov = state.status && state.status.vlm ? state.status.vlm.provider : '';
-  const sig = JSON.stringify([sigOf(ev), full, state.tab, state.form.open, state.reviewError, state.reviewBusy, state.explainBusy, state.detailError,
+  const grp = groupOf(ev.event_id);
+  const sig = JSON.stringify([sigOf(ev), full, state.tab, state.form.open, state.form.group, grp ? groupMembers(grp).map(sigOf) : null, state.reviewError, state.reviewBusy, state.explainBusy, state.detailError,
     (ev.review_log || []).length, prov, ev.review.updated_at]);
   renderIfChanged(root, sig, () => [buildTabs(ev), buildTabBody(ev, full), buildEng(ev, full)]);
   syncFrames(ev);
@@ -936,6 +986,8 @@ function buildReviewTab(ev, full) {
     st === 'resolved' && rv.resolution ? h('span', { class: 'chip chip-lg', style: 'background:var(--panel-2)' }, `결과: ${L.resolution[rv.resolution] || rv.resolution}`) : null,
     rv.updated_at ? h('span', { class: 'muted small' }, `${fmtDateTime(rv.updated_at)} · ${rv.actor || '—'}`) : null));
   if (rv.note) out.push(h('p', { class: 'small', style: 'margin:0 0 8px' }, '메모: ', rv.note));
+  const grp = groupOf(ev.event_id);
+  if (grp) out.push(buildGroupBox(ev, grp));
   if (!IS_STATIC) out.push(h('div', { class: 'actor-row' }, h('label', { for: 'actor' }, '담당자'),
     h('input', { id: 'actor', type: 'text', value: state.actor, maxlength: '80', placeholder: '이름 또는 ID',
       oninput: (e) => { state.actor = e.target.value; try { localStorage.setItem('sp.actor', state.actor); } catch { /* ignore */ } } }),
@@ -945,7 +997,7 @@ function buildReviewTab(ev, full) {
   const lock = IS_STATIC ? { disabled: true, title: STATIC_MSG } : { disabled: state.reviewBusy };
   if (st === 'needs_review') acts.append(btn('▶ 검토 시작', 'btn-primary', () => doReview(ev.event_id, 'in_review'), { ...lock, id: 'btn-start-review' }));
   if (st === 'in_review') {
-    acts.append(btn('✓ 처리 완료…', 'btn-success', () => { state.form.open = true; renderDetail(); }, { ...lock, id: 'btn-resolve' }));
+    acts.append(btn('✓ 처리 완료…', 'btn-success', () => { state.form.open = true; state.form.group = null; renderDetail(); }, { ...lock, id: 'btn-resolve' }));
     acts.append(btn('↩ 다시 확인 필요로', '', () => doReview(ev.event_id, 'needs_review'), { ...lock, id: 'btn-back' }));
   }
   if (st === 'resolved') acts.append(btn('↻ 재검토', '', () => doReview(ev.event_id, 'in_review'), { ...lock, id: 'btn-reopen' }));
@@ -953,7 +1005,7 @@ function buildReviewTab(ev, full) {
     : h('span', { class: 'muted small' }, st === 'needs_review' ? '검토를 시작하면 "검토 중"으로 바뀝니다.'
       : st === 'in_review' ? '처리 결과를 골라 완료하거나, 다시 확인 필요로 되돌립니다.' : '처리 완료된 사건입니다. 필요하면 재검토할 수 있습니다.'));
   out.push(acts);
-  if (state.form.open && st === 'in_review') out.push(buildResolveForm(ev));
+  if (state.form.open && !state.form.group && st === 'in_review') out.push(buildResolveForm(ev));
   if (state.reviewError) out.push(h('p', { class: 'err-text' }, `⚠ ${state.reviewError}`));
   const log = full ? ev.review_log || [] : null;
   out.push(h('h3', { style: 'margin-top:12px' }, '처리 이력'));
@@ -969,7 +1021,29 @@ function buildReviewTab(ev, full) {
   }
   return h('div', { class: 'tab-body' }, ...out);
 }
-function buildResolveForm(ev) {
+function buildGroupBox(ev, g) {
+  const members = groupMembers(g); const open = members.filter((m) => m.review.state !== 'resolved');
+  const waiting = members.filter((m) => m.review.state === 'needs_review');
+  const lock = IS_STATIC ? { disabled: true, title: STATIC_MSG } : { disabled: state.reviewBusy };
+  const box = h('div', { class: 'group-box', id: 'group-box' },
+    h('div', null, h('b', null, `같은 시간, 같은 구역에 있던 사건 ${g.size}건`)),
+    h('p', { class: 'muted small', style: 'margin:4px 0 6px' },
+      '여러 명이 함께 있었거나, 한 사람의 추적 번호가 바뀌어 둘로 나뉘었을 수 있습니다. 사건은 합치지 않고 각자 처리 상태를 가집니다. '
+      + '같은 상황이라고 판단되면 한 번에 처리할 수 있습니다.'),
+    h('div', { class: 'grp-members' }, members.map((m) => h('button', {
+      class: `chip grp-member${m.event_id === ev.event_id ? ' on' : ''}`, type: 'button',
+      title: m.event_id === ev.event_id ? '지금 보고 있는 사건' : '이 사건 보기',
+      onclick: () => selectEvent(m.event_id, { seek: true, play: true, scroll: true }) },
+    `영상 ${fmtMedia(m.media_entry_s)} · 트랙 ${m.track_id ?? '—'} · ${L.review[m.review.state] || m.review.state}`))),
+    h('div', { class: 'review-actions', style: 'margin-top:6px' },
+      waiting.length ? btn(`▶ 묶음 ${waiting.length}건 검토 시작`, 'btn-primary', () => doReviewMany(waiting.map((m) => m.event_id), 'in_review'),
+        { ...lock, id: 'btn-group-start' }) : null,
+      open.length ? btn(`✓ 묶음 ${open.length}건 처리 완료…`, 'btn-success', () => { state.form = { ...state.form, open: true, group: g.group_id }; renderDetail(); },
+        { ...lock, id: 'btn-group-resolve' }) : h('span', { class: 'muted small' }, '묶음의 사건이 모두 처리 완료됐습니다.')));
+  if (state.form.open && state.form.group === g.group_id && open.length) box.append(buildResolveForm(ev, open.map((m) => m.event_id)));
+  return box;
+}
+function buildResolveForm(ev, groupIds) {
   const sel = h('select', { id: 'res-select', onchange: (e) => { state.form.resolution = e.target.value; } },
     Object.entries(L.resolution).map(([k, v]) => h('option', { value: k, selected: k === state.form.resolution }, v)));
   const ta = h('textarea', { id: 'res-note', placeholder: '처리 메모 (선택)', maxlength: '2000', oninput: (e) => { state.form.note = e.target.value; } });
@@ -978,8 +1052,11 @@ function buildResolveForm(ev) {
     h('label', { for: 'res-select' }, '처리 결과'), sel,
     h('label', { for: 'res-note' }, '메모'), ta,
     h('div', { class: 'form-actions' },
-      btn('처리 완료 저장', 'btn-success', () => doReview(ev.event_id, 'resolved', { resolution: state.form.resolution, note: state.form.note }), { id: 'btn-resolve-save', disabled: state.reviewBusy }),
-      btn('취소', '', () => { state.form.open = false; renderDetail(); })));
+      groupIds
+        ? btn(`묶음 ${groupIds.length}건 처리 완료 저장`, 'btn-success', () => doReviewMany(groupIds, 'resolved', { resolution: state.form.resolution, note: state.form.note }),
+          { id: 'btn-group-resolve-save', disabled: state.reviewBusy })
+        : btn('처리 완료 저장', 'btn-success', () => doReview(ev.event_id, 'resolved', { resolution: state.form.resolution, note: state.form.note }), { id: 'btn-resolve-save', disabled: state.reviewBusy }),
+      btn('취소', '', () => { state.form.open = false; state.form.group = null; renderDetail(); })));
 }
 function buildEng(ev, full) {
   const run = ev.run || {}; const x = ev.explanation; const lat = ev.latency || {};
@@ -1048,7 +1125,8 @@ function updateExportLinks() {
 function selectEvent(id, opts = {}) {
   if (!id) return;
   const changed = id !== state.selectedId;
-  state.selectedId = id; state.form.open = false; state.reviewError = null; state.detailError = null;
+  state.selectedId = id; state.form.open = false; state.form.group = null; state.reviewError = null; state.detailError = null;
+  const g = groupOf(id); if (g) state.collapsedGroups.delete(g.group_id);
   if (changed) { state.detail = null; state.detailSig = null; state.frameRole = 'entry'; }
   if (opts.seek) state.pendingSeek = { id, play: !!opts.play };
   const cam = timelineCamera();
@@ -1112,6 +1190,39 @@ async function doReview(id, toState, extra = {}) {
   await loadDetail(id);
   refreshTimeline(); if (state.auditOpen) { state.auditSig = ''; refreshAudit(); }
 }
+/** Same transition for several events (a concurrent group), one API call per event so each keeps its own audit trail.
+ *  To resolve an event that is still "needs_review" it is first moved to "in_review", as a reviewer would. */
+async function doReviewMany(ids, toState, extra = {}) {
+  if (IS_STATIC) { toast(STATIC_MSG, 'err'); return; }
+  if (state.reviewBusy || !ids.length) return;
+  state.reviewError = null; state.reviewBusy = true; renderDetail();
+  const actor = (state.actor || '').trim() || '담당자';
+  const note = [extra.note || '', `(동시에 구역 안에 있던 사건 ${ids.length}건 묶음 처리)`].filter(Boolean).join(' ');
+  let ok = 0; const failed = [];
+  for (const id of ids) {
+    try {
+      let ev = state.eventsById.get(id);
+      const steps = toState === 'resolved' && ev && ev.review.state === 'needs_review' ? ['in_review', 'resolved'] : [toState];
+      for (const to of steps) {
+        const updated = await API.review(id, { state: to, actor, note: to === toState ? note : '', resolution: to === 'resolved' ? extra.resolution || 'confirmed' : null });
+        ev = state.eventsById.get(id);
+        if (ev) {
+          const c = state.counts;
+          if (ev.review.state !== updated.review.state && c) { c[ev.review.state] = Math.max(0, num(c[ev.review.state]) - 1); c[updated.review.state] = num(c[updated.review.state]) + 1; }
+          Object.assign(ev, updated);
+        }
+        if (state.detail && state.detail.event_id === id) { Object.assign(state.detail, updated); state.detailSig = null; }
+      }
+      ok++;
+    } catch (e) { failed.push(`${id.slice(0, 8)}: ${e.message}`); }
+  }
+  state.reviewBusy = false; state.form.open = false; state.form.group = null; state.form.note = '';
+  if (failed.length) { state.reviewError = `묶음 처리 중 ${failed.length}건 실패 — ${failed.join(' / ')}`; toast(state.reviewError, 'err'); }
+  else toast(`묶음 ${ok}건을 "${L.review[toState]}"(으)로 변경했습니다`, 'ok');
+  renderTopbar(); renderList(); renderSelHeader(); renderDetail();
+  if (state.selectedId) await loadDetail(state.selectedId);
+  refreshTimeline(); if (state.auditOpen) { state.auditSig = ''; refreshAudit(); }
+}
 async function requestExplain(id) {
   if (IS_STATIC) { toast(STATIC_MSG, 'err'); return; }
   if (state.explainBusy) return;
@@ -1157,7 +1268,7 @@ function onKey(e) {
   const t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-    const vis = filteredEvents(); if (!vis.length) return;
+    const vis = displayOrder(filteredEvents()); if (!vis.length) return;
     let i = vis.findIndex((x) => x.event_id === state.selectedId);
     i = e.key === 'ArrowDown' ? Math.min(vis.length - 1, i + 1) : Math.max(0, i < 0 ? 0 : i - 1);
     selectEvent(vis[i].event_id, { seek: true, play: true, scroll: true });

@@ -141,3 +141,15 @@ def test_slow_provider_times_out_and_late_result_is_discarded(tmp_path):
                 break
             time.sleep(0.1)
         assert x["status"] == "done"
+
+
+def test_list_marks_events_inside_the_zone_at_the_same_time(client):
+    c, state = client
+    for eid, m0, m1 in (("g-1", 10.0, 16.0), ("g-2", 12.0, 18.0), ("g-3", 40.0, 42.0)):
+        ev = event(eid, rev=3, status="EVENT_STATUS_CLOSED")
+        ev.update(media_entry_s=m0, media_exit_s=m1, entry_ts=1000.0 + m0, exit_ts=1000.0 + m1)
+        state.store.upsert_event(ev)
+    items = {x["event_id"]: x for x in c.get("/api/events").json()["items"]}
+    assert items["g-1"]["concurrent"] == items["g-2"]["concurrent"] == {"group_id": "g-1", "size": 2, "event_ids": ["g-1", "g-2"]}
+    assert items["g-3"]["concurrent"] is None
+    assert items["g-1"]["review"]["state"] == items["g-2"]["review"]["state"] == "needs_review"  # nothing merged

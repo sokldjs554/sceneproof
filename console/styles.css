@@ -342,3 +342,17 @@ pre.raw { background: #16202c; color: #d6e0ea; font-family: var(--mono); font-si
   .top-stats { order: 3; flex-basis: 100%; }
   .drawer { width: 100vw; }
 }
+
+/* events inside the same zone at the same time (server/groups.py): shown together, never hidden by default */
+.ev-group { border-bottom: 1px solid var(--border); border-left: 3px solid var(--accent); }
+.ev-group-h { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 5px 10px; background: var(--panel-2); cursor: pointer; font-size: 13px; }
+.ev-group-h:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ev-group-h .caret { width: 1em; color: var(--muted); }
+.ev-group-h .grp-states { display: inline-flex; gap: 4px; margin-left: auto; }
+.ev-group-body .ev-row { padding-left: 18px; }
+.ev-group-body .ev-row:last-child { border-bottom: 0; }
+.ev-group.folded .ev-group-body { display: none; }
+.group-box { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; padding: 8px 10px; margin: 0 0 10px; background: var(--panel-2); }
+.grp-members { display: flex; flex-wrap: wrap; gap: 4px; }
+.grp-member { cursor: pointer; border: 1px solid var(--border); background: var(--panel, #fff); font: inherit; font-size: 12px; }
+.grp-member.on { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
