@@ -1,0 +1,44 @@
+{
+ "sequence": "caviar-lobby-fight-run-away2",
+ "pairs": [
+  {
+   "a": "표시자3",
+   "b": "표시자4",
+   "events_a": 2,
+   "events_b": 2,
+   "matched": 2,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.11,
+   "median_exit_diff_s": 0.06,
+   "frame_kappa": 0.965
+  },
+  {
+   "a": "표시자3",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 2,
+   "events_b": 2,
+   "matched": 2,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.42,
+   "median_exit_diff_s": 0.24,
+   "frame_kappa": 0.851
+  },
+  {
+   "a": "표시자4",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 2,
+   "events_b": 2,
+   "matched": 2,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.34,
+   "median_exit_diff_s": 0.26,
+   "frame_kappa": 0.86
+  }
+ ]
+}

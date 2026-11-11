@@ -247,10 +247,19 @@ new_track = 새 추적을 시작하는 최소 점수(기본 0.6), buffer = 놓�
 
 도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.
 
-표시한 사람: 2명 (표시자1, 표시자2). 표시 원본은 `docs/eval/bench/agreement/labels/`에 있습니다. 
+표시한 사람: 4명 (표시자1, 표시자2, 표시자3, 표시자4). 표시 원본은 `docs/eval/bench/agreement/labels/`에 있습니다. 
 
 | 영상 | 비교 (앞 vs 뒤) | 앞 표시 / 뒤 표시 / 일치 | 사건 F1 | 프레임 카파 | 들어감 시각 차이(중앙값, 초) |
 |---|---|---|---|---|---|
+| caviar-lobby-fight-run-away2 | 표시자3 vs 표시자4 | 2 / 2 / 2 | 1.0 | 0.965 | 0.11 |
+| caviar-lobby-fight-run-away2 | 표시자3 vs 데이터 상자로 만든 정답 | 2 / 2 / 2 | 1.0 | 0.851 | 0.42 |
+| caviar-lobby-fight-run-away2 | 표시자4 vs 데이터 상자로 만든 정답 | 2 / 2 / 2 | 1.0 | 0.86 | 0.34 |
+| caviar-lobby-left-bag-picked-up | 표시자3 vs 표시자4 | 5 / 5 / 5 | 1.0 | 0.922 | 0.12 |
+| caviar-lobby-left-bag-picked-up | 표시자3 vs 데이터 상자로 만든 정답 | 5 / 5 / 5 | 1.0 | 0.736 | 0.43 |
+| caviar-lobby-left-bag-picked-up | 표시자4 vs 데이터 상자로 만든 정답 | 5 / 5 / 5 | 1.0 | 0.737 | 0.33 |
+| caviar-lobby-rest-slump-on-floor | 표시자3 vs 표시자4 | 3 / 3 / 3 | 1.0 | 0.963 | 0.13 |
+| caviar-lobby-rest-slump-on-floor | 표시자3 vs 데이터 상자로 만든 정답 | 3 / 3 / 3 | 1.0 | 0.862 | 0.45 |
+| caviar-lobby-rest-slump-on-floor | 표시자4 vs 데이터 상자로 만든 정답 | 3 / 3 / 3 | 1.0 | 0.887 | 0.36 |
 | caviar-lobby-split | 표시자1 vs 표시자2 | 1 / 1 / 1 | 1.0 | 0.759 | 0.5 |
 | caviar-lobby-split | 표시자1 vs 데이터 상자로 만든 정답 | 1 / 1 / 1 | 1.0 | 0.786 | 0.73 |
 | caviar-lobby-split | 표시자2 vs 데이터 상자로 만든 정답 | 1 / 1 / 1 | 1.0 | 0.849 | 0.23 |
@@ -260,6 +269,15 @@ new_track = 새 추적을 시작하는 최소 점수(기본 0.6), buffer = 놓�
 | caviar-mall-cor-enter-exit-crossing-paths1 | 표시자1 vs 표시자2 | 2 / 2 / 2 | 1.0 | 0.931 | 0.15 |
 | caviar-mall-cor-enter-exit-crossing-paths1 | 표시자1 vs 데이터 상자로 만든 정답 | 2 / 4 / 2 | 0.667 | 0.543 | 0.25 |
 | caviar-mall-cor-enter-exit-crossing-paths1 | 표시자2 vs 데이터 상자로 만든 정답 | 2 / 4 / 2 | 0.667 | 0.579 | 0.16 |
+| caviar-mall-cor-enter-exit-crossing-paths2 | 표시자3 vs 표시자4 | 2 / 2 / 2 | 1.0 | 0.958 | 0.07 |
+| caviar-mall-cor-enter-exit-crossing-paths2 | 표시자3 vs 데이터 상자로 만든 정답 | 2 / 2 / 2 | 1.0 | 0.866 | 0.36 |
+| caviar-mall-cor-enter-exit-crossing-paths2 | 표시자4 vs 데이터 상자로 만든 정답 | 2 / 2 / 2 | 1.0 | 0.866 | 0.29 |
+| caviar-mall-cor-one-stop-no-enter2 | 표시자3 vs 표시자4 | 4 / 4 / 4 | 1.0 | 0.828 | 0.26 |
+| caviar-mall-cor-one-stop-no-enter2 | 표시자3 vs 데이터 상자로 만든 정답 | 4 / 5 / 4 | 0.889 | 0.626 | 0.93 |
+| caviar-mall-cor-one-stop-no-enter2 | 표시자4 vs 데이터 상자로 만든 정답 | 4 / 5 / 4 | 0.889 | 0.782 | 0.29 |
+| caviar-mall-cor-shop-assistant1 | 표시자3 vs 표시자4 | 4 / 4 / 4 | 1.0 | 0.617 | 1.16 |
+| caviar-mall-cor-shop-assistant1 | 표시자3 vs 데이터 상자로 만든 정답 | 4 / 7 / 3 | 0.545 | 0.587 | 0.06 |
+| caviar-mall-cor-shop-assistant1 | 표시자4 vs 데이터 상자로 만든 정답 | 4 / 7 / 4 | 0.727 | 0.912 | 0.25 |
 | caviar-mall-front-two-enter-shop1 | 표시자1 vs 표시자2 | 0 / 1 / 0 | 0.0 | 0.0 | None |
 | caviar-mall-front-two-enter-shop1 | 표시자1 vs 데이터 상자로 만든 정답 | 0 / 5 / 0 | 0.0 | 0.0 | None |
 | caviar-mall-front-two-enter-shop1 | 표시자2 vs 데이터 상자로 만든 정답 | 1 / 5 / 0 | 0.0 | -0.009 | None |
@@ -268,6 +286,9 @@ new_track = 새 추적을 시작하는 최소 점수(기본 0.6), buffer = 놓�
 
 | 비교 (앞 vs 뒤) | 앞 표시 / 뒤 표시 / 일치 | 사건 F1 |
 |---|---|---|
+| 표시자3 vs 표시자4 | 20 / 20 / 20 | 1.000 |
+| 표시자3 vs 데이터 상자로 만든 정답 | 20 / 24 / 19 | 0.864 |
+| 표시자4 vs 데이터 상자로 만든 정답 | 20 / 24 / 20 | 0.909 |
 | 표시자1 vs 표시자2 | 5 / 7 / 5 | 0.833 |
 | 표시자1 vs 데이터 상자로 만든 정답 | 5 / 13 / 5 | 0.556 |
 | 표시자2 vs 데이터 상자로 만든 정답 | 7 / 13 / 6 | 0.600 |

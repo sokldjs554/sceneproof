@@ -1,0 +1,44 @@
+{
+ "sequence": "caviar-lobby-left-bag-picked-up",
+ "pairs": [
+  {
+   "a": "표시자3",
+   "b": "표시자4",
+   "events_a": 5,
+   "events_b": 5,
+   "matched": 5,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.12,
+   "median_exit_diff_s": 0.04,
+   "frame_kappa": 0.922
+  },
+  {
+   "a": "표시자3",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 5,
+   "events_b": 5,
+   "matched": 5,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.43,
+   "median_exit_diff_s": 0.53,
+   "frame_kappa": 0.736
+  },
+  {
+   "a": "표시자4",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 5,
+   "events_b": 5,
+   "matched": 5,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.33,
+   "median_exit_diff_s": 0.51,
+   "frame_kappa": 0.737
+  }
+ ]
+}

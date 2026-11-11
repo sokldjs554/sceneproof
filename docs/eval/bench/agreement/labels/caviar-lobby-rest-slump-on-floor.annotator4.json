@@ -1,0 +1,28 @@
+{
+ "sequence": "caviar-lobby-rest-slump-on-floor",
+ "video": "caviar-lobby-rest-slump-on-floor.mp4",
+ "site": "caviar-lobby",
+ "annotator": "표시자4",
+ "created": "2026-11-11T17:51:58.883Z",
+ "duration_s": 36.44,
+ "events": [
+  {
+   "start_s": 0.92,
+   "end_s": 7.99,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 18.02,
+   "end_s": 21.31,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 34.67,
+   "end_s": 36.44,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

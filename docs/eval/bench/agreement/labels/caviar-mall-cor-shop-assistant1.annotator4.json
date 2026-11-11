@@ -1,0 +1,34 @@
+{
+ "sequence": "caviar-mall-cor-shop-assistant1",
+ "video": "caviar-mall-cor-shop-assistant1.mp4",
+ "site": "caviar-mall-cor",
+ "annotator": "표시자4",
+ "created": "2026-11-11T17:55:07.679Z",
+ "duration_s": 67,
+ "events": [
+  {
+   "start_s": 6,
+   "end_s": 13.4,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 18.19,
+   "end_s": 21.8,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 55.17,
+   "end_s": 60.99,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 65.55,
+   "end_s": 67,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

@@ -13,6 +13,8 @@ python scripts/bench_report.py    # docs/eval/bench/README.md §7이 이 폴더�
 
 ## 영상 늘리기 (2차, 6편 · 약 4분 · 데이터셋 기준 출입 24건)
 
+**2026-11-11 완료**: 새로운 두 사람(표시자3·4)이 6편을 표시했습니다. 결과는 `docs/eval/bench/README.md` §7, 해석은 `docs/eval/bench/findings.md`.
+
 1차 4편에 더해, 같은 최종 분할에서 로비·복도 영상 6편을 골랐습니다. 매장 정면 화면은 1차에서 사람도 출입을 판단하지 못했으므로 뺐습니다.
 
 | 영상 | 길이 | 데이터셋 기준 출입 |

@@ -1,0 +1,34 @@
+{
+ "sequence": "caviar-mall-cor-one-stop-no-enter2",
+ "video": "caviar-mall-cor-one-stop-no-enter2.mp4",
+ "site": "caviar-mall-cor",
+ "annotator": "표시자4",
+ "created": "2026-11-11T17:53:45.651Z",
+ "duration_s": 60,
+ "events": [
+  {
+   "start_s": 13.04,
+   "end_s": 27.47,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 32.36,
+   "end_s": 34.72,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 36.98,
+   "end_s": 41.73,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 47.32,
+   "end_s": 51.88,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

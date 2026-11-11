@@ -1,0 +1,44 @@
+{
+ "sequence": "caviar-lobby-rest-slump-on-floor",
+ "pairs": [
+  {
+   "a": "표시자3",
+   "b": "표시자4",
+   "events_a": 3,
+   "events_b": 3,
+   "matched": 3,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.13,
+   "median_exit_diff_s": 0.08,
+   "frame_kappa": 0.963
+  },
+  {
+   "a": "표시자3",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 3,
+   "events_b": 3,
+   "matched": 3,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.45,
+   "median_exit_diff_s": 0.48,
+   "frame_kappa": 0.862
+  },
+  {
+   "a": "표시자4",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 3,
+   "events_b": 3,
+   "matched": 3,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.36,
+   "median_exit_diff_s": 0.48,
+   "frame_kappa": 0.887
+  }
+ ]
+}

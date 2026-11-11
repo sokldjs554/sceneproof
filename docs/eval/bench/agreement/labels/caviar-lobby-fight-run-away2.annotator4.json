@@ -1,0 +1,22 @@
+{
+ "sequence": "caviar-lobby-fight-run-away2",
+ "video": "caviar-lobby-fight-run-away2.mp4",
+ "site": "caviar-lobby",
+ "annotator": "표시자4",
+ "created": "2026-11-11T17:49:56.472Z",
+ "duration_s": 22.04,
+ "events": [
+  {
+   "start_s": 0.81,
+   "end_s": 4.76,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 9.73,
+   "end_s": 11.4,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

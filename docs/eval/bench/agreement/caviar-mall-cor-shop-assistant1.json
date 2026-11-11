@@ -1,0 +1,44 @@
+{
+ "sequence": "caviar-mall-cor-shop-assistant1",
+ "pairs": [
+  {
+   "a": "표시자3",
+   "b": "표시자4",
+   "events_a": 4,
+   "events_b": 4,
+   "matched": 4,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 1.16,
+   "median_exit_diff_s": 0.18,
+   "frame_kappa": 0.617
+  },
+  {
+   "a": "표시자3",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 4,
+   "events_b": 7,
+   "matched": 3,
+   "only_a": 1,
+   "only_b": 4,
+   "event_f1": 0.545,
+   "median_entry_diff_s": 0.06,
+   "median_exit_diff_s": 0.6,
+   "frame_kappa": 0.587
+  },
+  {
+   "a": "표시자4",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 4,
+   "events_b": 7,
+   "matched": 4,
+   "only_a": 0,
+   "only_b": 3,
+   "event_f1": 0.727,
+   "median_entry_diff_s": 0.25,
+   "median_exit_diff_s": 0.56,
+   "frame_kappa": 0.912
+  }
+ ]
+}
