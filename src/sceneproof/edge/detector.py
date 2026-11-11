@@ -7,6 +7,7 @@ pre/post-processing in one place (here, in numpy) is what makes the comparison f
 
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -169,6 +170,98 @@ class TorchBackend:
             return self.model(x)[0].cpu().numpy()
 
 
+class TensorRTBackend:
+    """NVIDIA TensorRT engine built from the same ONNX file, FP32 or FP16, batch 1.
+
+    Pre/post-processing stay in PersonDetector, so only the network itself changes and the outputs can be compared
+    with the ONNX Runtime CPU path frame by frame (scripts/gpu_bench.py). GPU buffers are PyTorch CUDA tensors —
+    PyTorch is present wherever this is used here (Colab, Jetson images). An engine only runs on the GPU model and
+    TensorRT version it was built with, so the cache file name carries both; the first run builds it (tens of
+    seconds), later runs load it.
+    """
+
+    def __init__(self, model_path: str | Path, precision: str = "fp16", engine_dir: str | Path | None = None,
+                 workspace_mb: int = 1024) -> None:
+        import tensorrt as trt
+        import torch
+
+        if not torch.cuda.is_available():
+            raise RuntimeError("TensorRT backend needs an NVIDIA GPU (torch.cuda.is_available() is False)")
+        precision = precision.lower()
+        if precision not in ("fp32", "fp16"):
+            raise ValueError(f"precision must be fp32 or fp16, not {precision!r}")
+        self._torch = torch
+        gpu = torch.cuda.get_device_name(0)
+        tag = re.sub(r"[^a-z0-9]+", "-", gpu.lower()).strip("-")
+        engine_dir = Path(engine_dir) if engine_dir else Path(model_path).parent / "trt"
+        engine_path = engine_dir / f"{Path(model_path).stem}.{precision}.trt{trt.__version__}.{tag}.engine"
+        logger = trt.Logger(trt.Logger.WARNING)
+        self.build_s: float | None = None
+        if engine_path.exists():
+            data = engine_path.read_bytes()
+        else:
+            t0 = time.perf_counter()
+            data = _build_trt_engine(trt, logger, Path(model_path), precision, workspace_mb)
+            self.build_s = time.perf_counter() - t0
+            engine_dir.mkdir(parents=True, exist_ok=True)
+            engine_path.write_bytes(data)
+        self.engine = trt.Runtime(logger).deserialize_cuda_engine(data)
+        if self.engine is None:
+            raise RuntimeError(f"TensorRT could not load {engine_path} (delete it to rebuild)")
+        self.context = self.engine.create_execution_context()
+        self.inputs: dict[str, Any] = {}
+        self.outputs: dict[str, Any] = {}
+        for i in range(self.engine.num_io_tensors):
+            name = self.engine.get_tensor_name(i)
+            shape = tuple(self.engine.get_tensor_shape(name))
+            if any(d < 0 for d in shape):
+                raise RuntimeError(f"tensor {name} has a dynamic shape {shape}; export the ONNX with a fixed input size")
+            np_dtype = np.dtype(trt.nptype(self.engine.get_tensor_dtype(name)))
+            buf = torch.empty(shape, dtype=getattr(torch, np_dtype.name), device="cuda")  # float32 -> torch.float32 ...
+            self.context.set_tensor_address(name, buf.data_ptr())
+            (self.inputs if self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT else self.outputs)[name] = buf
+        if len(self.inputs) != 1 or not self.outputs:
+            raise RuntimeError(f"expected 1 input and >=1 output, got {list(self.inputs)} / {list(self.outputs)}")
+        self.input = next(iter(self.inputs.values()))
+        self.output = next(iter(self.outputs.values()))
+        self.stream = torch.cuda.Stream()
+        self.name = f"tensorrt-{precision}"
+        self.version = trt.__version__
+        self.precision = precision
+        self.gpu = gpu
+        self.engine_path = str(engine_path)
+        self.model_path = str(model_path)
+
+    def run(self, blob_nchw: np.ndarray) -> np.ndarray:
+        torch = self._torch
+        with torch.cuda.stream(self.stream):
+            self.input.copy_(torch.from_numpy(np.ascontiguousarray(blob_nchw)).to(self.input.dtype))
+            if not self.context.execute_async_v3(self.stream.cuda_stream):
+                raise RuntimeError("TensorRT execute_async_v3 failed")
+            out = self.output.float()
+        self.stream.synchronize()
+        return out.cpu().numpy()[0]
+
+
+def _build_trt_engine(trt: Any, logger: Any, model_path: Path, precision: str, workspace_mb: int) -> bytes:
+    builder = trt.Builder(logger)
+    major = int(trt.__version__.split(".")[0])
+    flags = 0 if major >= 10 else 1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+    network = builder.create_network(flags)
+    parser = trt.OnnxParser(network, logger)
+    if not parser.parse(model_path.read_bytes()):
+        errors = "; ".join(str(parser.get_error(i)) for i in range(parser.num_errors))
+        raise RuntimeError(f"TensorRT could not parse {model_path}: {errors}")
+    config = builder.create_builder_config()
+    config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, workspace_mb << 20)
+    if precision == "fp16":
+        config.set_flag(trt.BuilderFlag.FP16)
+    data = builder.build_serialized_network(network, config)
+    if data is None:
+        raise RuntimeError("TensorRT engine build failed (see the TensorRT log above)")
+    return bytes(data)
+
+
 # --------------------------------------------------------------------------- detector
 
 
@@ -224,8 +317,9 @@ class PersonDetector:
 
 
 def build_detector(cfg: dict[str, Any]) -> PersonDetector:
-    """cfg keys: variant, backend (onnxruntime|torch), model (path), input_size [w,h], conf_threshold,
-    nms_threshold, providers, intra_op_threads, graph_optimization, device."""
+    """cfg keys: variant, backend (onnxruntime|torch|tensorrt), model (path), input_size [w,h], conf_threshold,
+    nms_threshold, providers, intra_op_threads, graph_optimization, device, precision (tensorrt: fp32|fp16),
+    engine_dir, workspace_mb."""
     variant = cfg.get("variant", "yolox_tiny")
     default_hw = YOLOX_VARIANTS[variant][3]
     if cfg.get("input_size"):
@@ -241,6 +335,9 @@ def build_detector(cfg: dict[str, Any]) -> PersonDetector:
                                               cfg.get("graph_optimization", "all"))
     elif backend_name == "torch":
         backend = TorchBackend(variant, model_path, cfg.get("device", "cpu"), int(cfg.get("intra_op_threads", 0)))
+    elif backend_name == "tensorrt":
+        backend = TensorRTBackend(model_path, cfg.get("precision") or "fp16", cfg.get("engine_dir"),
+                                  int(cfg.get("workspace_mb") or 1024))
     else:
         raise ValueError(f"unknown backend {backend_name!r}")
     return PersonDetector(backend, variant, input_hw, float(cfg.get("conf_threshold", 0.4)),

@@ -79,7 +79,7 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 
 ## 범위와 한계
 
-- NVIDIA 장비가 없는 환경에서 만들었습니다. TensorRT·DeepStream·Jetson·vLLM은 설정 경로와 클라이언트만 준비했고 **실행·측정하지 않았습니다**.
+- NVIDIA 장비가 없는 환경에서 만들었습니다. TensorRT는 탐지기 백엔드(`TensorRTBackend`, FP32·FP16)를 추가했고 Colab T4에서 속도·결과 차이·사건 결과를 재는 노트북을 준비했습니다([`docs/eval/gpu.md`](docs/eval/gpu.md), **아직 실행 전**). DeepStream·Jetson·vLLM은 설정 경로와 클라이언트만 준비했고 **실행·측정하지 않았습니다**.
 - Kubernetes는 GitHub Actions의 kind 클러스터에서 배포·서버 파드 삭제 복구·엣지 파드 삭제 복구·중복 없음 검사를 통과했습니다([k8s-runtime 실행](https://github.com/sokldjs554/sceneproof/actions/runs/42402112637)). 개발 샌드박스 자체에서는 중첩 컨테이너 런타임 제약으로 kind/k3s 파드가 뜨지 않았습니다(증적 보존).
 - 처음 만든 4편 평가의 정답은 같은 계열 탐지기 초안에서 출발했고, 사람은 애매한 14곳만 검수했습니다(영상 전체를 처음부터 따로 표시하지는 않음). 주 평가(연구용 벤치마크)의 정답은 데이터셋 작성자가 손으로 그린 상자에서 만들었고, 4명이 2명씩 짝지어 영상 10편을 따로 표시해 비교했습니다(로비·복도 9편: 사람끼리 사건 F1 0.98, 사람–정답 차이는 주로 '영상 시작 때 이미 있던 사람'과 '동시에 있는 여러 명'을 세는 방식; 매장 정면 화면은 사람도 출입을 판단하지 못함). 10편·4명이라 표본은 작습니다.
 - 평가 데이터는 로비·쇼핑몰·거리·기차역·광장입니다. 공장, 안전모·조끼, 지게차가 있는 장면에서 사람이 정답을 그린 공개 영상은 찾지 못했습니다(공장 장면이 있는 KAIST MTMMC는 서명한 동의서를 저자에게 보내 승인받아야 하고 비상업 학술 연구로 한정되어, 공개 포트폴리오에는 쓰지 않음 — `docs/eval/bench/findings.md`). 최종 측정 영상이 짧아 시간당 잘못 울림은 아직 믿을 숫자가 아닙니다.
@@ -94,6 +94,7 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 | [docs/job-mapping.md](docs/job-mapping.md) | 공고 전체 항목 대응표(검증 상태 포함) |
 | [docs/architecture.md](docs/architecture.md) | 구조, 사건 생애주기, 스레드·큐, 시간의 종류 |
 | [docs/design/decisions.md](docs/design/decisions.md) | 설계 결정·대안·미채택 기술 |
+| [docs/eval/gpu.md](docs/eval/gpu.md) | GPU(TensorRT FP32·FP16) 측정 방법 — Colab T4 노트북 |
 | [docs/eval/bench/README.md](docs/eval/bench/README.md) · [findings.md](docs/eval/bench/findings.md) | 연구용 벤치마크: 장소별 사건 성능, 추가 학습 전후, 최종 1회 측정(자동 생성) · 결과 읽는 법과 소견 |
 | [docs/eval/README.md](docs/eval/README.md) | 추론 속도·스트림 수·장애 시나리오·CV+VLM 비교 결과(자동 생성) |
 | [docs/eval/vlm-findings.md](docs/eval/vlm-findings.md) | Claude 해석 실측 소견(프롬프트 v1.2 → v1.3) |

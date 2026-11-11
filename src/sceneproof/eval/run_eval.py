@@ -37,6 +37,9 @@ def main() -> int:
     ap.add_argument("--cameras", default="")
     ap.add_argument("--min-overlap", type=float, default=0.5)
     ap.add_argument("--tolerance", type=float, default=1.0)
+    ap.add_argument("--backend", default=None, help="override detector backend: onnxruntime | torch | tensorrt")
+    ap.add_argument("--precision", default=None, help="tensorrt: fp32 | fp16")
+    ap.add_argument("--providers", default=None, help="onnxruntime execution providers, comma list (e.g. CUDAExecutionProvider)")
     args = ap.parse_args()
 
     data = yaml.safe_load(Path(args.config).read_text())
@@ -45,8 +48,19 @@ def main() -> int:
         data["detector"]["model"] = f"models/{args.variant}.onnx"
     if args.conf is not None:
         data["detector"]["conf_threshold"] = args.conf
+    if args.backend:
+        data["detector"]["backend"] = args.backend
+    if args.precision:
+        data["detector"]["precision"] = args.precision
+    if args.providers:
+        data["detector"]["providers"] = args.providers.split(",")
     cfg = EdgeConfig.model_validate(data)
     tag = f"{cfg.detector.variant}-c{cfg.detector.conf_threshold}"
+    if cfg.detector.backend != "onnxruntime" or cfg.detector.providers:
+        # keep GPU runs apart from the CPU runs whose events the saved reports point to
+        tag += f"-{cfg.detector.backend}" + (f"-{cfg.detector.precision}" if cfg.detector.backend == "tensorrt" else "")
+        tag += "-" + "-".join(p.replace("ExecutionProvider", "").lower() for p in cfg.detector.providers or [])
+        tag = tag.rstrip("-")
     runs_dir = Path(args.runs_dir) / tag
     runs_dir.mkdir(parents=True, exist_ok=True)
     git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()

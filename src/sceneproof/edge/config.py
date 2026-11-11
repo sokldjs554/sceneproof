@@ -91,6 +91,8 @@ class DetectorConfig(BaseModel):
     providers: list[Any] | None = None
     device: str = "cpu"
     input_size: list[int] | None = None
+    precision: str = "fp16"           # backend tensorrt: fp32 | fp16
+    engine_dir: str | None = None     # backend tensorrt: engine cache (default: <model dir>/trt)
 
 
 class PipelineConfig(BaseModel):
