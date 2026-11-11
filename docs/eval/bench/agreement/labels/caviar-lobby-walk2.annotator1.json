@@ -1,0 +1,22 @@
+{
+ "sequence": "caviar-lobby-walk2",
+ "video": "caviar-lobby-walk2.mp4",
+ "site": "caviar-lobby",
+ "annotator": "표시자1",
+ "created": "2026-11-11T04:59:07.276Z",
+ "duration_s": 42.2,
+ "events": [
+  {
+   "start_s": 4.77,
+   "end_s": 7.35,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 13.62,
+   "end_s": 15.82,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

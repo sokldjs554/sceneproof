@@ -1,0 +1,18 @@
+{
+ "sequence": "caviar-lobby-walk2",
+ "pairs": [
+  {
+   "a": "표시자1",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 2,
+   "events_b": 3,
+   "matched": 2,
+   "only_a": 0,
+   "only_b": 1,
+   "event_f1": 0.8,
+   "median_entry_diff_s": 0.59,
+   "median_exit_diff_s": 0.52,
+   "frame_kappa": 0.714
+  }
+ ]
+}

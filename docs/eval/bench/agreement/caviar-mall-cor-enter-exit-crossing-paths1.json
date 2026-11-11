@@ -1,0 +1,18 @@
+{
+ "sequence": "caviar-mall-cor-enter-exit-crossing-paths1",
+ "pairs": [
+  {
+   "a": "표시자1",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 2,
+   "events_b": 4,
+   "matched": 2,
+   "only_a": 0,
+   "only_b": 2,
+   "event_f1": 0.667,
+   "median_entry_diff_s": 0.25,
+   "median_exit_diff_s": 0.65,
+   "frame_kappa": 0.543
+  }
+ ]
+}

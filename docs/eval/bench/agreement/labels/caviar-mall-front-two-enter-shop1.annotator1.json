@@ -1,0 +1,16 @@
+{
+ "sequence": "caviar-mall-front-two-enter-shop1",
+ "video": "caviar-mall-front-two-enter-shop1.mp4",
+ "site": "caviar-mall-front",
+ "annotator": "표시자1",
+ "created": "2026-11-11T05:01:19.601Z",
+ "duration_s": 65.8,
+ "events": [
+  {
+   "start_s": 6.52,
+   "end_s": 54.6,
+   "label": "unsure",
+   "note": ""
+  }
+ ]
+}

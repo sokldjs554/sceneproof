@@ -1,0 +1,18 @@
+{
+ "sequence": "caviar-mall-front-two-enter-shop1",
+ "pairs": [
+  {
+   "a": "표시자1",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 0,
+   "events_b": 5,
+   "matched": 0,
+   "only_a": 0,
+   "only_b": 5,
+   "event_f1": 0.0,
+   "median_entry_diff_s": null,
+   "median_exit_diff_s": null,
+   "frame_kappa": 0.0
+  }
+ ]
+}

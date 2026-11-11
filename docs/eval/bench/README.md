@@ -247,7 +247,17 @@ new_track = 새 추적을 시작하는 최소 점수(기본 0.6), buffer = 놓�
 
 도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.
 
-**아직 측정하지 않았습니다.** 사람 두 명이 같은 영상을 따로 표시해야 하므로 사용자가 해야 하는 작업입니다. 결과 JSON을 `docs/eval/bench/agreement/`에 넣고 이 스크립트를 다시 돌리면 이 절이 채워집니다.
+표시한 사람: 1명 (표시자1). 표시 원본은 `docs/eval/bench/agreement/labels/`에 있습니다. **두 번째 사람의 표시가 아직 없어 사람끼리의 일치도는 비어 있고, 사람과 정답의 비교만 있습니다.**
+
+| 영상 | 비교 | 사람 표시 / 정답 / 일치 | 사건 F1 | 프레임 카파 | 들어감 시각 차이(중앙값, 초) |
+|---|---|---|---|---|---|
+| caviar-lobby-split | 표시자1 vs 데이터 상자로 만든 정답 | 1 / 1 / 1 | 1.0 | 0.786 | 0.73 |
+| caviar-lobby-walk2 | 표시자1 vs 데이터 상자로 만든 정답 | 2 / 3 / 2 | 0.8 | 0.714 | 0.59 |
+| caviar-mall-cor-enter-exit-crossing-paths1 | 표시자1 vs 데이터 상자로 만든 정답 | 2 / 4 / 2 | 0.667 | 0.543 | 0.25 |
+| caviar-mall-front-two-enter-shop1 | 표시자1 vs 데이터 상자로 만든 정답 | 0 / 5 / 0 | 0.0 | 0.0 | None |
+
+'불확실'·'경계 통과'로 표시한 것은 점수에 넣지 않습니다(목록에만 남음). 정답의 시작 시각은 발이 구역 안에 0.3초 머문 확인 시각이라, 사람이 누른 '들어간 순간'보다 원래 0.3초쯤 늦습니다.
+
 
 ## 8. 재현
 

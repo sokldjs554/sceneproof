@@ -67,6 +67,7 @@
         <li>사람의 <b>발</b>이 빨간 구역 안에 들어간 순간 <kbd>I</kbd>, 구역에서 나온 순간 <kbd>O</kbd>를 누릅니다. 한 사람이 들어갔다 나오면 사건 1건입니다.</li>
         <li>여러 사람이 동시에 들어가면 사람마다 따로 <kbd>I</kbd>를 누르고, 나올 때 목록에서 그 사람 줄의 "나감" 버튼을 누릅니다.</li>
         <li>발이 선 위를 스치기만 했으면 <kbd>B</kbd>(경계 통과), 확신이 없으면 <kbd>U</kbd>(불확실)로 바꿉니다.</li>
+        <li>영상이 <b>시작할 때 이미 구역 안에 있는 사람</b>도 사건입니다: 0초에서 <kbd>I</kbd>를 누르고 나올 때 <kbd>O</kbd>. 영상이 끝날 때까지 안에 있으면 <kbd>O</kbd> 없이 내보내면 됩니다.</li>
         <li>다른 사람의 결과를 보지 말고 혼자 표시한 뒤 <b>내보내기</b>로 저장하세요. 두 사람의 파일을 비교합니다.</li>
       </ol>
       <span class="muted">← → 로 0.2초씩, Shift+← → 로 1초씩 움직이며 정확한 순간을 고르면 좋습니다.</span>
@@ -134,8 +135,9 @@ function step(d) { video.pause(); video.currentTime = Math.max(0, Math.min(video
 function flash(t) { $('flash').textContent = t; clearTimeout(flash.t); flash.t = setTimeout(() => { $('flash').textContent = ''; }, 2500); }
 function openEvent() {
   if (!video.src) { flash('먼저 영상을 고르세요'); return; }
-  if (video.currentTime === 0 && video.played.length === 0) {
-    flash('먼저 Space(또는 재생 버튼)로 영상을 재생하고, 사람의 발이 빨간 구역에 들어가는 순간에 누르세요'); return;
+  if (video.currentTime === 0 && video.played.length === 0
+      && !confirm('영상이 시작할 때 이미 구역 안에 있는 사람을 표시할까요?\n(아니면 "취소"를 누르고, Space로 재생하다가 발이 구역에 들어가는 순간에 누르세요)')) {
+    flash('Space로 재생하다가 발이 빨간 구역에 들어가는 순간에 누르세요'); return;
   }
   events.push({ start_s: +video.currentTime.toFixed(2), end_s: null, label: 'intrusion', note: '' }); render();
   flash(`들어감 표시: ${video.currentTime.toFixed(2)}초`);

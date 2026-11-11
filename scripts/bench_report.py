@@ -304,11 +304,20 @@ def main() -> int:
           "도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.", ""]
     agr = sorted((BENCH / "agreement").glob("*.json")) if (BENCH / "agreement").exists() else []
     if agr:
-        L += ["| 영상 | 비교 | 사건 F1 | 프레임 카파 | 들어감 시각 차이(중앙값, 초) |", "|---|---|---|---|---|"]
+        def who(n):
+            return "데이터 상자로 만든 정답" if n and n.startswith("dataset boxes") else n
+
+        people = {pr["a"] for p in agr for pr in json.loads(p.read_text())["pairs"]} - {"dataset boxes -> zone rule"}
+        L += [f"표시한 사람: {len(people)}명 ({', '.join(sorted(people))}). 표시 원본은 `docs/eval/bench/agreement/labels/`에 있습니다. "
+              + ("**두 번째 사람의 표시가 아직 없어 사람끼리의 일치도는 비어 있고, 사람과 정답의 비교만 있습니다.**" if len(people) < 2 else ""), "",
+              "| 영상 | 비교 | 사람 표시 / 정답 / 일치 | 사건 F1 | 프레임 카파 | 들어감 시각 차이(중앙값, 초) |", "|---|---|---|---|---|---|"]
         for p in agr:
             r = json.loads(p.read_text())
             for pr in r["pairs"]:
-                L.append(f"| {r['sequence']} | {pr['a']} vs {pr['b']} | {pr['event_f1']} | {pr['frame_kappa']} | {pr['median_entry_diff_s']} |")
+                L.append(f"| {r['sequence']} | {who(pr['a'])} vs {who(pr['b'])} | {pr['events_a']} / {pr['events_b']} / {pr['matched']} | "
+                         f"{pr['event_f1']} | {pr['frame_kappa']} | {pr['median_entry_diff_s']} |")
+        L += ["", "'불확실'·'경계 통과'로 표시한 것은 점수에 넣지 않습니다(목록에만 남음). 정답의 시작 시각은 발이 구역 안에 0.3초 머문 "
+              "확인 시각이라, 사람이 누른 '들어간 순간'보다 원래 0.3초쯤 늦습니다.", ""]
     else:
         L += ["**아직 측정하지 않았습니다.** 사람 두 명이 같은 영상을 따로 표시해야 하므로 사용자가 해야 하는 작업입니다. 결과 JSON을 "
               "`docs/eval/bench/agreement/`에 넣고 이 스크립트를 다시 돌리면 이 절이 채워집니다."]
