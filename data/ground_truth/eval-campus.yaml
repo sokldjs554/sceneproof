@@ -11,9 +11,9 @@ events:
   - id: e01
     start_s: 0.0
     end_s: 0.9
-    label: boundary_pass
+    label: intrusion
     dwell: false
-    note: "검은 재킷 보행자가 잔디 경계선을 따라 걷는다. 발이 경계선 위(0.2s) → 보도(0.9s). 침입 아님."
+    note: "검은 재킷 보행자가 잔디 경계선을 따라 걷는다. 초안은 경계 통과였으나 검수에서 발이 잔디 안으로 들어갔다고 판정(침입)."
   - id: e02
     start_s: 52.5
     end_s: 60.2
@@ -29,16 +29,23 @@ events:
   - id: e04
     start_s: 74.7
     end_s: 79.0
-    label: boundary_pass
+    label: intrusion
     dwell: false
-    note: "빨간 재킷 보행자가 잔디 경계선을 따라 보도 쪽으로 이동. 발은 경계/보도 위."
+    note: "빨간 재킷 보행자가 잔디 경계선을 따라 보도 쪽으로 이동. 초안은 경계 통과였으나 검수에서 발이 잔디 안으로 들어갔다고 판정(침입)."
 negatives:
   - { start_s: 10.0, end_s: 50.0, note: "다수 보행자가 보도와 통제 테이프 부근을 통행. 잔디 진입 없음." }
 annotation:
   method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 프레임 단위 점유(zone_occupancy.py, conf0.2) 대조"
-  status: draft
-  reviewer: ""
-  needs_human_review:
+  status: reviewed
+  reviewer: "사용자(저장소 주인), tools/review/gt_review.html"
+  reviewed_at: "2026-11-11"
+  review_changes:
+    - "e01 boundary_pass -> intrusion (발이 잔디 안으로 들어감)"
+    - "e04 boundary_pass -> intrusion (발이 잔디 안으로 들어감)"
+  review_kept:
+    - "e03은 발이 화면 아래로 잘린 58~62s에도 한 사건"
+    - "52~60s에 e02·e03 말고 잔디에 들어간 사람 없음"
+  review_questions:  # answered in the review above
     - "e01·e04 경계 통과 판정(발 위치가 경계선과 겹침)"
     - "e03의 58~62s 구간(발이 화면 밖) 처리 방식"
     - "52~60s 구간에서 세 번째 인물의 잔디 접촉 여부"

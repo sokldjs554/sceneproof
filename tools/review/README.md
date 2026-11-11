@@ -1,5 +1,7 @@
 # 확인용 페이지 (설치 없이 브라우저로 열기)
 
+**2026-11-11 두 페이지 모두 완료·반영**: 정답 검수 결과는 [`docs/eval/ground-truth.md`](../../docs/eval/ground-truth.md), 채점 결과는 [`docs/eval/vlm-findings.md`](../../docs/eval/vlm-findings.md) §1-2. 페이지 안의 "지금 정답"은 검수 전 초안 기준입니다. 다른 사람이 한 번 더 채점하려면 같은 페이지를 그대로 쓰면 됩니다.
+
 | 페이지 | 하는 일 | 끝나면 |
 |---|---|---|
 | [`gt_review.html`](gt_review.html) | 처음 만든 평가 영상 4편 정답 초안의 확인할 곳 14개. 사진에 구역(빨간 칸)이 그려져 있고 버튼으로 답합니다. | **내보내기**로 받은 `gt_review.<이름>.json`을 올리면 정답 파일(`data/ground_truth/*.yaml`)을 고치고 다시 채점합니다. |

@@ -1,0 +1,249 @@
+{
+ "note": "same 19 explanations (prompt v1.3, and v1.2 for comparison); only the ground truth changed (human review 2026-11-11)",
+ "assessment_by_cv_outcome_reviewed_gt": {
+  "duplicate": {
+   "needs_attention": 6
+  },
+  "tp": {
+   "needs_attention": 9,
+   "unclear": 3
+  },
+  "fp": {
+   "needs_attention": 1
+  }
+ },
+ "true_intrusions_kept_as_needs_attention": "9/12",
+ "true_intrusions_marked_likely_benign": "0/12",
+ "cv_false_alarms_marked_likely_benign": "0/1",
+ "prompt_v1_2": {
+  "assessment_by_cv_outcome_reviewed_gt": {
+   "duplicate": {
+    "needs_attention": 3,
+    "unclear": 1,
+    "likely_benign": 2
+   },
+   "tp": {
+    "needs_attention": 4,
+    "unclear": 4,
+    "likely_benign": 4
+   },
+   "fp": {
+    "needs_attention": 1
+   }
+  },
+  "true_intrusions_kept_as_needs_attention": "4/12",
+  "true_intrusions_marked_likely_benign": "4/12",
+  "cv_false_alarms_marked_likely_benign": "0/1"
+ },
+ "changed_outcomes": [
+  {
+   "event_id": "aef76226-2978-5b1a-a1c2-c91cd3cf0394",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "6dc4638a-2b73-5861-906f-1d95654fad7e",
+   "camera_id": "eval-store",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "89022581-e31b-5d9d-95af-968c7919ee72",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "4475ece9-1cfa-574d-958d-6c8dd3418971",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "unclear",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  }
+ ],
+ "events": [
+  {
+   "event_id": "c89387d5-db8a-533a-9837-8ec93dcc4486",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "duplicate",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "577c7fd7-47fb-5289-aba6-74ff0dc10bcb",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "aef76226-2978-5b1a-a1c2-c91cd3cf0394",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "1d48e2c7-7d0d-5956-9c37-b1ddde0f82db",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "fp",
+   "outcome_reviewed_gt": "fp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": true
+  },
+  {
+   "event_id": "38d99618-138a-50f7-9f5a-8432c0c7980f",
+   "camera_id": "eval-parking",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "78427e95-9ea1-5b03-a75b-729f12fd9124",
+   "camera_id": "eval-store",
+   "outcome_draft_gt": "duplicate",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "1f3e682a-2e09-5eec-a1fb-628504fc4447",
+   "camera_id": "eval-store",
+   "outcome_draft_gt": "duplicate",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "6dc4638a-2b73-5861-906f-1d95654fad7e",
+   "camera_id": "eval-store",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "aeb54eac-cc2b-5128-9435-b0a0e40f1154",
+   "camera_id": "eval-store",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "bed635bb-95f7-5633-b2dc-fec417d1cc95",
+   "camera_id": "eval-indoor",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "unclear",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "39bddf0b-93b7-5020-b9fe-e3e1ca9adb40",
+   "camera_id": "eval-indoor",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "unclear",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "b684ec81-54ca-5688-9d4c-a49f9cd2715c",
+   "camera_id": "eval-indoor",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "3eb42623-7854-5ec7-9d67-8989ef8a171f",
+   "camera_id": "eval-indoor",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "unclear",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "89022581-e31b-5d9d-95af-968c7919ee72",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "17e97727-8fae-5544-b8d1-5c8e66c9f905",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "duplicate",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": true
+  },
+  {
+   "event_id": "a31feb6a-c494-5226-b0e0-c41281c157d4",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "duplicate",
+   "outcome_reviewed_gt": "duplicate",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "3fb401f4-bd47-5a51-9a34-b90fbd13e80e",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "b9041a3b-9fdb-5e4c-8140-9ce99da825b4",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "tp",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "needs_attention",
+   "assessment_v1_2": "needs_attention",
+   "exit_time_approximate": false
+  },
+  {
+   "event_id": "4475ece9-1cfa-574d-958d-6c8dd3418971",
+   "camera_id": "eval-campus",
+   "outcome_draft_gt": "boundary",
+   "outcome_reviewed_gt": "tp",
+   "assessment": "unclear",
+   "assessment_v1_2": "likely_benign",
+   "exit_time_approximate": false
+  }
+ ]
+}

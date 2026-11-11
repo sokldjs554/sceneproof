@@ -2,36 +2,38 @@
 
 모든 표는 `scripts/eval_report.py`가 `docs/eval/raw/*.json`과 `docs/evidence/`에서 생성합니다(손으로 적은 숫자 없음). 목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.
 
-> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 86편으로, 장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다(측정 뒤 바꾼 것은 새로 고정한 두 번째 최종 분할에서 한 번). 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안)는 처음 만든 작은 점검용 세트로 남겨 둡니다. §2–§5(속도, 스트림 수, 장애, VLM)는 그대로 유효합니다.
+> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 86편으로, 장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다. 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안을 사람이 검수)는 처음 만든 작은 점검용 세트로 남겨 둡니다. §2–§5(속도, 스트림 수, 장애, VLM)는 그대로 유효합니다.
 
-## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 draft)
+## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 Claude 초안 → 사람 검수 완료)
+
+정답 초안의 확인할 곳 14개를 사람이 `tools/review/gt_review.html`로 검수해 5곳을 고쳤습니다(경계 통과 3건 → 침입, 매장 두 사건 → 한 사건, 주차장 시작 시각 1건). 아래 수치는 검수한 정답 기준이며, 저장한 예측을 다시 채점한 것입니다(분석은 다시 돌리지 않음). 고친 내용: 각 정답 파일의 `annotation.review_changes`.
 
 매칭 규칙·분모: `docs/eval/ground-truth.md`. 실행: `python -m sceneproof.eval.run_eval --variant <v>`; 재채점: `rescore.py`.
 
 | 모델(ONNX, conf 0.4) | precision | recall | F1 | FP/h | TP | FP | 놓침 | 중복 | 경계·가림 겹침 | 오프라인 처리 fps(평균) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| yolox_nano | 1.0 | 0.8 | 0.889 | 0.00 | 8 | 0 | 2 | 3 | 3 | 70.2 |
-| yolox_tiny | 1.0 | 1.0 | 1.0 | 0.00 | 10 | 0 | 0 | 5 | 3 | 18.1 |
-| yolox_s | 1.0 | 1.0 | 1.0 | 0.00 | 10 | 0 | 0 | 2 | 3 | 12.1 |
+| yolox_nano | 1.0 | 0.833 | 0.909 | 0.00 | 10 | 0 | 2 | 4 | 0 | 70.2 |
+| yolox_tiny | 1.0 | 1.0 | 1.0 | 0.00 | 12 | 0 | 0 | 6 | 0 | 18.1 |
+| yolox_s | 1.0 | 1.0 | 1.0 | 0.00 | 12 | 0 | 0 | 3 | 0 | 12.1 |
 
 오프라인 처리 fps는 평가 실행 중 다른 작업(다른 모델 평가·벤치마크)과 CPU를 나눠 쓴 값이라 참고용입니다. 추론 성능 비교는 §2를 보세요.
 
-정답 양성(intrusion) 사건 수: eval-campus 2, eval-indoor 4, eval-store 2, eval-parking 2
+정답 양성(intrusion) 사건 수: eval-campus 4, eval-indoor 4, eval-store 1, eval-parking 3
 
 ### 영상별 (yolox_tiny — 기본 설정)
 
 | 영상 | P | R | TP | FP | 놓침 | 중복 | 경계·가림 | 시작 MAE(s) | 종료 MAE(s) | 체류 판정 일치/불일치 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| eval-campus | 1.0 | 1.0 | 2 | 0 | 0 | 1 | 2 | 0.15 | 2.35 | 1/1 |
+| eval-campus | 1.0 | 1.0 | 4 | 0 | 0 | 1 | 0 | 0.20 | 1.40 | 3/1 |
 | eval-indoor | 1.0 | 1.0 | 4 | 0 | 0 | 0 | 0 | 0.24 | 0.24 | 4/0 |
-| eval-store | 1.0 | 1.0 | 2 | 0 | 0 | 3 | 0 | 0.12 | 0.38 | 2/0 |
-| eval-parking | 1.0 | 1.0 | 2 | 0 | 0 | 1 | 1 | 0.43 | 2.52 | 2/0 |
+| eval-store | 1.0 | 1.0 | 1 | 0 | 0 | 4 | 0 | 0.17 | 23.43 | 1/0 |
+| eval-parking | 1.0 | 1.0 | 3 | 0 | 0 | 1 | 0 | 0.45 | 1.69 | 3/0 |
 
 ### 모델별 차이가 드러난 곳
 
-- **yolox_nano**: eval-campus: 중복 1건; eval-store: 중복 2건; eval-parking: 놓침 ['e01', 'e03']
-- **yolox_tiny**: eval-campus: 중복 1건; eval-store: 중복 3건; eval-parking: 중복 1건
-- **yolox_s**: eval-store: 중복 2건
+- **yolox_nano**: eval-campus: 중복 1건; eval-store: 중복 3건; eval-parking: 놓침 ['e01', 'e03']
+- **yolox_tiny**: eval-campus: 중복 1건; eval-store: 중복 4건; eval-parking: 중복 1건
+- **yolox_s**: eval-store: 중복 3건
 
 해석: 중복(duplicates)은 같은 정답 사건이 추적 ID 전환·추적 끊김으로 둘 이상의 사건으로 쪼개진 횟수입니다. 놓침은 소형 원거리 객체(주차장 자전거)에서 nano가 사람을 탐지하지 못한 경우입니다. 경계·가림 겹침은 정답에서 `boundary_pass`/`occluded`로 표시한 구간과 겹친 예측으로, 오탐으로 세지 않되 숨기지도 않습니다.
 
@@ -128,7 +130,9 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 - CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 10, CV 오탐 1)
 - CV+VLM: 정답 침입을 '확인 필요'로 유지 8/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
 - assessment × CV 결과: `{"duplicate": {"needs_attention": 5}, "tp": {"needs_attention": 8, "unclear": 2}, "boundary": {"needs_attention": 2, "unclear": 1}, "fp": {"needs_attention": 1}}`
-- 사람 채점 루브릭: `docs/eval/raw/vlm_eval-rubric.csv` (채점 전)
+- 사람 채점(1명, `tools/review/vlm_rubric.html`, 19/19건): 관찰이 사진과 맞음 19/19, 지어낸 내용 있음 1/19, '불확실한 점'이 타당 19/19, 읽기 쉬움 평균 3.0/3. 원본: `docs/eval/raw/vlm_eval-rubric.csv`
+- **검수한 정답 기준**(같은 해석 19건, 정답만 바뀜; `raw/vlm_eval_reviewed_gt.json`): 정답 침입을 '확인 필요'로 유지 9/12, CV 오탐을 '정상 가능성 높음'으로 표시 0/1 (남은 오탐 1건은 정답 e01과 같은 자전거 탄 사람이 화면 끝에서 새 추적 번호를 받은 조각 — `ground-truth.md`), assessment × CV 결과 `{"duplicate": {"needs_attention": 6}, "tp": {"needs_attention": 9, "unclear": 3}, "fp": {"needs_attention": 1}}`. 바뀐 사건: eval-parking aef76226 boundary→tp (VLM needs_attention); eval-store 6dc4638a tp→duplicate (VLM needs_attention); eval-campus 89022581 boundary→tp (VLM needs_attention); eval-campus 4475ece9 boundary→tp (VLM unclear). 사람이 '경계 통과'에서 '침입'으로 고친 3건을 VLM(v1.3)은 이미 2건 '확인 필요', 1건 '불확실'로 보고 있었습니다.
+- 같은 검수 정답으로 v1.2 해석을 보면: 정답 침입 '확인 필요' 유지 4/12, '정상 가능성 높음' 4/12 (v1.3은 0/12).
 - 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 0/10건이 사람 눈에 띄지 않았을 것입니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.
 
 프롬프트 버전 비교 (같은 사건 집합 · 같은 모델; 뒤 버전은 앞 버전의 결과를 보고 assessment 규칙을 명시한 것이므로 같은 사건에 대한 재측정은 뒤 버전에 유리한 평가입니다 — `docs/eval/vlm-findings.md` §4):

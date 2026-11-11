@@ -200,13 +200,13 @@
   "rescored": true
  },
  "aggregate": {
-  "tp": 10,
+  "tp": 12,
   "fp": 0,
   "missed": 0,
-  "duplicates": 2,
-  "boundary_hits": 3,
+  "duplicates": 3,
+  "boundary_hits": 0,
   "duration_s": 248.5,
-  "gt_positives": 10,
+  "gt_positives": 12,
   "precision": 1.0,
   "recall": 1.0,
   "f1": 1.0,
@@ -214,22 +214,22 @@
  },
  "per_video": {
   "eval-campus": {
-   "gt_positives": 2,
-   "gt_other": 2,
+   "gt_positives": 4,
+   "gt_other": 0,
    "predicted": 4,
-   "tp": 2,
+   "tp": 4,
    "fp": 0,
    "missed": 0,
    "duplicates": 0,
-   "boundary_hits": 2,
+   "boundary_hits": 0,
    "precision": 1.0,
    "recall": 1.0,
    "f1": 1.0,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": 0.2,
-   "end_mae_s": 0.5,
+   "start_mae_s": 0.22,
+   "end_mae_s": 0.47,
    "dwell": {
-    "tp_dwell_correct": 2,
+    "tp_dwell_correct": 4,
     "tp_dwell_wrong": 0
    },
    "duration_s": 79.5,
@@ -241,27 +241,26 @@
    "details": {
     "tp": [
      [
+      "d6fd0b4f-bcfc-564f-9e64-78808ed7284f",
+      "e01"
+     ],
+     [
       "b39677c7-9b5d-5fec-b58e-ab6cd9cf5c05",
       "e02"
      ],
      [
       "9f708b85-3de5-50c6-b09e-ad3e83a3886a",
       "e03"
-     ]
-    ],
-    "fp": [],
-    "missed": [],
-    "duplicates": [],
-    "boundary_hits": [
-     [
-      "d6fd0b4f-bcfc-564f-9e64-78808ed7284f",
-      "e01"
      ],
      [
       "ecb131a3-cbb9-516e-9cab-9ef86aceb3a2",
       "e04"
      ]
-    ]
+    ],
+    "fp": [],
+    "missed": [],
+    "duplicates": [],
+    "boundary_hits": []
    },
    "run": {
     "frames": 795,
@@ -539,22 +538,22 @@
    ]
   },
   "eval-store": {
-   "gt_positives": 2,
+   "gt_positives": 1,
    "gt_other": 1,
    "predicted": 4,
-   "tp": 2,
+   "tp": 1,
    "fp": 0,
    "missed": 0,
-   "duplicates": 2,
+   "duplicates": 3,
    "boundary_hits": 0,
    "precision": 1.0,
    "recall": 1.0,
    "f1": 1.0,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": 0.15,
-   "end_mae_s": 0.08,
+   "start_mae_s": 0.13,
+   "end_mae_s": 22.83,
    "dwell": {
-    "tp_dwell_correct": 2,
+    "tp_dwell_correct": 1,
     "tp_dwell_wrong": 0
    },
    "duration_s": 65.4,
@@ -568,22 +567,22 @@
      [
       "14b51e4d-aaf1-5fd7-97af-e897b4f12c37",
       "e01"
-     ],
-     [
-      "f3c99956-525c-5575-8618-9907b8e12aa8",
-      "e02"
      ]
     ],
     "fp": [],
     "missed": [],
     "duplicates": [
      [
+      "f3c99956-525c-5575-8618-9907b8e12aa8",
+      "e01"
+     ],
+     [
       "6cd5e552-f2cd-5f79-b8d1-13c5c6eea2bd",
-      "e02"
+      "e01"
      ],
      [
       "10654ee6-b904-5362-a2c2-d48ec595a7e3",
-      "e02"
+      "e01"
      ]
     ],
     "boundary_hits": []
@@ -703,22 +702,22 @@
    ]
   },
   "eval-parking": {
-   "gt_positives": 2,
-   "gt_other": 1,
+   "gt_positives": 3,
+   "gt_other": 0,
    "predicted": 3,
-   "tp": 2,
+   "tp": 3,
    "fp": 0,
    "missed": 0,
    "duplicates": 0,
-   "boundary_hits": 1,
+   "boundary_hits": 0,
    "precision": 1.0,
    "recall": 1.0,
    "f1": 1.0,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": 0.39,
-   "end_mae_s": 0.1,
+   "start_mae_s": 0.42,
+   "end_mae_s": 0.08,
    "dwell": {
-    "tp_dwell_correct": 2,
+    "tp_dwell_correct": 3,
     "tp_dwell_wrong": 0
    },
    "duration_s": 53.9,
@@ -734,6 +733,10 @@
       "e01"
      ],
      [
+      "0a1086e9-ddc7-5eb4-ace2-9b72c7972437",
+      "e02"
+     ],
+     [
       "bff13b13-4dab-5e5d-982b-6f713a3a2116",
       "e03"
      ]
@@ -741,12 +744,7 @@
     "fp": [],
     "missed": [],
     "duplicates": [],
-    "boundary_hits": [
-     [
-      "0a1086e9-ddc7-5eb4-ace2-9b72c7972437",
-      "e02"
-     ]
-    ]
+    "boundary_hits": []
    },
    "run": {
     "frames": 647,

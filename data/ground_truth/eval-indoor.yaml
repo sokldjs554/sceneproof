@@ -37,7 +37,12 @@ negatives:
   - { start_s: 21.0, end_s: 29.5, note: "구역 밖 통행." }
 annotation:
   method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조(세그먼트 16.3–20.8, 29.6–33.3, 45.1–46.5)"
-  status: draft
-  reviewer: ""
-  needs_human_review:
+  status: reviewed
+  reviewer: "사용자(저장소 주인), tools/review/gt_review.html"
+  reviewed_at: "2026-11-11"
+  review_changes:
+    []
+  review_kept:
+    - "e04 시작 45.2s 맞음"
+  review_questions:  # answered in the review above
     - "e04 시작 시각(블러로 발 위치 불명확)"

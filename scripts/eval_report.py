@@ -25,7 +25,9 @@ def fmt(x, nd=1):
 
 
 def event_section() -> str:
-    out = ["## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 draft)", "",
+    out = ["## 1. 사건 단위 평가 (held-out 영상 4편, 정답은 Claude 초안 → 사람 검수 완료)", "",
+           "정답 초안의 확인할 곳 14개를 사람이 `tools/review/gt_review.html`로 검수해 5곳을 고쳤습니다(경계 통과 3건 → 침입, 매장 두 사건 → 한 사건, "
+           "주차장 시작 시각 1건). 아래 수치는 검수한 정답 기준이며, 저장한 예측을 다시 채점한 것입니다(분석은 다시 돌리지 않음). 고친 내용: 각 정답 파일의 `annotation.review_changes`.", "",
            "매칭 규칙·분모: `docs/eval/ground-truth.md`. 실행: `python -m sceneproof.eval.run_eval --variant <v>`; 재채점: `rescore.py`.", "",
            "| 모델(ONNX, conf 0.4) | precision | recall | F1 | FP/h | TP | FP | 놓침 | 중복 | 경계·가림 겹침 | 오프라인 처리 fps(평균) |", "|---|---|---|---|---|---|---|---|---|---|---|"]
     rows = []
@@ -117,6 +119,39 @@ def scenarios_section() -> str:
     return "\n".join(out)
 
 
+def rubric_line(d: dict) -> str:
+    import csv
+
+    path = ROOT / d["human_rubric_csv"]
+    rows = list(csv.DictReader(path.open(encoding="utf-8"))) if path.exists() else []
+    done = [r for r in rows if r.get("grader_observations_match_frames_0_1", "") != ""]
+    if not done:
+        return f"- 사람 채점 루브릭: `{d['human_rubric_csv']}` (채점 전)"
+    n = len(done)
+    ok = sum(r["grader_observations_match_frames_0_1"] == "1" for r in done)
+    hal = sum(r["grader_hallucination_0_1"] == "1" for r in done)
+    unc = sum(r["grader_uncertainties_sensible_0_1"] == "1" for r in done)
+    rd = sum(int(r["grader_readability_1_3"]) for r in done) / n
+    return (f"- 사람 채점(1명, `tools/review/vlm_rubric.html`, {n}/{len(rows)}건): 관찰이 사진과 맞음 {ok}/{n}, 지어낸 내용 있음 {hal}/{n}, "
+            f"'불확실한 점'이 타당 {unc}/{n}, 읽기 쉬움 평균 {rd:.1f}/3. 원본: `{d['human_rubric_csv']}`")
+
+
+def reviewed_gt_lines() -> list[str]:
+    r = load("vlm_eval_reviewed_gt.json")
+    if not r:
+        return []
+    ch = "; ".join(f"{x['camera_id']} {x['event_id'][:8]} {x['outcome_draft_gt']}→{x['outcome_reviewed_gt']} (VLM {x['assessment']})"
+                   for x in r["changed_outcomes"])
+    return [f"- **검수한 정답 기준**(같은 해석 19건, 정답만 바뀜; `raw/vlm_eval_reviewed_gt.json`): 정답 침입을 '확인 필요'로 유지 "
+            f"{r['true_intrusions_kept_as_needs_attention']}, CV 오탐을 '정상 가능성 높음'으로 표시 {r['cv_false_alarms_marked_likely_benign']} "
+            "(남은 오탐 1건은 정답 e01과 같은 자전거 탄 사람이 화면 끝에서 새 추적 번호를 받은 조각 — `ground-truth.md`), "
+            f"assessment × CV 결과 `{json.dumps(r['assessment_by_cv_outcome_reviewed_gt'], ensure_ascii=False)}`. 바뀐 사건: {ch}. "
+            "사람이 '경계 통과'에서 '침입'으로 고친 3건을 VLM(v1.3)은 이미 2건 '확인 필요', 1건 '불확실'로 보고 있었습니다."] + (
+        [f"- 같은 검수 정답으로 v1.2 해석을 보면: 정답 침입 '확인 필요' 유지 {v['true_intrusions_kept_as_needs_attention']}, "
+         f"'정상 가능성 높음' {v['true_intrusions_marked_likely_benign']} (v1.3은 {r['true_intrusions_marked_likely_benign']})."]
+        if (v := r.get("prompt_v1_2")) else [])
+
+
 def vlm_section() -> str:
     d = load("vlm_eval.json")
     if not d:
@@ -135,7 +170,8 @@ def vlm_section() -> str:
            f"- CV만: 모든 사건이 '확인 필요' ({d['cv_only']['events_needing_review']}건; 그중 정답 침입 {d['cv_only']['true_intrusions_flagged']}, CV 오탐 {d['cv_only']['cv_false_alarms_flagged']})",
            f"- CV+VLM: 정답 침입을 '확인 필요'로 유지 {d['cv_plus_vlm']['true_intrusions_kept_as_needs_attention']}, CV 오탐을 '정상 가능성 높음'으로 표시 {d['cv_plus_vlm']['cv_false_alarms_marked_likely_benign']}",
            f"- assessment × CV 결과: `{json.dumps(d['cv_plus_vlm']['assessment_by_cv_outcome'], ensure_ascii=False)}`",
-           f"- 사람 채점 루브릭: `{d['human_rubric_csv']}` (채점 전)"]
+           rubric_line(d)]
+    out += reviewed_gt_lines()
     a = d["cv_plus_vlm"]["assessment_by_cv_outcome"]
     tp = a.get("tp", {})
     tp_total = sum(tp.values())
@@ -167,8 +203,8 @@ def vlm_section() -> str:
 def main() -> int:
     head = ["# 평가·실험 결과", "", "모든 표는 `scripts/eval_report.py`가 `docs/eval/raw/*.json`과 `docs/evidence/`에서 생성합니다(손으로 적은 숫자 없음). "
             "목표치가 아니라 **실측**이며, 측정 환경은 각 절에 적습니다. 데이터·분할·정답: `data/README.md`, `docs/eval/ground-truth.md`.", "",
-            "> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 84편으로, "
-            "장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다. 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안)는 "
+            "> **주 평가는 [`docs/eval/bench/README.md`](bench/README.md)입니다.** 사람이 손으로 그린 상자가 있는 연구용 공개 데이터 86편으로, "
+            "장소별·처음 보는 장소별 사건 성능과 추가 학습 효과를 최종 분할에서 한 번만 잽니다. 아래 §1의 사건 평가(영상 4편, 정답은 Claude 초안을 사람이 검수)는 "
             "처음 만든 작은 점검용 세트로 남겨 둡니다. §2–§5(속도, 스트림 수, 장애, VLM)는 그대로 유효합니다.", ""]
     body = [event_section(), bench_section(), streams_section(), scenarios_section(), vlm_section()]
     tail = ["## 재현 절차", "", "```bash", "bash scripts/fetch_data.sh && bash scripts/fetch_models.sh",

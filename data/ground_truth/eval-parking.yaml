@@ -17,11 +17,11 @@ events:
   - id: e02
     start_s: 44.4
     end_s: 45.8
-    label: boundary_pass
+    label: intrusion
     dwell: false
-    note: "보행자가 구역 좌상단 경계선 바깥(위쪽)을 따라 걷는다."
+    note: "보행자가 구역 좌상단 경계선을 따라 걷는다. 초안은 경계 통과였으나 검수에서 발이 구역 안으로 들어갔다고 판정(침입)."
   - id: e03
-    start_s: 45.8
+    start_s: 45.5
     end_s: 49.2
     label: intrusion
     dwell: false
@@ -31,8 +31,15 @@ negatives:
   - { start_s: 0.0, end_s: 26.0, note: "빈 주차장." }
 annotation:
   method: "yolox_s@640 conf0.3 초안 → 확대 크롭 육안 검토(원거리 소형 객체) → 점유 타임라인 대조"
-  status: draft
-  reviewer: ""
-  needs_human_review:
+  status: reviewed
+  reviewer: "사용자(저장소 주인), tools/review/gt_review.html"
+  reviewed_at: "2026-11-11"
+  review_changes:
+    - "e02 boundary_pass -> intrusion (보행자의 발이 구역 안으로 들어감)"
+    - "e03 시작 45.8s -> 45.5s"
+  review_kept:
+    - "e01 시작 27.0s·끝 29.0s 맞음"
+    - "e03 끝 49.2s 맞음"
+  review_questions:  # answered in the review above
     - "e02 보행자의 경계 안쪽 진입 여부(원거리라 발 위치 판독 어려움)"
     - "e01/e03 시작·종료 시각(±0.5s)"

@@ -12,16 +12,10 @@ rules: { entry_confirm_seconds: 0.3, exit_confirm_seconds: 0.8, dwell_seconds: 5
 events:
   - id: e01
     start_s: 28.9
-    end_s: 42.7
-    label: intrusion
-    dwell: true
-    note: "자주색 상의 인물이 통로 끝(선반 앞)에서 물건을 고른다. 42.7s 이후 가림/놓침."
-  - id: e02
-    start_s: 47.9
     end_s: 65.4
     label: intrusion
     dwell: true
-    note: "통로 끝의 같은 자주색 상의 인물이 영상 끝까지 머문다(50.2–50.8s 깜빡임은 같은 사건)."
+    note: "자주색(갈색) 상의 인물이 통로 끝(선반 앞)에서 물건을 고르며 영상 끝까지 머문다. 42.7–47.9s에는 가려 보이지 않지만 구역 밖으로 나가지 않았다(검수: 초안의 e01·e02를 한 사건으로 합침)."
   - id: e03
     start_s: 50.0
     end_s: 65.4
@@ -32,9 +26,16 @@ negatives:
   - { start_s: 0.0, end_s: 27.0, note: "통로 앞쪽 통행. 구역 밖." }
 annotation:
   method: "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조"
-  status: draft
-  reviewer: ""
-  needs_human_review:
+  status: reviewed
+  reviewer: "사용자(저장소 주인), tools/review/gt_review.html"
+  reviewed_at: "2026-11-11"
+  review_changes:
+    - "e01(28.9–42.7)과 e02(47.9–65.4)를 한 사건 e01(28.9–65.4)로 합침: 가려진 동안에도 구역 안에 있었음"
+  review_kept:
+    - "e03(금발 인물)은 가려서 판단 불가 그대로"
+    - "초록(청록) 상의 인물은 구역에 닿지 않음"
+    - "구역은 직원 전용(고객이 들어가도 알림)"
+  review_questions:  # answered in the review above
     - "e01과 e02가 같은 인물의 연속 체류인지(42.7–47.9s 공백) 확인"
     - "e03 가림 구간의 실제 지면 위치"
     - "초록 상의 인물(오른쪽 선반)의 구역 접촉 여부"

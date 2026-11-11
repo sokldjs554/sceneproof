@@ -200,36 +200,36 @@
   "rescored": true
  },
  "aggregate": {
-  "tp": 8,
+  "tp": 10,
   "fp": 0,
   "missed": 2,
-  "duplicates": 3,
-  "boundary_hits": 3,
+  "duplicates": 4,
+  "boundary_hits": 0,
   "duration_s": 248.5,
-  "gt_positives": 10,
+  "gt_positives": 12,
   "precision": 1.0,
-  "recall": 0.8,
-  "f1": 0.889,
+  "recall": 0.833,
+  "f1": 0.909,
   "false_alarms_per_hour": 0.0
  },
  "per_video": {
   "eval-campus": {
-   "gt_positives": 2,
-   "gt_other": 2,
+   "gt_positives": 4,
+   "gt_other": 0,
    "predicted": 5,
-   "tp": 2,
+   "tp": 4,
    "fp": 0,
    "missed": 0,
    "duplicates": 1,
-   "boundary_hits": 2,
+   "boundary_hits": 0,
    "precision": 1.0,
    "recall": 1.0,
    "f1": 1.0,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": 0.95,
-   "end_mae_s": 2.45,
+   "start_mae_s": 0.6,
+   "end_mae_s": 1.45,
    "dwell": {
-    "tp_dwell_correct": 1,
+    "tp_dwell_correct": 3,
     "tp_dwell_wrong": 1
    },
    "duration_s": 79.5,
@@ -241,12 +241,20 @@
    "details": {
     "tp": [
      [
+      "a85884e7-f5d2-50c4-bbbc-ad57d7f74640",
+      "e01"
+     ],
+     [
       "a4044aba-ef94-52ef-8b70-afeb8db27dc0",
       "e03"
      ],
      [
       "26fbf000-6e6f-5f0f-bd85-5f05aacab1b6",
       "e02"
+     ],
+     [
+      "92afe985-c83c-5fa7-a6d4-55b70b36c23e",
+      "e04"
      ]
     ],
     "fp": [],
@@ -257,16 +265,7 @@
       "e03"
      ]
     ],
-    "boundary_hits": [
-     [
-      "a85884e7-f5d2-50c4-bbbc-ad57d7f74640",
-      "e01"
-     ],
-     [
-      "92afe985-c83c-5fa7-a6d4-55b70b36c23e",
-      "e04"
-     ]
-    ]
+    "boundary_hits": []
    },
    "run": {
     "frames": 795,
@@ -553,22 +552,22 @@
    ]
   },
   "eval-store": {
-   "gt_positives": 2,
+   "gt_positives": 1,
    "gt_other": 1,
    "predicted": 4,
-   "tp": 2,
+   "tp": 1,
    "fp": 0,
    "missed": 0,
-   "duplicates": 2,
+   "duplicates": 3,
    "boundary_hits": 0,
    "precision": 1.0,
    "recall": 1.0,
    "f1": 1.0,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": 0.53,
-   "end_mae_s": 5.83,
+   "start_mae_s": 0.9,
+   "end_mae_s": 34.33,
    "dwell": {
-    "tp_dwell_correct": 1,
+    "tp_dwell_correct": 0,
     "tp_dwell_wrong": 1
    },
    "duration_s": 65.4,
@@ -582,10 +581,6 @@
      [
       "7f7e26fa-2179-59a5-9a2d-aaf2a703e6db",
       "e01"
-     ],
-     [
-      "5819b220-6afc-5dd9-ae01-4869597bd8c1",
-      "e02"
      ]
     ],
     "fp": [],
@@ -596,8 +591,12 @@
       "e01"
      ],
      [
+      "5819b220-6afc-5dd9-ae01-4869597bd8c1",
+      "e01"
+     ],
+     [
       "5ec090b5-e4ef-53d9-921b-d900de5a9fd1",
-      "e02"
+      "e01"
      ]
     ],
     "boundary_hits": []
@@ -717,22 +716,22 @@
    ]
   },
   "eval-parking": {
-   "gt_positives": 2,
-   "gt_other": 1,
+   "gt_positives": 3,
+   "gt_other": 0,
    "predicted": 1,
-   "tp": 0,
+   "tp": 1,
    "fp": 0,
    "missed": 2,
    "duplicates": 0,
-   "boundary_hits": 1,
-   "precision": 0.0,
-   "recall": 0.0,
-   "f1": 0.0,
+   "boundary_hits": 0,
+   "precision": 1.0,
+   "recall": 0.333,
+   "f1": 0.5,
    "false_alarms_per_hour": 0.0,
-   "start_mae_s": null,
-   "end_mae_s": null,
+   "start_mae_s": 0.18,
+   "end_mae_s": 0.72,
    "dwell": {
-    "tp_dwell_correct": 0,
+    "tp_dwell_correct": 1,
     "tp_dwell_wrong": 0
    },
    "duration_s": 53.9,
@@ -742,19 +741,19 @@
     "false_alarms_per_hour": "FP / video hours"
    },
    "details": {
-    "tp": [],
+    "tp": [
+     [
+      "973487fd-c098-528f-a2bb-1d781eba56b4",
+      "e02"
+     ]
+    ],
     "fp": [],
     "missed": [
      "e01",
      "e03"
     ],
     "duplicates": [],
-    "boundary_hits": [
-     [
-      "973487fd-c098-528f-a2bb-1d781eba56b4",
-      "e02"
-     ]
-    ]
+    "boundary_hits": []
    },
    "run": {
     "frames": 647,
