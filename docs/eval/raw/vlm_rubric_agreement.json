@@ -12,9 +12,9 @@
   },
   "hallucination": {
    "n": 19,
-   "same": 18,
+   "same": 19,
    "kappa": null,
-   "grader1_yes": 1,
+   "grader1_yes": 0,
    "grader2_yes": 0
   },
   "uncertainties_sensible": {
@@ -32,15 +32,5 @@
    "mean_grader2": 3.0
   }
  },
- "disagreements": [
-  {
-   "event_id": "78427e95-9ea1-5b03-a75b-729f12fd9124",
-   "camera_id": "eval-store",
-   "question": "hallucination",
-   "grader1": "1",
-   "grader2": "0",
-   "note_grader1": "",
-   "note_grader2": ""
-  }
- ]
+ "disagreements": []
 }
