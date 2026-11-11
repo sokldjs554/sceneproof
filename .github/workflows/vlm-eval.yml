@@ -10,6 +10,9 @@ on:
       variant:
         description: detector variant for the CV runs
         default: yolox_tiny
+      heldout_eval:
+        description: run the held-out CV vs CV+VLM evaluation (paid, ~1 USD); "false" = demo bundle only
+        default: "true"
       budget_eval_usd:
         description: budget for the held-out evaluation server
         default: "3"
@@ -91,6 +94,7 @@ jobs:
           assert not res.error and parsed is not None
           PY
       - name: Held-out evaluation (CV runs + VLM + metrics + report)
+        if: inputs.heldout_eval != 'false'
         env:
           SP_SERVER_VLM_BUDGET_USD: ${{ inputs.budget_eval_usd }}
           SP_SERVER_VLM_MAX_CONCURRENCY: "2"
@@ -110,6 +114,7 @@ jobs:
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/health && break; sleep 1; done
           NODE_PATH=$(npm root -g) node scripts/capture_demo.mjs http://127.0.0.1:8000 docs/images/replay-vlm || cat /tmp/replay-server.log
       - name: Summary
+        if: inputs.heldout_eval != 'false'
         run: |
           python - <<'PY'
           import json
@@ -136,7 +141,8 @@ jobs:
           git config user.email "ci@users.noreply.github.com"
           git add docs/eval/raw docs/eval/README.md demo/bundle docs/images/replay-vlm 2>/dev/null || true
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          git commit -m "eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"
+          if [ "${{ inputs.heldout_eval }}" = "false" ]; then MSG="demo: 데모 번들 해석 다시 생성(Claude API) [skip ci]"; else MSG="eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"; fi
+          git commit -m "$MSG"
           # main may have moved while the (paid) run was in progress: rebase the result commit instead of failing
           # --autostash: fetch_models/fetch_data regenerate tracked helper files (model metadata, checksums) during the run
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || { echo "::error::rebase failed — results are still in the uploaded artifact"; exit 1; }
