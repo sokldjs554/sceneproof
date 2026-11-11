@@ -1,0 +1,22 @@
+{
+ "sequence": "caviar-mall-cor-enter-exit-crossing-paths1",
+ "video": "caviar-mall-cor-enter-exit-crossing-paths1.mp4",
+ "site": "caviar-mall-cor",
+ "annotator": "표시자2",
+ "created": "2026-11-11T05:45:02.085Z",
+ "duration_s": 15.32,
+ "events": [
+  {
+   "start_s": 3.74,
+   "end_s": 5.59,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 7.46,
+   "end_s": 11.42,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

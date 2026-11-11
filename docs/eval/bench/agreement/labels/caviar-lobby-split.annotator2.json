@@ -1,0 +1,16 @@
+{
+ "sequence": "caviar-lobby-split",
+ "video": "caviar-lobby-split.mp4",
+ "site": "caviar-lobby",
+ "annotator": "표시자2",
+ "created": "2026-11-11T05:43:29.690Z",
+ "duration_s": 22.08,
+ "events": [
+  {
+   "start_s": 10.89,
+   "end_s": 14.88,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

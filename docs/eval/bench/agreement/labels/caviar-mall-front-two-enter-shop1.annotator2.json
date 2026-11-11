@@ -1,0 +1,22 @@
+{
+ "sequence": "caviar-mall-front-two-enter-shop1",
+ "video": "caviar-mall-front-two-enter-shop1.mp4",
+ "site": "caviar-mall-front",
+ "annotator": "표시자2",
+ "created": "2026-11-11T05:46:36.481Z",
+ "duration_s": 65.8,
+ "events": [
+  {
+   "start_s": 6.32,
+   "end_s": 53.28,
+   "label": "boundary_pass",
+   "note": ""
+  },
+  {
+   "start_s": 65.46,
+   "end_s": 65.8,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}

@@ -3,6 +3,19 @@
  "pairs": [
   {
    "a": "표시자1",
+   "b": "표시자2",
+   "events_a": 1,
+   "events_b": 1,
+   "matched": 1,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.5,
+   "median_exit_diff_s": 1.06,
+   "frame_kappa": 0.759
+  },
+  {
+   "a": "표시자1",
    "b": "dataset boxes -> zone rule",
    "events_a": 1,
    "events_b": 1,
@@ -13,6 +26,19 @@
    "median_entry_diff_s": 0.73,
    "median_exit_diff_s": 0.42,
    "frame_kappa": 0.786
+  },
+  {
+   "a": "표시자2",
+   "b": "dataset boxes -> zone rule",
+   "events_a": 1,
+   "events_b": 1,
+   "matched": 1,
+   "only_a": 0,
+   "only_b": 0,
+   "event_f1": 1.0,
+   "median_entry_diff_s": 0.23,
+   "median_exit_diff_s": 0.64,
+   "frame_kappa": 0.849
   }
  ]
 }
