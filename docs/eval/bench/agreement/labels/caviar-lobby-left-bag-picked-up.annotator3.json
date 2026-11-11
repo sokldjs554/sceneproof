@@ -1,0 +1,40 @@
+{
+ "sequence": "caviar-lobby-left-bag-picked-up",
+ "video": "caviar-lobby-left-bag-picked-up.mp4",
+ "site": "caviar-lobby",
+ "annotator": "표시자3",
+ "created": "2026-11-11T09:39:17.230Z",
+ "duration_s": 54.2,
+ "events": [
+  {
+   "start_s": 0.73,
+   "end_s": 3.81,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 13.25,
+   "end_s": 15.91,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 27.76,
+   "end_s": 28.89,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 35.74,
+   "end_s": 38.01,
+   "label": "intrusion",
+   "note": ""
+  },
+  {
+   "start_s": 42.04,
+   "end_s": 44.19,
+   "label": "intrusion",
+   "note": ""
+  }
+ ]
+}
