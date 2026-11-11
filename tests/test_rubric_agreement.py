@@ -34,6 +34,8 @@ def test_compare_counts_and_lists_disagreements():
     r = ra.compare(rows, answers)
     assert r["events_scored_by_both"] == 3
     assert r["questions"]["hallucination"]["same"] == 2 and r["questions"]["hallucination"]["grader1_yes"] == 1
+    # grader 2 answered "0" everywhere: kappa would be 0 regardless, so it is not reported
+    assert r["questions"]["hallucination"]["kappa"] is None
     assert r["questions"]["readability"]["same"] == 2 and r["questions"]["readability"]["within_one"] == 3
     got = {(d["event_id"], d["question"]) for d in r["disagreements"]}
     assert got == {("b", "hallucination"), ("c", "readability")}

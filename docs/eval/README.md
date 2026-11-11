@@ -130,7 +130,8 @@ yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 
 - CV만: 모든 사건이 '확인 필요' (19건; 그중 정답 침입 10, CV 오탐 1)
 - CV+VLM: 정답 침입을 '확인 필요'로 유지 8/10, CV 오탐을 '정상 가능성 높음'으로 표시 0/1
 - assessment × CV 결과: `{"duplicate": {"needs_attention": 5}, "tp": {"needs_attention": 8, "unclear": 2}, "boundary": {"needs_attention": 2, "unclear": 1}, "fp": {"needs_attention": 1}}`
-- 사람 채점(`tools/review/vlm_rubric.html`, 19/19건): 관찰이 사진과 맞음 19/19, 지어낸 내용 있음 1/19, '불확실한 점'이 타당 19/19, 읽기 쉬움 평균 3.0/3. 원본: `docs/eval/raw/vlm_eval-rubric.csv` (채점자 1명)
+- 사람 채점(`tools/review/vlm_rubric.html`, 19/19건): 관찰이 사진과 맞음 19/19, 지어낸 내용 있음 1/19, '불확실한 점'이 타당 19/19, 읽기 쉬움 평균 3.0/3. 원본: `docs/eval/raw/vlm_eval-rubric.csv`
+- 두 번째 채점자와 같은 답(`raw/vlm_rubric_agreement.json`, 19건): 관찰 일치 19/19, 지어낸 내용 18/19, 불확실한 점 19/19, 읽기 쉬움 같은 점수 19/19·1점 차 이내 19/19; 다른 답 1건. κ(우연히 같을 확률을 뺀 일치도)는 두 사람 모두 두 가지 답을 다 쓴 항목에서만 적습니다 — 한 사람이 모든 사건에 같은 답을 하면 κ는 의미가 없습니다.
 - **검수한 정답 기준**(같은 해석 19건, 정답만 바뀜; `raw/vlm_eval_reviewed_gt.json`): 정답 침입을 '확인 필요'로 유지 9/12, CV 오탐을 '정상 가능성 높음'으로 표시 0/1 (남은 오탐 1건은 정답 e01과 같은 자전거 탄 사람이 화면 끝에서 새 추적 번호를 받은 조각 — `ground-truth.md`), assessment × CV 결과 `{"duplicate": {"needs_attention": 6}, "tp": {"needs_attention": 9, "unclear": 3}, "fp": {"needs_attention": 1}}`. 바뀐 사건: eval-parking aef76226 boundary→tp (VLM needs_attention); eval-store 6dc4638a tp→duplicate (VLM needs_attention); eval-campus 89022581 boundary→tp (VLM needs_attention); eval-campus 4475ece9 boundary→tp (VLM unclear). 사람이 '경계 통과'에서 '침입'으로 고친 3건을 VLM(v1.3)은 이미 2건 '확인 필요', 1건 '불확실'로 보고 있었습니다.
 - 같은 검수 정답으로 v1.2 해석을 보면: 정답 침입 '확인 필요' 유지 4/12, '정상 가능성 높음' 4/12 (v1.3은 0/12).
 - 읽는 법: VLM의 '정상 가능성 높음'을 자동 종결에 썼다면 정답 침입 0/10건이 사람 눈에 띄지 않았을 것입니다. 그래서 제품은 VLM 판단을 보조 표시로만 쓰고 모든 사건을 '확인 필요'로 유지합니다(decisions D7). 사례별 소견과 프롬프트 개선안: `docs/eval/vlm-findings.md`.

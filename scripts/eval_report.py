@@ -142,7 +142,7 @@ def rubric_line(d: dict) -> str:
     parts = [f"{names[k]} {q[k]['same']}/{q[k]['n']}" + (f"(κ {q[k]['kappa']})" if q[k].get("kappa") is not None else "") for k in names]
     parts.append(f"읽기 쉬움 같은 점수 {q['readability']['same']}/{q['readability']['n']}·1점 차 이내 {q['readability']['within_one']}/{q['readability']['n']}")
     return (line + f"\n- 두 번째 채점자와 같은 답(`raw/vlm_rubric_agreement.json`, {ag['events_scored_by_both']}건): " + ", ".join(parts)
-            + f"; 다른 답 {len(ag['disagreements'])}건. κ가 없는 항목은 한 사람이 모든 사건에 같은 답을 해서 계산할 수 없는 경우입니다.")
+            + f"; 다른 답 {len(ag['disagreements'])}건. κ(우연히 같을 확률을 뺀 일치도)는 두 사람 모두 두 가지 답을 다 쓴 항목에서만 적습니다 — 한 사람이 모든 사건에 같은 답을 하면 κ는 의미가 없습니다.")
 
 
 def reviewed_gt_lines() -> list[str]:

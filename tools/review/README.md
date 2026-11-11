@@ -1,6 +1,6 @@
 # 확인용 페이지 (설치 없이 브라우저로 열기)
 
-**2026-11-11 두 페이지 모두 완료·반영**: 정답 검수 결과는 [`docs/eval/ground-truth.md`](../../docs/eval/ground-truth.md), 채점 결과는 [`docs/eval/vlm-findings.md`](../../docs/eval/vlm-findings.md) §1-2. 페이지 안의 "지금 정답"은 검수 전 초안 기준입니다. 다른 사람이 한 번 더 채점하려면 같은 페이지를 그대로 쓰면 됩니다.
+**2026-11-11 두 페이지 모두 완료·반영**: 정답 검수 결과는 [`docs/eval/ground-truth.md`](../../docs/eval/ground-truth.md), 채점 결과는 [`docs/eval/vlm-findings.md`](../../docs/eval/vlm-findings.md) §1-2. 페이지 안의 "지금 정답"은 검수 전 초안 기준입니다. 두 번째 사람의 채점도 반영했습니다(`docs/eval/raw/vlm_rubric_agreement.json`). 비교 스크립트는 지금 두 사람(저장소 CSV의 채점자 1과 새 채점자) 비교만 합니다.
 
 ## 다른 사람이 한 번 더 채점하기 (채점이 얼마나 일치하는지)
 

@@ -7,9 +7,10 @@ question is written next to it:
     python scripts/rubric_agreement.py ~/Downloads/vlm_rubric.<name>.json
     # -> docs/eval/raw/vlm_rubric_grader2.json, docs/eval/raw/vlm_rubric_agreement.json
 
-Per yes/no question: how many of the events both people answered the same way, and Cohen's kappa when it is
-defined (when one person gave the same answer to every event, kappa is undefined — percent agreement is then the
-only meaningful number). Readability (1-3): exact and within-one agreement and each person's mean. Every
+Per yes/no question: how many of the events both people answered the same way, and Cohen's kappa only when each
+person used both answers at least once. When one person gave the same answer to every event, kappa is 0 or undefined
+whatever the other did (it measures agreement beyond chance, and a constant rater has none to offer), so it is left out
+and percent agreement is the number to read. Readability (1-3): exact and within-one agreement and each person's mean. Every
 disagreement is listed with both people's notes so it can be looked at.
 """
 
@@ -53,7 +54,7 @@ def compare(rows: list[dict], answers: dict) -> dict:
             res["mean_grader1"] = round(sum(map(int, g1)) / len(g1), 2) if g1 else None
             res["mean_grader2"] = round(sum(map(int, g2)) / len(g2), 2) if g2 else None
         else:
-            res["kappa"] = cohen_kappa(g1, g2)
+            res["kappa"] = cohen_kappa(g1, g2) if len(set(g1)) > 1 and len(set(g2)) > 1 else None
             res["grader1_yes"] = sum(x == "1" for x in g1)
             res["grader2_yes"] = sum(x == "1" for x in g2)
         out["questions"][q] = res
