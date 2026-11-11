@@ -132,8 +132,17 @@ def rubric_line(d: dict) -> str:
     hal = sum(r["grader_hallucination_0_1"] == "1" for r in done)
     unc = sum(r["grader_uncertainties_sensible_0_1"] == "1" for r in done)
     rd = sum(int(r["grader_readability_1_3"]) for r in done) / n
-    return (f"- 사람 채점(1명, `tools/review/vlm_rubric.html`, {n}/{len(rows)}건): 관찰이 사진과 맞음 {ok}/{n}, 지어낸 내용 있음 {hal}/{n}, "
+    line = (f"- 사람 채점(`tools/review/vlm_rubric.html`, {n}/{len(rows)}건): 관찰이 사진과 맞음 {ok}/{n}, 지어낸 내용 있음 {hal}/{n}, "
             f"'불확실한 점'이 타당 {unc}/{n}, 읽기 쉬움 평균 {rd:.1f}/3. 원본: `{d['human_rubric_csv']}`")
+    ag = load("vlm_rubric_agreement.json")
+    if not ag:
+        return line + " (채점자 1명)"
+    q = ag["questions"]
+    names = {"observations_match_frames": "관찰 일치", "hallucination": "지어낸 내용", "uncertainties_sensible": "불확실한 점"}
+    parts = [f"{names[k]} {q[k]['same']}/{q[k]['n']}" + (f"(κ {q[k]['kappa']})" if q[k].get("kappa") is not None else "") for k in names]
+    parts.append(f"읽기 쉬움 같은 점수 {q['readability']['same']}/{q['readability']['n']}·1점 차 이내 {q['readability']['within_one']}/{q['readability']['n']}")
+    return (line + f"\n- 두 번째 채점자와 같은 답(`raw/vlm_rubric_agreement.json`, {ag['events_scored_by_both']}건): " + ", ".join(parts)
+            + f"; 다른 답 {len(ag['disagreements'])}건. κ가 없는 항목은 한 사람이 모든 사건에 같은 답을 해서 계산할 수 없는 경우입니다.")
 
 
 def reviewed_gt_lines() -> list[str]:

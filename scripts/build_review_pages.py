@@ -315,6 +315,7 @@ textarea, input[type=text] { font:inherit; color:var(--fg); background:var(--bg)
 textarea { width:100%; box-sizing:border-box; margin-top:8px; min-height:38px; }
 .muted { color:var(--muted); font-size:13px; }
 .primary { background:var(--accent); color:#fff; border:0; border-radius:6px; padding:8px 14px; font:inherit; cursor:pointer; }
+.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; margin-left:auto; }
 .obs { white-space:pre-wrap; background:var(--bg); border-radius:6px; padding:8px; font-size:14px; }
 """
 
@@ -349,6 +350,11 @@ function progress() {
   document.getElementById('progress').textContent = `${done} / ${document.querySelectorAll('.card[data-id]').length} 완료`;
 }
 progress();
+document.getElementById('reset').addEventListener('click', () => {
+  if (!confirm('이 브라우저에 저장된 답을 모두 지우고 새로 시작할까요? (다른 사람이 채점할 때. 먼저 내보내기를 했는지 확인하세요)')) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  location.reload();
+});
 document.getElementById('export').addEventListener('click', () => {
   const total = document.querySelectorAll('.card[data-id]').length;
   const left = total - document.querySelectorAll('.card.done').length;
@@ -366,7 +372,8 @@ def _page(title: str, key: str, intro: str, cards: list[str]) -> str:
     return (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
             f"<title>{html.escape(title)}</title><style>{PAGE_CSS}</style></head><body data-key='{key}'>"
             f"<header><b>{html.escape(title)}</b><label>이름 <input type='text' id='who' size='10' placeholder='예: 홍길동'></label>"
-            f"<span id='progress' class='muted'></span><button class='primary' id='export'>내보내기 (JSON)</button></header>"
+            f"<span id='progress' class='muted'></span><button class='primary' id='export'>내보내기 (JSON)</button>"
+            f"<button id='reset' class='ghost'>새로 시작 (다른 사람)</button></header>"
             f"<main><div class='card'>{intro}</div>{''.join(cards)}</main><script>{PAGE_JS}</script></body></html>")
 
 
