@@ -19,7 +19,9 @@ import time
 from collections import defaultdict
 
 
-def _overlap(a0: float, a1: float, b0: float, b1: float) -> bool:
+def _overlap(a0: float, a1: float, b0: float, b1: float, gap_s: float = 0.0) -> bool:
+    if gap_s > 0:
+        return a0 <= b1 + gap_s and b0 <= a1 + gap_s
     return a0 < b1 and b0 < a1
 
 
@@ -30,7 +32,7 @@ def _find(parent: list[int], i: int) -> int:
     return i
 
 
-def concurrent_groups(events: list[dict], now: float | None = None) -> dict[str, dict]:
+def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float = 0.0) -> dict[str, dict]:
     """event_id -> {"group_id", "size", "event_ids"} for events in a group of two or more.
 
     ``events`` need event_id, camera_id, zone_id, entry_ts / exit_ts (epoch seconds, exit may be None) and
@@ -56,7 +58,7 @@ def concurrent_groups(events: list[dict], now: float | None = None) -> dict[str,
         for i in range(len(evs)):
             for j in range(i + 1, len(evs)):
                 a, b = spans[i], spans[j]
-                if _overlap(a[0], a[1], b[0], b[1]) and (a[2] <= b[3] and b[2] <= a[3]):
+                if _overlap(a[0], a[1], b[0], b[1], gap_s) and (a[2] <= b[3] + gap_s and b[2] <= a[3] + gap_s):
                     parent[_find(parent, i)] = _find(parent, j)
         comps: dict[int, list[int]] = defaultdict(list)
         for i in range(len(evs)):
