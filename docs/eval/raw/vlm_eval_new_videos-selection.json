@@ -1,0 +1,40 @@
+{
+ "closed_events": 70,
+ "picked": 18,
+ "false_alarms_in_run": 2,
+ "false_alarms_picked": 2,
+ "picked_per_video": {
+  "caviar-lobby-browse3": "0/0",
+  "caviar-lobby-fight-run-away1": "1/1",
+  "caviar-lobby-meet-walk-split": "0/0",
+  "caviar-lobby-meet-walk-together2": "1/1",
+  "caviar-mall-cor-one-shop-one-wait2": "2/12",
+  "caviar-mall-cor-one-stop-move-enter1": "2/17",
+  "caviar-mall-cor-shop-assistant2": "2/11",
+  "caviar-mall-cor-two-leave-shop1": "2/5",
+  "caviar-mall-front-one-shop-one-wait2": "4/7",
+  "caviar-mall-front-one-stop-move-enter1": "2/4",
+  "caviar-mall-front-shop-assistant2": "1/10",
+  "caviar-mall-front-two-leave-shop1": "1/2"
+ },
+ "event_ids": [
+  "75c61c8c-8f30-56e4-b31b-4d2ed87e3d71",
+  "94d251ed-14af-5f2e-98eb-e2f73182e43e",
+  "0aaf53f0-033d-5e0b-bef7-b21985e06447",
+  "ec58ab9a-9a5c-588c-8726-1fc79ac07e8c",
+  "2a957f29-de00-5a5b-b580-6d3a4c20678d",
+  "7636b807-7da9-5006-a970-e926d01b688b",
+  "9533421b-569f-5cbe-b943-56dd6c91e83d",
+  "05d5bcdb-72f7-5b89-84ec-c51ef4735246",
+  "6bce9ce8-9bdb-5777-89a7-c0764b782ebf",
+  "a7302c34-02ba-54a3-ae77-77e3669f9b2a",
+  "8a65c652-c7e7-5468-9635-37c000537b39",
+  "e1a6d726-d992-5f58-ae64-5e40c021ecb5",
+  "d25d84ee-0aa8-5e0a-af6a-9c945ab9494c",
+  "3cce5830-679f-599f-92a5-45039cc6a036",
+  "e94ec663-d276-5c64-9599-a061c7c36e35",
+  "1e708f67-46a4-577c-9119-e10b89114f95",
+  "60f192ea-a85a-5eed-8e7d-cc5df3eda09e",
+  "b6fe567c-1416-52bc-9521-2b4f4fd09232"
+ ]
+}

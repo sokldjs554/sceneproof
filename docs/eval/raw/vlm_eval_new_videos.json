@@ -1,0 +1,72 @@
+{
+ "time": "2026-11-12T01:57:29",
+ "provider": "anthropic",
+ "model": "claude-opus-5-5",
+ "prompt_version": "v1.4-ko",
+ "matching": {
+  "source": "data/runs/vlm-new/events_all.jsonl vs data/runs/vlm-new/gt (min_overlap=0.5s, tolerance=1.0s)",
+  "events": 18,
+  "matched": 18,
+  "unmatched": 0,
+  "by_cv_outcome": {
+   "tp": 14,
+   "fp": 2,
+   "duplicate": 2,
+   "boundary": 0,
+   "unmatched": 0
+  },
+  "gt_intrusions_missed_by_cv": 8
+ },
+ "events": 18,
+ "explanations_by_status": {
+  "done": 18
+ },
+ "latency_ms": {
+  "p50": 19951.8245205,
+  "p95": 25560.37883784997,
+  "n": 18
+ },
+ "estimated_cost_usd": 0.8632,
+ "cv_only": {
+  "policy": "every event shown as needs_attention (확인 필요)",
+  "events_needing_review": 18,
+  "true_intrusions_flagged": 14,
+  "cv_false_alarms_flagged": 2
+ },
+ "cv_plus_vlm": {
+  "assessment_by_cv_outcome": {
+   "tp": {
+    "needs_attention": 9,
+    "unclear": 5
+   },
+   "duplicate": {
+    "needs_attention": 1,
+    "unclear": 1
+   },
+   "fp": {
+    "unclear": 2
+   }
+  },
+  "zone_relation_by_cv_outcome": {
+   "tp": {
+    "near_boundary": 7,
+    "clearly_inside": 7
+   },
+   "duplicate": {
+    "clearly_inside": 1,
+    "near_boundary": 1
+   },
+   "fp": {
+    "near_boundary": 2
+   }
+  },
+  "true_intrusions_kept_as_needs_attention": "9/14",
+  "cv_false_alarms_marked_likely_benign": "0/2",
+  "assessed_events": 18
+ },
+ "human_rubric_csv": "docs/eval/raw/vlm_eval_new_videos-rubric.csv",
+ "notes": [
+  "assessment is categorical; no confidence numbers are produced or evaluated",
+  "a VLM 'likely_benign' on a GT intrusion is a miss that CV-only would not have made: report it, do not hide it"
+ ]
+}
