@@ -161,6 +161,20 @@ def reviewed_gt_lines() -> list[str]:
         if (v := r.get("prompt_v1_2")) else [])
 
 
+def new_video_lines() -> list[str]:
+    n = load("vlm_eval_new_videos.json")
+    if not n:
+        return []
+    c = n["cv_plus_vlm"]
+    a = c["assessment_by_cv_outcome"]
+    tp, fp = a.get("tp", {}), a.get("fp", {})
+    return [f"- **처음 보는 영상**(연구용 조정 분할 12편에서 {n['events']}건, 프롬프트 {n['prompt_version']}, 측정 규칙은 실행 전 "
+            f"`configs/bench/vlm_new_videos.yaml`에 고정; `raw/vlm_eval_new_videos.json`): 정답 침입을 '확인 필요'로 유지 "
+            f"{c['true_intrusions_kept_as_needs_attention']}, '정상 가능성 높음' {tp.get('likely_benign', 0)}/{sum(tp.values())}, "
+            f"CV 잘못 울림(마네킹)을 '정상 가능성 높음'으로 표시 {c['cv_false_alarms_marked_likely_benign']} (둘 다 '불확실' {fp.get('unclear', 0)}), "
+            f"비용 {n['estimated_cost_usd']} USD. 해석: `docs/eval/vlm-findings.md` §1-3."]
+
+
 def vlm_section() -> str:
     d = load("vlm_eval.json")
     if not d:
@@ -181,6 +195,7 @@ def vlm_section() -> str:
            f"- assessment × CV 결과: `{json.dumps(d['cv_plus_vlm']['assessment_by_cv_outcome'], ensure_ascii=False)}`",
            rubric_line(d)]
     out += reviewed_gt_lines()
+    out += new_video_lines()
     a = d["cv_plus_vlm"]["assessment_by_cv_outcome"]
     tp = a.get("tp", {})
     tp_total = sum(tp.values())
