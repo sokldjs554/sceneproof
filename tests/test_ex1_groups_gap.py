@@ -6,6 +6,7 @@ gap_s 초 이하로 떨어진 사건(앞 사건이 끝나고 gap_s 초 안에 �
 """
 
 from sceneproof.server.groups import concurrent_groups
+import pytest
 
 
 def ev(eid, m0, m1, w0=None, w1=None, cam="c", zone="z"):
@@ -37,3 +38,14 @@ def test_gap_applies_to_wall_clock_too():
 def test_overlapping_events_still_group_with_a_gap():
     g = concurrent_groups([ev("a", 0, 5), ev("b", 4, 8)], now=2000, gap_s=2.0)
     assert g["a"]["size"] == 2
+
+
+def test_negative_gap_is_rejected_even_without_events():
+    with pytest.raises(ValueError, match="gap_s"):
+        concurrent_groups([], gap_s=-1)
+
+
+def test_touching_events_respect_default_and_positive_gap():
+    events = [ev("a", 0, 5), ev("b", 5, 9)]
+    assert concurrent_groups(events, now=2000, gap_s=0) == {}
+    assert concurrent_groups(events, now=2000, gap_s=1e-9)["a"]["size"] == 2

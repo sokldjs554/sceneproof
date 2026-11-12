@@ -20,6 +20,7 @@ from collections import defaultdict
 
 
 def _overlap(a0: float, a1: float, b0: float, b1: float, gap_s: float = 0.0) -> bool:
+    # Preserve strict overlap at zero; any positive tolerance includes touching intervals.
     if gap_s > 0:
         return a0 <= b1 + gap_s and b0 <= a1 + gap_s
     return a0 < b1 and b0 < a1
@@ -38,7 +39,10 @@ def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float
     ``events`` need event_id, camera_id, zone_id, entry_ts / exit_ts (epoch seconds, exit may be None) and
     media_entry_s / media_exit_s (exit may be None). ``event_ids`` is ordered by media entry time and the group id
     is the first of them, so it does not change when a later member closes.
+    ``gap_s`` is the allowed gap in seconds on both clocks, to join short tracking interruptions.
     """
+    if gap_s < 0:
+        raise ValueError("gap_s must be non-negative")
     now = time.time() if now is None else now
     by_zone: dict[tuple, list[dict]] = defaultdict(list)
     for e in events:
