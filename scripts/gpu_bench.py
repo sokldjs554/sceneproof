@@ -135,6 +135,8 @@ def main() -> int:
                     raise RuntimeError(f"CUDA execution provider not active (session uses {b.active_providers})")
                 row["engine_build_s"] = round(b.build_s, 1) if getattr(b, "build_s", None) else None
                 row["runtime"] = f"{b.name} {b.version}"
+                if getattr(b, "fp16_method", ""):
+                    row["fp16_method"] = b.fp16_method  # builder-flag (TensorRT <= 10) | fp16-onnx (strongly typed)
                 res = run_setting(det, frames, args.repeats)
                 row.update(summarize(res))
                 if ref_det is None:

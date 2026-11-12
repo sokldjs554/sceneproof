@@ -16,7 +16,7 @@ dependencies = [
   "onnxruntime>=1.19",
   "scipy>=1.13",
   "grpcio>=1.66",
-  "protobuf>=5.28",
+  "protobuf>=7.35.1",  # the generated code (src/sceneproof/proto) refuses an older runtime
   "pydantic>=2.8",
   "pydantic-settings>=2.4",
   "pyyaml>=6.0",
@@ -36,6 +36,9 @@ torch = ["torch>=2.4", "onnx>=1.16"]
 # imageio-ffmpeg: a ready-made ffmpeg when none is installed (Homebrew builds it from source on older Macs)
 bench = ["remotezip>=0.12", "imageio-ffmpeg>=0.5"]
 gst = ["pygobject>=3.50", "pycairo>=1.26"]
+# TensorRT FP16 on TensorRT >= 11 (no FP16 builder flag): the ONNX is converted to FP16 first (detector.TensorRTBackend).
+# tensorrt / onnxruntime-gpu themselves come from the GPU machine's setup (notebooks/colab_gpu_bench.ipynb).
+trt = ["onnx>=1.16", "onnxconverter-common>=1.14"]
 vlm-local = ["transformers>=4.46", "torch>=2.4", "pillow>=10"]
 dev = [
   "pytest>=8.2",
@@ -44,6 +47,8 @@ dev = [
   "ruff>=0.6",
   "pillow>=10",
   "playwright>=1.47",
+  "onnx>=1.16",
+  "onnxconverter-common>=1.14",
 ]
 
 [project.scripts]

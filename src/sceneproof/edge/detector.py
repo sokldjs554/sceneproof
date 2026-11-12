@@ -197,14 +197,17 @@ class TensorRTBackend:
         engine_path = engine_dir / f"{Path(model_path).stem}.{precision}.trt{trt.__version__}.{tag}.engine"
         logger = trt.Logger(trt.Logger.WARNING)
         self.build_s: float | None = None
+        fp16_note = engine_path.with_suffix(".fp16-method")
         if engine_path.exists():
             data = engine_path.read_bytes()
+            self.fp16_method = fp16_note.read_text().strip() if fp16_note.exists() else ""
         else:
             t0 = time.perf_counter()
-            data = _build_trt_engine(trt, logger, Path(model_path), precision, workspace_mb)
+            data, self.fp16_method = _build_trt_engine(trt, logger, Path(model_path), precision, workspace_mb)
             self.build_s = time.perf_counter() - t0
             engine_dir.mkdir(parents=True, exist_ok=True)
             engine_path.write_bytes(data)
+            fp16_note.write_text(self.fp16_method)
         self.engine = trt.Runtime(logger).deserialize_cuda_engine(data)
         if self.engine is None:
             raise RuntimeError(f"TensorRT could not load {engine_path} (delete it to rebuild)")
@@ -243,23 +246,51 @@ class TensorRTBackend:
         return out.cpu().numpy()[0]
 
 
-def _build_trt_engine(trt: Any, logger: Any, model_path: Path, precision: str, workspace_mb: int) -> bytes:
+def onnx_to_fp16(model_path: str | Path) -> bytes:
+    """FP16 weights and activations, FP32 input and output (Cast nodes at the edges). Resize stays FP32: its
+    `scales` input must be float32. Used for TensorRT >= 11, whose networks are strongly typed (precision comes
+    from the ONNX tensor types; the FP16 builder flag is gone)."""
+    import warnings
+
+    import onnx
+    from onnxconverter_common import float16
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # "float32 number ... will be truncated" for tiny weights
+        m16 = float16.convert_float_to_float16(onnx.load(str(model_path)), keep_io_types=True, op_block_list=["Resize"])
+    onnx.checker.check_model(m16)
+    return m16.SerializeToString()
+
+
+def _build_trt_engine(trt: Any, logger: Any, model_path: Path, precision: str, workspace_mb: int) -> tuple[bytes, str]:
+    """-> (serialized engine, how FP16 was obtained: "builder-flag" (TensorRT <= 10), "fp16-onnx" (strongly typed),
+    or "" for FP32)."""
     builder = trt.Builder(logger)
     major = int(trt.__version__.split(".")[0])
     flags = 0 if major >= 10 else 1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+    onnx_bytes = model_path.read_bytes()
+    method = ""
+    if precision == "fp16":
+        if hasattr(trt.BuilderFlag, "FP16"):
+            method = "builder-flag"
+        else:
+            onnx_bytes, method = onnx_to_fp16(model_path), "fp16-onnx"
+            strongly_typed = getattr(trt.NetworkDefinitionCreationFlag, "STRONGLY_TYPED", None)
+            if strongly_typed is not None:
+                flags |= 1 << int(strongly_typed)
     network = builder.create_network(flags)
     parser = trt.OnnxParser(network, logger)
-    if not parser.parse(model_path.read_bytes()):
+    if not parser.parse(onnx_bytes):
         errors = "; ".join(str(parser.get_error(i)) for i in range(parser.num_errors))
         raise RuntimeError(f"TensorRT could not parse {model_path}: {errors}")
     config = builder.create_builder_config()
     config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, workspace_mb << 20)
-    if precision == "fp16":
+    if method == "builder-flag":
         config.set_flag(trt.BuilderFlag.FP16)
     data = builder.build_serialized_network(network, config)
     if data is None:
         raise RuntimeError("TensorRT engine build failed (see the TensorRT log above)")
-    return bytes(data)
+    return bytes(data), method
 
 
 # --------------------------------------------------------------------------- detector

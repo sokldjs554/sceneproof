@@ -1,0 +1,399 @@
+{
+ "what": "same frames, same pre/post-processing; only the network runtime differs",
+ "git": "8ea427f",
+ "time": "2026-11-12T08:32:05",
+ "video": "campus-walkway.mp4",
+ "frames": 300,
+ "frame_hw": [
+  576,
+  768
+ ],
+ "repeats": 3,
+ "env": {
+  "python": "3.13.16",
+  "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "cpu_count": 2,
+  "nvidia_smi": "Tesla T4, 580.82.07, 15360 MiB",
+  "onnxruntime": "1.31.1",
+  "onnxruntime_providers": [
+   "TensorrtExecutionProvider",
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ],
+  "torch": "2.14.1+cu130",
+  "torch_cuda": "13.0",
+  "gpu": "Tesla T4",
+  "tensorrt": "11.4.0.106"
+ },
+ "results": [
+  {
+   "variant": "yolox_nano",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.07,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 18.133,
+   "infer_ms_p95": 50.511,
+   "total_ms_p50": 20.944,
+   "total_ms_p95": 56.263,
+   "fps_median": 38.8,
+   "per_repeat_infer_p50": [
+    18.313,
+    18.133,
+    18.05
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.71,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 4.409,
+   "infer_ms_p95": 6.103,
+   "total_ms_p50": 7.212,
+   "total_ms_p95": 9.257,
+   "fps_median": 138.1,
+   "per_repeat_infer_p50": [
+    4.425,
+    4.409,
+    3.476
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 3e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.36,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 13.147,
+   "infer_ms_p95": 17.543,
+   "total_ms_p50": 15.963,
+   "total_ms_p95": 21.031,
+   "fps_median": 60.6,
+   "per_repeat_infer_p50": [
+    13.147,
+    13.718,
+    12.885
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0002,
+    "max_abs_score_output": 4e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "tensorrt-fp32",
+   "load_s": 53.96,
+   "engine_build_s": 53.8,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 3.241,
+   "infer_ms_p95": 4.035,
+   "total_ms_p50": 6.159,
+   "total_ms_p95": 7.224,
+   "fps_median": 159.4,
+   "per_repeat_infer_p50": [
+    3.419,
+    3.241,
+    2.785
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0002,
+    "max_abs_score_output": 3e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "tensorrt-fp16",
+   "status": "failed",
+   "error": "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'",
+   "trace_tail": [
+    "    config.set_flag(trt.BuilderFlag.FP16)",
+    "                    ^^^^^^^^^^^^^^^^^^^^",
+    "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'"
+   ]
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.13,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 68.762,
+   "infer_ms_p95": 163.304,
+   "total_ms_p50": 72.059,
+   "total_ms_p95": 172.137,
+   "fps_median": 11.5,
+   "per_repeat_infer_p50": [
+    68.762,
+    68.469,
+    69.129
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.13,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 4.805,
+   "infer_ms_p95": 4.927,
+   "total_ms_p50": 7.043,
+   "total_ms_p95": 7.535,
+   "fps_median": 140.4,
+   "per_repeat_infer_p50": [
+    4.81,
+    4.805,
+    4.789
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.57,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 11.678,
+   "infer_ms_p95": 19.212,
+   "total_ms_p50": 14.571,
+   "total_ms_p95": 23.574,
+   "fps_median": 59.9,
+   "per_repeat_infer_p50": [
+    11.678,
+    11.607,
+    11.741
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "tensorrt-fp32",
+   "load_s": 49.92,
+   "engine_build_s": 49.6,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 3.565,
+   "infer_ms_p95": 3.696,
+   "total_ms_p50": 5.819,
+   "total_ms_p95": 6.639,
+   "fps_median": 169.1,
+   "per_repeat_infer_p50": [
+    3.565,
+    3.534,
+    3.565
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 5.484,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "tensorrt-fp16",
+   "status": "failed",
+   "error": "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'",
+   "trace_tail": [
+    "    config.set_flag(trt.BuilderFlag.FP16)",
+    "                    ^^^^^^^^^^^^^^^^^^^^",
+    "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'"
+   ]
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.19,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 254.887,
+   "infer_ms_p95": 501.369,
+   "total_ms_p50": 261.421,
+   "total_ms_p95": 510.456,
+   "fps_median": 3.3,
+   "per_repeat_infer_p50": [
+    254.887,
+    254.744,
+    258.108
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.19,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 9.789,
+   "infer_ms_p95": 10.134,
+   "total_ms_p50": 14.065,
+   "total_ms_p95": 16.443,
+   "fps_median": 69.7,
+   "per_repeat_infer_p50": [
+    9.696,
+    9.789,
+    9.813
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.53,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 12.683,
+   "infer_ms_p95": 19.262,
+   "total_ms_p50": 17.89,
+   "total_ms_p95": 26.861,
+   "fps_median": 52.7,
+   "per_repeat_infer_p50": [
+    12.683,
+    12.963,
+    12.497
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "tensorrt-fp32",
+   "load_s": 52.85,
+   "engine_build_s": 52.4,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 8.437,
+   "infer_ms_p95": 8.777,
+   "total_ms_p50": 12.856,
+   "total_ms_p95": 14.658,
+   "fps_median": 75.9,
+   "per_repeat_infer_p50": [
+    8.445,
+    8.389,
+    8.437
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "tensorrt-fp16",
+   "status": "failed",
+   "error": "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'",
+   "trace_tail": [
+    "    config.set_flag(trt.BuilderFlag.FP16)",
+    "                    ^^^^^^^^^^^^^^^^^^^^",
+    "AttributeError: type object 'tensorrt_bindings.tensorrt.BuilderFlag' has no attribute 'FP16'"
+   ]
+  }
+ ]
+}
