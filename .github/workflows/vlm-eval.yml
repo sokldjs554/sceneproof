@@ -10,6 +10,9 @@ on:
       variant:
         description: detector variant for the CV runs
         default: yolox_tiny
+      new_videos:
+        description: CV+VLM on the 12 DEV-split benchmark videos (plan configs/bench/vlm_new_videos.yaml, paid, budget in the plan)
+        default: "false"
       heldout_eval:
         description: run the held-out CV vs CV+VLM evaluation (paid, ~1 USD); "false" = demo bundle only
         default: "true"
@@ -48,7 +51,7 @@ jobs:
         run: |
           python -m pip install -U pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -e ".[server,dev,torch]"
+          pip install -e ".[server,dev,torch,bench]"
       - name: Data + model
         run: |
           bash scripts/fetch_data.sh
@@ -99,6 +102,9 @@ jobs:
           SP_SERVER_VLM_BUDGET_USD: ${{ inputs.budget_eval_usd }}
           SP_SERVER_VLM_MAX_CONCURRENCY: "2"
         run: bash scripts/run_vlm_eval.sh ${{ inputs.variant }}
+      - name: New-video evaluation (plan fixed in configs/bench/vlm_new_videos.yaml)
+        if: inputs.new_videos == 'true'
+        run: bash scripts/run_vlm_new_videos.sh
       - name: Demo bundle with real explanations
         if: inputs.rebuild_demo == 'true'
         env:
@@ -133,6 +139,8 @@ jobs:
             data/runs/eval-bundle-*/events.jsonl
             data/server-eval-*/sceneproof.db
             data/runs/demo-build/server.log
+            data/runs/vlm-new/server.log
+            data/runs/vlm-new/selection.json
             /tmp/replay-server.log
             docs/images/replay-vlm
       - name: Commit results back
@@ -141,7 +149,9 @@ jobs:
           git config user.email "ci@users.noreply.github.com"
           git add docs/eval/raw docs/eval/README.md demo/bundle docs/images/replay-vlm 2>/dev/null || true
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          if [ "${{ inputs.heldout_eval }}" = "false" ]; then MSG="demo: 데모 번들 해석 다시 생성(Claude API) [skip ci]"; else MSG="eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"; fi
+          if [ "${{ inputs.new_videos }}" = "true" ]; then MSG="eval: 새 영상(조정 분할 12편) CV+VLM 결과(Claude API) [skip ci]"
+          elif [ "${{ inputs.heldout_eval }}" = "false" ]; then MSG="demo: 데모 번들 해석 다시 생성(Claude API) [skip ci]"
+          else MSG="eval: CV+VLM 비교 결과(Claude API) 및 데모 번들 해석 추가 [skip ci]"; fi
           git commit -m "$MSG"
           # main may have moved while the (paid) run was in progress: rebase the result commit instead of failing
           # --autostash: fetch_models/fetch_data regenerate tracked helper files (model metadata, checksums) during the run

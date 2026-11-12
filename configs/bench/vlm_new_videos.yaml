@@ -1,0 +1,38 @@
+# CV+VLM re-measurement on videos the prompt never saw — fixed BEFORE any explanation was generated (2026-11-12).
+#
+# Why: prompt v1.3 was written after reading v1.2's answers on the 19 events of the 4 held-out videos and was then
+# scored on the same 19 events (docs/eval/vlm-findings.md §4). This run asks the same question on new events.
+# Nothing below may change after the run starts; a re-run needs a recorded reason (as for the benchmark locks).
+prompt: current product prompt (v1.4-ko = the v1.3 rule, the same sentence also in the schema description)
+model: claude-opus-5-5, effort medium, 5 annotated key frames per event (same as the earlier runs)
+videos:   # all 12 sequences of the DEV split of configs/bench/split.yaml (sha256_16 56c1ec58729798c8), in that order
+  - caviar-lobby-browse3
+  - caviar-lobby-fight-run-away1
+  - caviar-lobby-meet-walk-split
+  - caviar-lobby-meet-walk-together2
+  - caviar-mall-cor-one-shop-one-wait2
+  - caviar-mall-cor-one-stop-move-enter1
+  - caviar-mall-cor-shop-assistant2
+  - caviar-mall-cor-two-leave-shop1
+  - caviar-mall-front-one-shop-one-wait2
+  - caviar-mall-front-one-stop-move-enter1
+  - caviar-mall-front-shop-assistant2
+  - caviar-mall-front-two-leave-shop1
+cv: product defaults of configs/eval.yaml (yolox_tiny ONNX, conf 0.4, ByteTrack settings, rejoin off), zones of
+    configs/bench/zones.yaml WITHOUT exclusion areas (the state right after installation; it also lets the run show
+    whether the VLM flags CV false alarms such as mannequins)
+ground_truth: dataset hand-drawn boxes -> the same zone rule (eval/bench/episodes.gt_episodes); labels intrusion,
+    boundary_pass, and ignore (distractors) -> treated as not-positive
+matching: time overlap as in the earlier VLM evaluation (eval/metrics.match_events, min_overlap 0.5 s, tolerance 1 s),
+    against ALL CV events of each video, so duplicates are classified the same way whether or not they were selected
+selection: >-
+    Closed events only. First every CV false alarm (an event matching no ground-truth episode, up to
+    max_false_alarms), then round-robin over the videos above (1st remaining event of each video by media entry
+    time, then the 2nd, ...) until max_events.
+    Changed once before the paid run, after a local dry run of the free CV step only (no explanation existed) -
+    the first rule (round-robin only) picked none of the 2 false alarms among 73 events, so the run could not
+    show whether the VLM flags CV false alarms. The total stays 18, so the cost does not change.
+max_false_alarms: 4
+max_events: 18
+budget_usd: 1.0   # server-side hard stop; with the earlier runs (about $4.85) the total stays under $6
+report: docs/eval/raw/vlm_eval_new_videos.json (+ -rubric.csv); the numbers are reported whatever they are
