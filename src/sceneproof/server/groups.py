@@ -32,28 +32,25 @@ def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float
             i = parents[i]
         return i
 
-    def media_overlaps(a, b):
-        a_start = float(a.get("media_entry_s") or 0.0)
-        b_start = float(b.get("media_entry_s") or 0.0)
-        a_end = float("inf") if a.get("media_exit_s") is None else float(a["media_exit_s"])
-        b_end = float("inf") if b.get("media_exit_s") is None else float(b["media_exit_s"])
-        if gap_s == 0:
-            return a_start < b_end and b_start < a_end
-        return a_start - b_end <= gap_s and b_start - a_end <= gap_s
-
-    def wall_overlaps(a, b):
-        a_start = float(a.get("entry_ts") or 0.0)
-        b_start = float(b.get("entry_ts") or 0.0)
-        a_end = max(now, a_start) if a.get("exit_ts") is None else float(a["exit_ts"])
-        b_end = max(now, b_start) if b.get("exit_ts") is None else float(b["exit_ts"])
-        return a_start - b_end <= gap_s and b_start - a_end <= gap_s
-
     by_zone: dict[tuple, list[int]] = defaultdict(list)
-    for i, a in enumerate(events):
-        zone_key = (a.get("camera_id"), a.get("zone_id"))
+    spans = []
+    for i, event in enumerate(events):
+        media_start = float(event.get("media_entry_s") or 0.0)
+        media_end_value = event.get("media_exit_s")
+        media_end = float("inf") if media_end_value is None else float(media_end_value)
+        wall_start = float(event.get("entry_ts") or 0.0)
+        wall_end_value = event.get("exit_ts")
+        wall_end = max(now, wall_start) if wall_end_value is None else float(wall_end_value)
+        spans.append((media_start, media_end, wall_start, wall_end))
+        zone_key = (event.get("camera_id"), event.get("zone_id"))
         for j in by_zone[zone_key]:
-            b = events[j]
-            if media_overlaps(a, b) and wall_overlaps(a, b):
+            other_media_start, other_media_end, other_wall_start, other_wall_end = spans[j]
+            if gap_s == 0:
+                media_match = media_start < other_media_end and other_media_start < media_end
+            else:
+                media_match = media_start - other_media_end <= gap_s and other_media_start - media_end <= gap_s
+            if (media_match and wall_start - other_wall_end <= gap_s
+                    and other_wall_start - wall_end <= gap_s):
                 parents[find(i)] = find(j)
         by_zone[zone_key].append(i)
 
