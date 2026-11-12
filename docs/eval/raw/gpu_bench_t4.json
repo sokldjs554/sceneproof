@@ -1,0 +1,462 @@
+{
+ "what": "same frames, same pre/post-processing; only the network runtime differs",
+ "git": "b8b4426",
+ "time": "2026-11-12T09:09:15",
+ "video": "campus-walkway.mp4",
+ "frames": 300,
+ "frame_hw": [
+  576,
+  768
+ ],
+ "repeats": 3,
+ "env": {
+  "python": "3.13.16",
+  "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "cpu_count": 2,
+  "nvidia_smi": "Tesla T4, 580.82.07, 15360 MiB",
+  "onnxruntime": "1.31.1",
+  "onnxruntime_providers": [
+   "TensorrtExecutionProvider",
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ],
+  "torch": "2.14.1+cu130",
+  "torch_cuda": "13.0",
+  "gpu": "Tesla T4",
+  "tensorrt": "11.4.0.106"
+ },
+ "results": [
+  {
+   "variant": "yolox_nano",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.09,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 17.674,
+   "infer_ms_p95": 21.892,
+   "total_ms_p50": 20.44,
+   "total_ms_p95": 24.895,
+   "fps_median": 47.1,
+   "per_repeat_infer_p50": [
+    17.342,
+    17.73,
+    17.674
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.3,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 4.235,
+   "infer_ms_p95": 6.485,
+   "total_ms_p50": 7.146,
+   "total_ms_p95": 9.244,
+   "fps_median": 145.3,
+   "per_repeat_infer_p50": [
+    4.235,
+    3.426,
+    5.124
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 3e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.32,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 12.329,
+   "infer_ms_p95": 14.348,
+   "total_ms_p50": 15.058,
+   "total_ms_p95": 17.647,
+   "fps_median": 64.6,
+   "per_repeat_infer_p50": [
+    13.626,
+    12.184,
+    12.329
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0002,
+    "max_abs_score_output": 4e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "tensorrt-fp32",
+   "load_s": 52.31,
+   "engine_build_s": 52.0,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 2.725,
+   "infer_ms_p95": 3.155,
+   "total_ms_p50": 4.901,
+   "total_ms_p95": 5.766,
+   "fps_median": 200.4,
+   "per_repeat_infer_p50": [
+    3.454,
+    2.725,
+    2.574
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 2134,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 2e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_nano",
+   "backend": "tensorrt-fp16",
+   "load_s": 148.27,
+   "engine_build_s": 148.1,
+   "runtime": "tensorrt-fp16 11.4.0.106",
+   "fp16_method": "fp16-onnx",
+   "infer_ms_p50": 2.998,
+   "infer_ms_p95": 3.338,
+   "total_ms_p50": 5.422,
+   "total_ms_p95": 6.065,
+   "fps_median": 182.3,
+   "per_repeat_infer_p50": [
+    3.393,
+    2.998,
+    2.856
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 2,
+    "matched_boxes": 2133,
+    "unmatched_boxes": 1,
+    "max_box_delta_px": 4.64,
+    "max_score_delta": 0.0113
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.9585,
+    "max_abs_score_output": 0.08922
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.13,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 68.966,
+   "infer_ms_p95": 162.368,
+   "total_ms_p50": 72.408,
+   "total_ms_p95": 168.796,
+   "fps_median": 11.5,
+   "per_repeat_infer_p50": [
+    69.416,
+    68.389,
+    68.966
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.13,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 4.807,
+   "infer_ms_p95": 4.912,
+   "total_ms_p50": 7.04,
+   "total_ms_p95": 7.564,
+   "fps_median": 140.7,
+   "per_repeat_infer_p50": [
+    4.814,
+    4.802,
+    4.807
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.71,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 11.171,
+   "infer_ms_p95": 18.168,
+   "total_ms_p50": 14.094,
+   "total_ms_p95": 22.515,
+   "fps_median": 66.1,
+   "per_repeat_infer_p50": [
+    11.171,
+    11.061,
+    12.969
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "tensorrt-fp32",
+   "load_s": 49.55,
+   "engine_build_s": 49.3,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 3.539,
+   "infer_ms_p95": 3.653,
+   "total_ms_p50": 5.746,
+   "total_ms_p95": 6.343,
+   "fps_median": 172.4,
+   "per_repeat_infer_p50": [
+    3.553,
+    3.532,
+    3.539
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1893,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 5.484,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_tiny",
+   "backend": "tensorrt-fp16",
+   "load_s": 126.4,
+   "engine_build_s": 126.2,
+   "runtime": "tensorrt-fp16 11.4.0.106",
+   "fp16_method": "fp16-onnx",
+   "infer_ms_p50": 2.743,
+   "infer_ms_p95": 3.014,
+   "total_ms_p50": 5.079,
+   "total_ms_p95": 6.225,
+   "fps_median": 185.1,
+   "per_repeat_infer_p50": [
+    2.97,
+    2.724,
+    2.743
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 3,
+    "matched_boxes": 1891,
+    "unmatched_boxes": 2,
+    "max_box_delta_px": 5.471,
+    "max_score_delta": 0.03973
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.3634,
+    "max_abs_score_output": 0.026
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "onnxruntime-cpu",
+   "load_s": 0.19,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "infer_ms_p50": 253.153,
+   "infer_ms_p95": 493.237,
+   "total_ms_p50": 259.786,
+   "total_ms_p95": 505.796,
+   "fps_median": 3.3,
+   "per_repeat_infer_p50": [
+    253.153,
+    253.901,
+    252.508
+   ],
+   "reference": true,
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "onnxruntime-cuda",
+   "load_s": 0.19,
+   "engine_build_s": null,
+   "runtime": "onnxruntime-cuda 1.31.1",
+   "infer_ms_p50": 9.828,
+   "infer_ms_p95": 10.379,
+   "total_ms_p50": 14.237,
+   "total_ms_p95": 15.831,
+   "fps_median": 69.3,
+   "per_repeat_infer_p50": [
+    9.783,
+    9.835,
+    9.828
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "torch-cuda-fp32",
+   "load_s": 0.53,
+   "engine_build_s": null,
+   "runtime": "torch-cuda 2.14.1+cu130",
+   "infer_ms_p50": 12.427,
+   "infer_ms_p95": 20.141,
+   "total_ms_p50": 17.71,
+   "total_ms_p95": 27.24,
+   "fps_median": 50.9,
+   "per_repeat_infer_p50": [
+    12.542,
+    12.271,
+    12.427
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "tensorrt-fp32",
+   "load_s": 52.76,
+   "engine_build_s": 52.3,
+   "runtime": "tensorrt-fp32 11.4.0.106",
+   "infer_ms_p50": 8.344,
+   "infer_ms_p95": 8.692,
+   "total_ms_p50": 12.993,
+   "total_ms_p95": 15.31,
+   "fps_median": 74.2,
+   "per_repeat_infer_p50": [
+    8.326,
+    8.371,
+    8.344
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 0,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 0.0,
+    "max_score_delta": 0.0
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.0001,
+    "max_abs_score_output": 1e-05
+   },
+   "status": "ok"
+  },
+  {
+   "variant": "yolox_s",
+   "backend": "tensorrt-fp16",
+   "load_s": 128.08,
+   "engine_build_s": 127.9,
+   "runtime": "tensorrt-fp16 11.4.0.106",
+   "fp16_method": "fp16-onnx",
+   "infer_ms_p50": 4.925,
+   "infer_ms_p95": 5.143,
+   "total_ms_p50": 9.261,
+   "total_ms_p95": 10.664,
+   "fps_median": 106.3,
+   "per_repeat_infer_p50": [
+    5.046,
+    4.894,
+    4.925
+   ],
+   "vs_cpu_after_nms": {
+    "frames": 300,
+    "frames_with_count_diff": 1,
+    "matched_boxes": 1888,
+    "unmatched_boxes": 0,
+    "max_box_delta_px": 2.799,
+    "max_score_delta": 0.00323
+   },
+   "vs_cpu_raw_output": {
+    "frames": 20,
+    "max_abs_box_output": 0.3914,
+    "max_abs_score_output": 0.06476
+   },
+   "status": "ok"
+  }
+ ]
+}
