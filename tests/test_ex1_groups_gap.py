@@ -5,8 +5,9 @@ gap_s 초 이하로 떨어진 사건(앞 사건이 끝나고 gap_s 초 안에 �
 영상 시각과 실제 시각 두 쪽 모두에 같은 여유를 적용합니다. gap_s=0.0이면 지금과 똑같이 동작해야 합니다.
 """
 
-from sceneproof.server.groups import concurrent_groups
 import pytest
+
+from sceneproof.server.groups import concurrent_groups
 
 
 def ev(eid, m0, m1, w0=None, w1=None, cam="c", zone="z"):
