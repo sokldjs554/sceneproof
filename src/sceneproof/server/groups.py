@@ -1,78 +1,69 @@
-"""Events that were inside the same zone at the same time.
-
-The zone monitor makes one event per tracked person, which is also how the benchmark ground truth counts. People
-who mark the same video count a group that is inside together as ONE event (docs/eval/bench/findings.md, agreement
-round 2), and one person whose track id changed can also appear as two overlapping events. The review console
-shows such events together so a reviewer can look at them, and if they decide so handle them, at once. Nothing is
-merged or hidden here: every event keeps its own id and review state.
-
-Two events are concurrent when they share camera and zone and their intervals overlap both in media time (the
-video's own clock) and in wall-clock time. The second condition keeps two analyses of the same file, run at
-different times, apart. An open event (no exit yet) counts as still inside. Groups are the connected components of
-that relation, so A-B and B-C put A, B and C in one group even if A and C never overlapped.
-"""
+"""Group events that share a camera, zone, and sufficiently close time intervals."""
 
 from __future__ import annotations
 
-import math
 import time
-from collections import defaultdict
-
-
-def _overlap(a0: float, a1: float, b0: float, b1: float, gap_s: float = 0.0) -> bool:
-    # Preserve strict overlap at zero; any positive tolerance includes touching intervals.
-    if gap_s > 0:
-        return a0 <= b1 + gap_s and b0 <= a1 + gap_s
-    return a0 < b1 and b0 < a1
-
-
-def _find(parent: list[int], i: int) -> int:
-    while parent[i] != i:
-        parent[i] = parent[parent[i]]
-        i = parent[i]
-    return i
+from collections import deque
 
 
 def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float = 0.0) -> dict[str, dict]:
-    """event_id -> {"group_id", "size", "event_ids"} for events in a group of two or more.
-
-    ``events`` need event_id, camera_id, zone_id, entry_ts / exit_ts (epoch seconds, exit may be None) and
-    media_entry_s / media_exit_s (exit may be None). ``event_ids`` is ordered by media entry time and the group id
-    is the first of them, so it does not change when a later member closes.
-    ``gap_s`` is the allowed gap in seconds on both clocks, to join short tracking interruptions.
-    """
+    """Return group details for linked events; gap_s is the allowed gap in seconds on both clocks."""
     if gap_s < 0:
         raise ValueError("gap_s must be non-negative")
-    now = time.time() if now is None else now
-    by_zone: dict[tuple, list[dict]] = defaultdict(list)
-    for e in events:
-        by_zone[(e.get("camera_id"), e.get("zone_id"))].append(e)
-    out: dict[str, dict] = {}
-    for evs in by_zone.values():
-        if len(evs) < 2:
+
+    current_time = time.time() if now is None else now
+    neighbors = [[] for _ in events]
+
+    def connected(first: dict, second: dict) -> bool:
+        if (first.get("camera_id"), first.get("zone_id")) != (second.get("camera_id"), second.get("zone_id")):
+            return False
+
+        first_media_start = float(first.get("media_entry_s") or 0.0)
+        second_media_start = float(second.get("media_entry_s") or 0.0)
+        first_media_end = first.get("media_exit_s")
+        second_media_end = second.get("media_exit_s")
+        first_media_end = float("inf") if first_media_end is None else float(first_media_end)
+        second_media_end = float("inf") if second_media_end is None else float(second_media_end)
+        latest_start = max(first_media_start, second_media_start)
+        earliest_end = min(first_media_end, second_media_end)
+        # Zero preserves the existing strict media-time boundary; a positive gap is inclusive.
+        media_match = latest_start < earliest_end if gap_s == 0 else latest_start <= earliest_end + gap_s
+        if not media_match:
+            return False
+
+        first_wall_start = float(first.get("entry_ts") or 0.0)
+        second_wall_start = float(second.get("entry_ts") or 0.0)
+        first_wall_end = first.get("exit_ts")
+        second_wall_end = second.get("exit_ts")
+        first_wall_end = max(current_time, first_wall_start) if first_wall_end is None else float(first_wall_end)
+        second_wall_end = max(current_time, second_wall_start) if second_wall_end is None else float(second_wall_end)
+        return max(first_wall_start, second_wall_start) <= min(first_wall_end, second_wall_end) + gap_s
+
+    for left in range(len(events)):
+        for right in range(left + 1, len(events)):
+            if connected(events[left], events[right]):
+                neighbors[left].append(right)
+                neighbors[right].append(left)
+
+    result: dict[str, dict] = {}
+    visited: set[int] = set()
+    for start in range(len(events)):
+        if start in visited:
             continue
-        parent = list(range(len(evs)))
-        spans = []
-        for e in evs:
-            m0 = float(e.get("media_entry_s") or 0.0)
-            m1 = math.inf if e.get("media_exit_s") is None else float(e["media_exit_s"])
-            w0 = float(e.get("entry_ts") or 0.0)
-            w1 = max(now, w0) if e.get("exit_ts") is None else float(e["exit_ts"])
-            spans.append((m0, m1, w0, w1))
-        for i in range(len(evs)):
-            for j in range(i + 1, len(evs)):
-                a, b = spans[i], spans[j]
-                if _overlap(a[0], a[1], b[0], b[1], gap_s) and (a[2] <= b[3] + gap_s and b[2] <= a[3] + gap_s):
-                    parent[_find(parent, i)] = _find(parent, j)
-        comps: dict[int, list[int]] = defaultdict(list)
-        for i in range(len(evs)):
-            comps[_find(parent, i)].append(i)
-        for members in comps.values():
-            if len(members) < 2:
-                continue
-            members.sort(key=lambda k: (spans[k][0], evs[k]["event_id"]))
-            ids = [evs[k]["event_id"] for k in members]
-            info = {"group_id": ids[0], "size": len(ids), "event_ids": ids}
-            for eid in ids:
-                out[eid] = info
-    return out
+        pending = deque([start])
+        visited.add(start)
+        component = []
+        while pending:
+            index = pending.popleft()
+            component.append(events[index])
+            for neighbor in neighbors[index]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    pending.append(neighbor)
+        if len(component) < 2:
+            continue
+        component.sort(key=lambda event: (float(event.get("media_entry_s") or 0.0), event["event_id"]))
+        ids = [event["event_id"] for event in component]
+        details = {"group_id": ids[0], "size": len(ids), "event_ids": ids}
+        result.update({event_id: details for event_id in ids})
+    return result
