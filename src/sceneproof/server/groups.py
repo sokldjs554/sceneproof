@@ -1,9 +1,16 @@
-"""Group events that overlap in the same camera and zone."""
+"""Show related events together without merging or hiding their individual records.
+
+Media time locates events in a video; wall-clock time keeps separate analyses of
+the same video apart. Events in the same camera and zone form a group when they
+overlap on both clocks. Links are transitive: A-B and B-C connect A, B and C,
+even when A and C do not directly overlap.
+"""
 
 import time
+from collections import defaultdict
 
 
-def concurrent_groups(events, now=None, gap_s: float = 0.0):
+def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float = 0.0) -> dict[str, dict]:
     """Return group metadata for events connected by concurrent intervals.
 
     Events must share a camera and zone, and overlap in both media and wall
@@ -26,23 +33,29 @@ def concurrent_groups(events, now=None, gap_s: float = 0.0):
         return i
 
     def media_overlaps(a, b):
-        a_end = float("inf") if a["media_exit_s"] is None else a["media_exit_s"]
-        b_end = float("inf") if b["media_exit_s"] is None else b["media_exit_s"]
+        a_start = float(a.get("media_entry_s") or 0.0)
+        b_start = float(b.get("media_entry_s") or 0.0)
+        a_end = float("inf") if a.get("media_exit_s") is None else float(a["media_exit_s"])
+        b_end = float("inf") if b.get("media_exit_s") is None else float(b["media_exit_s"])
         if gap_s == 0:
-            return a["media_entry_s"] < b_end and b["media_entry_s"] < a_end
-        return a["media_entry_s"] - b_end <= gap_s and b["media_entry_s"] - a_end <= gap_s
+            return a_start < b_end and b_start < a_end
+        return a_start - b_end <= gap_s and b_start - a_end <= gap_s
 
     def wall_overlaps(a, b):
-        a_end = now if a["exit_ts"] is None else a["exit_ts"]
-        b_end = now if b["exit_ts"] is None else b["exit_ts"]
-        return a["entry_ts"] - b_end <= gap_s and b["entry_ts"] - a_end <= gap_s
+        a_start = float(a.get("entry_ts") or 0.0)
+        b_start = float(b.get("entry_ts") or 0.0)
+        a_end = max(now, a_start) if a.get("exit_ts") is None else float(a["exit_ts"])
+        b_end = max(now, b_start) if b.get("exit_ts") is None else float(b["exit_ts"])
+        return a_start - b_end <= gap_s and b_start - a_end <= gap_s
 
+    by_zone: dict[tuple, list[int]] = defaultdict(list)
     for i, a in enumerate(events):
-        for j in range(i):
+        zone_key = (a.get("camera_id"), a.get("zone_id"))
+        for j in by_zone[zone_key]:
             b = events[j]
-            if (a["camera_id"] == b["camera_id"] and a["zone_id"] == b["zone_id"]
-                    and media_overlaps(a, b) and wall_overlaps(a, b)):
+            if media_overlaps(a, b) and wall_overlaps(a, b):
                 parents[find(i)] = find(j)
+        by_zone[zone_key].append(i)
 
     components = {}
     for i, event in enumerate(events):
@@ -52,7 +65,7 @@ def concurrent_groups(events, now=None, gap_s: float = 0.0):
     for component in components.values():
         if len(component) < 2:
             continue
-        component.sort(key=lambda event: (event["media_entry_s"], event["event_id"]))
+        component.sort(key=lambda event: (float(event.get("media_entry_s") or 0.0), event["event_id"]))
         ids = [event["event_id"] for event in component]
         group = {"group_id": ids[0], "size": len(ids), "event_ids": ids}
         for event_id in ids:
