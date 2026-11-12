@@ -317,12 +317,13 @@ class DetectorInfo:
 
 class PersonDetector:
     def __init__(self, backend: Backend, variant: str, input_hw: tuple[int, int], conf_thresh: float = 0.4,
-                 nms_thresh: float = 0.45, model_version: str = "") -> None:
+                 nms_thresh: float = 0.45, model_version: str = "", min_box_height_px: int = 0) -> None:
         self.backend = backend
         self.variant = variant
         self.input_hw = input_hw
         self.conf_thresh = conf_thresh
         self.nms_thresh = nms_thresh
+        self.min_box_height_px = min_box_height_px
         self.grids, self.strides = grid_tables(input_hw)
         self.model_version = model_version
         self.info = DetectorInfo(variant, model_version, backend.name, backend.version, input_hw[1], input_hw[0],
@@ -337,6 +338,9 @@ class PersonDetector:
         decoded = decode_raw(raw, self.grids, self.strides)
         h, w = frame_bgr.shape[:2]
         boxes, scores = postprocess(decoded, ratio, self.conf_thresh, self.nms_thresh, frame_wh=(w, h))
+        if self.min_box_height_px > 0:
+            keep = (boxes[:, 3] - boxes[:, 1]) >= self.min_box_height_px
+            boxes, scores = boxes[keep], scores[keep]
         t3 = time.perf_counter()
         return Detection(boxes, scores, {"preprocess": (t1 - t0) * 1e3, "infer": (t2 - t1) * 1e3,
                                          "postprocess": (t3 - t2) * 1e3})
@@ -350,7 +354,7 @@ class PersonDetector:
 def build_detector(cfg: dict[str, Any]) -> PersonDetector:
     """cfg keys: variant, backend (onnxruntime|torch|tensorrt), model (path), input_size [w,h], conf_threshold,
     nms_threshold, providers, intra_op_threads, graph_optimization, device, precision (tensorrt: fp32|fp16),
-    engine_dir, workspace_mb."""
+    engine_dir, workspace_mb, min_box_height_px."""
     variant = cfg.get("variant", "yolox_tiny")
     default_hw = YOLOX_VARIANTS[variant][3]
     if cfg.get("input_size"):
@@ -372,4 +376,4 @@ def build_detector(cfg: dict[str, Any]) -> PersonDetector:
     else:
         raise ValueError(f"unknown backend {backend_name!r}")
     return PersonDetector(backend, variant, input_hw, float(cfg.get("conf_threshold", 0.4)),
-                          float(cfg.get("nms_threshold", 0.45)), version)
+                          float(cfg.get("nms_threshold", 0.45)), version, int(cfg.get("min_box_height_px", 0)))
