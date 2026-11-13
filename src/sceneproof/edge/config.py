@@ -86,7 +86,7 @@ class DetectorConfig(BaseModel):
     model: str = "models/yolox_tiny.onnx"
     conf_threshold: float = 0.4
     nms_threshold: float = 0.45
-    min_box_height_px: int = 0
+    min_box_height_px: int = Field(default=0, ge=0)
     intra_op_threads: int = 0
     graph_optimization: str = "all"
     providers: list[Any] | None = None

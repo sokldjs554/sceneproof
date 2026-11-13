@@ -313,6 +313,7 @@ class DetectorInfo:
     input_height: int
     conf_thresh: float
     nms_thresh: float
+    min_box_height_px: int = 0
 
 
 class PersonDetector:
@@ -327,7 +328,7 @@ class PersonDetector:
         self.grids, self.strides = grid_tables(input_hw)
         self.model_version = model_version
         self.info = DetectorInfo(variant, model_version, backend.name, backend.version, input_hw[1], input_hw[0],
-                                 conf_thresh, nms_thresh)
+                                 conf_thresh, nms_thresh, min_box_height_px)
 
     def detect(self, frame_bgr: np.ndarray) -> Detection:
         t0 = time.perf_counter()
