@@ -133,13 +133,22 @@ def build_router(app_state: Any) -> APIRouter:
     @r.get("/events")
     def list_events(camera_id: str | None = None, state: str | None = None, kind: str | None = None,
                     device_id: str | None = None, since: float | None = None, until: float | None = None,
-                    limit: int = Query(200, le=2000), offset: int = 0):
-        rows = store.list_events(camera_id, state, kind, since, until, limit, offset, device_id)
+                    limit: int = Query(200, le=2000), offset: int = 0, concurrent_only: bool = False):
+        if concurrent_only:
+            # Calculate groups before applying review-state filters or page boundaries.
+            groups = concurrent_groups(store.list_events(limit=-1))
+            rows = store.list_events(camera_id, state, kind, since, until, -1, 0, device_id)
+            rows = [row for row in rows if row["event_id"] in groups]
+            start = max(offset, 0)
+            rows = rows[start:] if limit < 0 else rows[start:start + limit]
+        else:
+            rows = store.list_events(camera_id, state, kind, since, until, limit, offset, device_id)
         expl = store.latest_explanation_map([x["event_id"] for x in rows])
         devs = devices_view()
         items = [_event_view(store, x, expl.get(x["event_id"]), devs) for x in rows]
-        # events of this response that were inside the same zone at the same time (groups.py); None when alone
-        groups = concurrent_groups(items)
+        # The default retains existing page-scoped grouping; concurrent_only uses all events above.
+        if not concurrent_only:
+            groups = concurrent_groups(items)
         for it in items:
             it["concurrent"] = groups.get(it["event_id"])
         for it in items:  # list view: keep payload small
