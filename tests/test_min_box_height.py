@@ -1,10 +1,4 @@
-"""과제 3 — 너무 작은 사람 상자 무시하기 (src/sceneproof/edge/detector.py, src/sceneproof/edge/config.py)
-
-PersonDetector에 min_box_height_px(기본 0 = 끔)를 추가합니다. 0보다 크면, 찾은 상자 중 높이(y2 - y1)가
-이 값보다 작은 것을 결과에서 뺍니다(겹친 상자 정리가 끝난 뒤에, 순서는 그대로).
-설정(DetectorConfig)과 build_detector()에서도 이 값을 받을 수 있게 합니다.
-필요: scripts/fetch_models.sh(yolox_nano.onnx)와 scripts/fetch_data.sh(campus-walkway.mp4).
-"""
+"""탐지기의 min_box_height_px: 겹친 상자 정리(NMS) 뒤 기준보다 낮은 상자를 뺀다(0 = 끔, 남은 순서 유지).  모델·영상이 있어야 끝까지 돈다(scripts/fetch_models.sh, scripts/fetch_data.sh). """
 
 from pathlib import Path
 
