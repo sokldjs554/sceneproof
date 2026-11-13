@@ -1,0 +1,840 @@
+{
+ "tag": "yolox_tiny-c0.4",
+ "git": "aad33d0",
+ "time": "2026-11-13T02:07:36",
+ "config": {
+  "device_id": "eval-01",
+  "gateway": "127.0.0.1:50051",
+  "evidence_root": "data/evidence-eval",
+  "detector": {
+   "variant": "yolox_tiny",
+   "backend": "onnxruntime",
+   "model": "models/yolox_tiny.onnx",
+   "conf_threshold": 0.4,
+   "nms_threshold": 0.45,
+   "intra_op_threads": 4
+  },
+  "tracker": {
+   "track_thresh": 0.5,
+   "low_thresh": 0.1,
+   "new_track_thresh": 0.6,
+   "match_thresh": 0.8,
+   "track_buffer_seconds": 1.5
+  },
+  "pipeline": {
+   "source_backend": "auto",
+   "queue_capacity": 4,
+   "ring_seconds": 12,
+   "ring_max_mb": 128,
+   "ring_max_side": 960,
+   "pre_roll_s": 3,
+   "post_roll_s": 3,
+   "clip_fps": 10
+  },
+  "cameras": [
+   {
+    "camera_id": "eval-campus",
+    "name": "옥외 보행로 (평가)",
+    "source": "file://data/videos/campus-walkway.mp4",
+    "split": "eval",
+    "realtime": false,
+    "fps_hint": 10,
+    "zones": [
+     {
+      "zone_id": "z-grass",
+      "name": "잔디 출입금지 구역",
+      "polygon": [
+       [
+        0.0,
+        0.44
+       ],
+       [
+        0.36,
+        0.5
+       ],
+       [
+        0.53,
+        0.63
+       ],
+       [
+        0.61,
+        0.82
+       ],
+       [
+        0.66,
+        1.0
+       ],
+       [
+        0.0,
+        1.0
+       ]
+      ],
+      "entry_confirm_frames": 3,
+      "exit_confirm_frames": 5,
+      "entry_confirm_seconds": 1.0,
+      "exit_confirm_seconds": 0.8,
+      "dwell_seconds": 5,
+      "lost_grace_seconds": 1.5
+     }
+    ]
+   },
+   {
+    "camera_id": "eval-indoor",
+    "name": "실내 출입문 앞 (평가)",
+    "source": "file://data/videos/people-indoor.mp4",
+    "split": "eval",
+    "realtime": false,
+    "fps_hint": 12,
+    "zones": [
+     {
+      "zone_id": "z-door",
+      "name": "출입문 앞 통제구역",
+      "polygon": [
+       [
+        0.02,
+        0.52
+       ],
+       [
+        0.33,
+        0.5
+       ],
+       [
+        0.36,
+        0.98
+       ],
+       [
+        0.02,
+        0.98
+       ]
+      ],
+      "entry_confirm_frames": 3,
+      "exit_confirm_frames": 5,
+      "entry_confirm_seconds": 1.0,
+      "exit_confirm_seconds": 0.8,
+      "dwell_seconds": 5,
+      "lost_grace_seconds": 1.5
+     }
+    ]
+   },
+   {
+    "camera_id": "eval-store",
+    "name": "매장 통로 안쪽 (평가)",
+    "source": "file://data/videos/store-aisle.mp4",
+    "split": "eval",
+    "realtime": false,
+    "fps_hint": 30,
+    "zones": [
+     {
+      "zone_id": "z-stock",
+      "name": "통로 안쪽 재고 구역",
+      "polygon": [
+       [
+        0.28,
+        0.18
+       ],
+       [
+        0.6,
+        0.18
+       ],
+       [
+        0.72,
+        0.45
+       ],
+       [
+        0.22,
+        0.45
+       ]
+      ],
+      "entry_confirm_frames": 5,
+      "exit_confirm_frames": 8,
+      "entry_confirm_seconds": 1.0,
+      "exit_confirm_seconds": 0.8,
+      "dwell_seconds": 5,
+      "lost_grace_seconds": 1.5
+     }
+    ]
+   },
+   {
+    "camera_id": "eval-parking",
+    "name": "주차 구역 (평가·비사람 이동체)",
+    "source": "file://data/videos/parking-lot.mp4",
+    "split": "eval",
+    "realtime": false,
+    "fps_hint": 12,
+    "zones": [
+     {
+      "zone_id": "z-stalls",
+      "name": "주차 구역 출입금지",
+      "polygon": [
+       [
+        0.28,
+        0.06
+       ],
+       [
+        0.98,
+        0.06
+       ],
+       [
+        0.98,
+        0.4
+       ],
+       [
+        0.35,
+        0.4
+       ]
+      ],
+      "entry_confirm_frames": 3,
+      "exit_confirm_frames": 5,
+      "entry_confirm_seconds": 1.0,
+      "exit_confirm_seconds": 0.8,
+      "dwell_seconds": 5,
+      "lost_grace_seconds": 1.5
+     }
+    ]
+   }
+  ]
+ },
+ "matching": {
+  "min_overlap_s": 0.5,
+  "start_tolerance_s": 1.0
+ },
+ "aggregate": {
+  "tp": 9,
+  "fp": 0,
+  "missed": 3,
+  "duplicates": 2,
+  "boundary_hits": 0,
+  "duration_s": 248.5,
+  "gt_positives": 12,
+  "precision": 1.0,
+  "recall": 0.75,
+  "f1": 0.857,
+  "false_alarms_per_hour": 0.0
+ },
+ "per_video": {
+  "eval-campus": {
+   "gt_positives": 4,
+   "gt_other": 0,
+   "predicted": 4,
+   "tp": 3,
+   "fp": 0,
+   "missed": 1,
+   "duplicates": 1,
+   "boundary_hits": 0,
+   "precision": 1.0,
+   "recall": 0.75,
+   "f1": 0.857,
+   "false_alarms_per_hour": 0.0,
+   "start_mae_s": 0.83,
+   "end_mae_s": 1.67,
+   "dwell": {
+    "tp_dwell_correct": 2,
+    "tp_dwell_wrong": 1
+   },
+   "duration_s": 79.5,
+   "denominators": {
+    "precision": "TP+FP (duplicates and boundary hits excluded)",
+    "recall": "TP+missed (GT intrusion events)",
+    "false_alarms_per_hour": "FP / video hours"
+   },
+   "details": {
+    "tp": [
+     [
+      "f9d4004e-9c39-5362-a2d9-a5315a8c2973",
+      "e02"
+     ],
+     [
+      "7ac47442-051c-5eca-b98e-d0f3dcc6eb61",
+      "e03"
+     ],
+     [
+      "1214821d-be98-53a0-ac48-a15926ae7afe",
+      "e04"
+     ]
+    ],
+    "fp": [],
+    "missed": [
+     "e01"
+    ],
+    "duplicates": [
+     [
+      "155caa4a-5ac1-56c8-83c3-8545293c30cc",
+      "e03"
+     ]
+    ],
+    "boundary_hits": []
+   },
+   "run": {
+    "frames": 795,
+    "wall_s": 31.1,
+    "fps": 25.57,
+    "timings": {
+     "evidence_encode": {
+      "mean": 1.2847908666662988,
+      "p50": 1.2424784999893745,
+      "p95": 1.5128212001400243,
+      "n": 300
+     },
+     "preprocess": {
+      "mean": 0.6238908233535767,
+      "p50": 0.6054605000826996,
+      "p95": 0.8021003496651247,
+      "n": 300
+     },
+     "infer": {
+      "mean": 33.34538488663384,
+      "p50": 31.28202300013072,
+      "p95": 45.1372793490009,
+      "n": 300
+     },
+     "postprocess": {
+      "mean": 0.895483523393826,
+      "p50": 0.8418580000579823,
+      "p95": 1.1253848999331242,
+      "n": 300
+     },
+     "track": {
+      "mean": 0.6510111966660285,
+      "p50": 0.6067525000617024,
+      "p95": 0.8351027001481272,
+      "n": 300
+     },
+     "zones": {
+      "mean": 0.3766346733148869,
+      "p50": 0.07006600026215892,
+      "p95": 0.1561648497045099,
+      "n": 300
+     },
+     "total": {
+      "mean": 37.19552796665084,
+      "p50": 34.79575049914274,
+      "p95": 50.0037018009607,
+      "n": 300
+     },
+     "clip": {
+      "mean": 368.1565367501207,
+      "p50": 369.82458000056795,
+      "p95": 514.670670749365,
+      "n": 4
+     }
+    },
+    "detector": {
+     "model_name": "yolox_tiny",
+     "model_version": "427cc366d34e",
+     "backend": "onnxruntime-cpu",
+     "backend_version": "1.31.1",
+     "input_width": 416,
+     "input_height": 416,
+     "conf_thresh": 0.4,
+     "nms_thresh": 0.45
+    }
+   },
+   "gt_annotation": {
+    "method": "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 프레임 단위 점유(zone_occupancy.py, conf0.2) 대조",
+    "status": "reviewed",
+    "reviewer": "사용자(저장소 주인), tools/review/gt_review.html",
+    "reviewed_at": "2026-11-11",
+    "review_changes": [
+     "e01 boundary_pass -> intrusion (발이 잔디 안으로 들어감)",
+     "e04 boundary_pass -> intrusion (발이 잔디 안으로 들어감)"
+    ],
+    "review_kept": [
+     "e03은 발이 화면 아래로 잘린 58~62s에도 한 사건",
+     "52~60s에 e02·e03 말고 잔디에 들어간 사람 없음"
+    ],
+    "review_questions": [
+     "e01·e04 경계 통과 판정(발 위치가 경계선과 겹침)",
+     "e03의 58~62s 구간(발이 화면 밖) 처리 방식",
+     "52~60s 구간에서 세 번째 인물의 잔디 접촉 여부"
+    ]
+   },
+   "predictions": [
+    {
+     "event_id": "f9d4004e-9c39-5362-a2d9-a5315a8c2973",
+     "start_s": 53.4,
+     "end_s": 56.0,
+     "dwell": false,
+     "track_id": 23,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    },
+    {
+     "event_id": "7ac47442-051c-5eca-b98e-d0f3dcc6eb61",
+     "start_s": 54.2,
+     "end_s": 75.9,
+     "dwell": true,
+     "track_id": 25,
+     "close_reason": "CLOSE_REASON_EXITED",
+     "revision": 4
+    },
+    {
+     "event_id": "155caa4a-5ac1-56c8-83c3-8545293c30cc",
+     "start_s": 57.7,
+     "end_s": 60.6,
+     "dwell": false,
+     "track_id": 26,
+     "close_reason": "CLOSE_REASON_EXITED",
+     "revision": 3
+    },
+    {
+     "event_id": "1214821d-be98-53a0-ac48-a15926ae7afe",
+     "start_s": 75.5,
+     "end_s": 79.4,
+     "dwell": false,
+     "track_id": 26,
+     "close_reason": "CLOSE_REASON_EXITED",
+     "revision": 3
+    }
+   ]
+  },
+  "eval-indoor": {
+   "gt_positives": 4,
+   "gt_other": 0,
+   "predicted": 3,
+   "tp": 3,
+   "fp": 0,
+   "missed": 1,
+   "duplicates": 0,
+   "boundary_hits": 0,
+   "precision": 1.0,
+   "recall": 0.75,
+   "f1": 0.857,
+   "false_alarms_per_hour": 0.0,
+   "start_mae_s": 0.91,
+   "end_mae_s": 0.22,
+   "dwell": {
+    "tp_dwell_correct": 3,
+    "tp_dwell_wrong": 0
+   },
+   "duration_s": 49.7,
+   "denominators": {
+    "precision": "TP+FP (duplicates and boundary hits excluded)",
+    "recall": "TP+missed (GT intrusion events)",
+    "false_alarms_per_hour": "FP / video hours"
+   },
+   "details": {
+    "tp": [
+     [
+      "4029ec5c-1517-514d-9621-40fd52bb3b16",
+      "e01"
+     ],
+     [
+      "9f9af240-6cd5-5ea9-9ee1-5b3c46f134b9",
+      "e03"
+     ],
+     [
+      "786297af-4698-53f5-a912-8d037752f2db",
+      "e04"
+     ]
+    ],
+    "fp": [],
+    "missed": [
+     "e02"
+    ],
+    "duplicates": [],
+    "boundary_hits": []
+   },
+   "run": {
+    "frames": 596,
+    "wall_s": 22.69,
+    "fps": 26.27,
+    "timings": {
+     "evidence_encode": {
+      "mean": 0.8108101933188058,
+      "p50": 0.7623524998052744,
+      "p95": 1.0023499500675825,
+      "n": 300
+     },
+     "preprocess": {
+      "mean": 0.558546093404099,
+      "p50": 0.49785299961513374,
+      "p95": 0.7987031495758856,
+      "n": 300
+     },
+     "infer": {
+      "mean": 33.392862170063985,
+      "p50": 32.41165150029701,
+      "p95": 43.14357195062258,
+      "n": 300
+     },
+     "postprocess": {
+      "mean": 0.6584421365854117,
+      "p50": 0.6313289995887317,
+      "p95": 0.8683217499310559,
+      "n": 300
+     },
+     "track": {
+      "mean": 0.20519732666798518,
+      "p50": 0.13879450034437468,
+      "p95": 0.46766079994995385,
+      "n": 300
+     },
+     "zones": {
+      "mean": 0.08554029337877485,
+      "p50": 0.02036099976976402,
+      "p95": 0.06043159955879675,
+      "n": 300
+     },
+     "total": {
+      "mean": 35.728462866706344,
+      "p50": 34.79296700061241,
+      "p95": 45.805823698810855,
+      "n": 300
+     },
+     "clip": {
+      "mean": 278.47646233385603,
+      "p50": 269.59523699952115,
+      "p95": 303.6376668005687,
+      "n": 3
+     }
+    },
+    "detector": {
+     "model_name": "yolox_tiny",
+     "model_version": "427cc366d34e",
+     "backend": "onnxruntime-cpu",
+     "backend_version": "1.31.1",
+     "input_width": 416,
+     "input_height": 416,
+     "conf_thresh": 0.4,
+     "nms_thresh": 0.45
+    }
+   },
+   "gt_annotation": {
+    "method": "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조(세그먼트 16.3–20.8, 29.6–33.3, 45.1–46.5)",
+    "status": "reviewed",
+    "reviewer": "사용자(저장소 주인), tools/review/gt_review.html",
+    "reviewed_at": "2026-11-11",
+    "review_changes": [],
+    "review_kept": [
+     "e04 시작 45.2s 맞음"
+    ],
+    "review_questions": [
+     "e04 시작 시각(블러로 발 위치 불명확)"
+    ]
+   },
+   "predictions": [
+    {
+     "event_id": "4029ec5c-1517-514d-9621-40fd52bb3b16",
+     "start_s": 17.416666666666668,
+     "end_s": 20.0,
+     "dwell": false,
+     "track_id": 37,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    },
+    {
+     "event_id": "9f9af240-6cd5-5ea9-9ee1-5b3c46f134b9",
+     "start_s": 30.75,
+     "end_s": 33.083333333333336,
+     "dwell": false,
+     "track_id": 38,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    },
+    {
+     "event_id": "786297af-4698-53f5-a912-8d037752f2db",
+     "start_s": 46.166666666666664,
+     "end_s": 46.166666666666664,
+     "dwell": false,
+     "track_id": 42,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    }
+   ]
+  },
+  "eval-store": {
+   "gt_positives": 1,
+   "gt_other": 1,
+   "predicted": 2,
+   "tp": 1,
+   "fp": 0,
+   "missed": 0,
+   "duplicates": 1,
+   "boundary_hits": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "false_alarms_per_hour": 0.0,
+   "start_mae_s": 0.83,
+   "end_mae_s": 23.43,
+   "dwell": {
+    "tp_dwell_correct": 1,
+    "tp_dwell_wrong": 0
+   },
+   "duration_s": 65.4,
+   "denominators": {
+    "precision": "TP+FP (duplicates and boundary hits excluded)",
+    "recall": "TP+missed (GT intrusion events)",
+    "false_alarms_per_hour": "FP / video hours"
+   },
+   "details": {
+    "tp": [
+     [
+      "459907eb-8d3a-5c0d-a712-37fba588c240",
+      "e01"
+     ]
+    ],
+    "fp": [],
+    "missed": [],
+    "duplicates": [
+     [
+      "3ec8edc6-54b2-5b7e-97a9-b119ef5d308f",
+      "e01"
+     ]
+    ],
+    "boundary_hits": []
+   },
+   "run": {
+    "frames": 1964,
+    "wall_s": 75.52,
+    "fps": 26.01,
+    "timings": {
+     "evidence_encode": {
+      "mean": 0.9688451366794956,
+      "p50": 0.9136215003309189,
+      "p95": 1.1505475501508045,
+      "n": 300
+     },
+     "preprocess": {
+      "mean": 0.5736099666197939,
+      "p50": 0.5106219996378059,
+      "p95": 0.7826246988770436,
+      "n": 300
+     },
+     "infer": {
+      "mean": 33.86408411329588,
+      "p50": 31.494448499870487,
+      "p95": 45.719805199678376,
+      "n": 300
+     },
+     "postprocess": {
+      "mean": 0.8974288167397996,
+      "p50": 0.8455229999526637,
+      "p95": 1.2530747999335292,
+      "n": 300
+     },
+     "track": {
+      "mean": 0.5097794434065387,
+      "p50": 0.46886850032024086,
+      "p95": 0.6672782997156901,
+      "n": 300
+     },
+     "zones": {
+      "mean": 0.060864270071760984,
+      "p50": 0.05661049999616807,
+      "p95": 0.08428555047430564,
+      "n": 300
+     },
+     "total": {
+      "mean": 36.89108862340314,
+      "p50": 34.535406500253885,
+      "p95": 48.97777180076446,
+      "n": 300
+     },
+     "clip": {
+      "mean": 476.55572749954445,
+      "p50": 476.55572749954445,
+      "p95": 485.1032691488399,
+      "n": 2
+     }
+    },
+    "detector": {
+     "model_name": "yolox_tiny",
+     "model_version": "427cc366d34e",
+     "backend": "onnxruntime-cpu",
+     "backend_version": "1.31.1",
+     "input_width": 416,
+     "input_height": 416,
+     "conf_thresh": 0.4,
+     "nms_thresh": 0.45
+    }
+   },
+   "gt_annotation": {
+    "method": "yolox_s@640 conf0.3 초안 → 키프레임 시트·확대 크롭 육안 검토 → 점유 타임라인 대조",
+    "status": "reviewed",
+    "reviewer": "사용자(저장소 주인), tools/review/gt_review.html",
+    "reviewed_at": "2026-11-11",
+    "review_changes": [
+     "e01(28.9–42.7)과 e02(47.9–65.4)를 한 사건 e01(28.9–65.4)로 합침: 가려진 동안에도 구역 안에 있었음"
+    ],
+    "review_kept": [
+     "e03(금발 인물)은 가려서 판단 불가 그대로",
+     "초록(청록) 상의 인물은 구역에 닿지 않음",
+     "구역은 직원 전용(고객이 들어가도 알림)"
+    ],
+    "review_questions": [
+     "e01과 e02가 같은 인물의 연속 체류인지(42.7–47.9s 공백) 확인",
+     "e03 가림 구간의 실제 지면 위치",
+     "초록 상의 인물(오른쪽 선반)의 구역 접촉 여부"
+    ]
+   },
+   "predictions": [
+    {
+     "event_id": "459907eb-8d3a-5c0d-a712-37fba588c240",
+     "start_s": 29.733333333333334,
+     "end_s": 41.96666666666667,
+     "dwell": true,
+     "track_id": 47,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 4
+    },
+    {
+     "event_id": "3ec8edc6-54b2-5b7e-97a9-b119ef5d308f",
+     "start_s": 48.7,
+     "end_s": 65.43333333333334,
+     "dwell": true,
+     "track_id": 50,
+     "close_reason": "CLOSE_REASON_STREAM_ENDED",
+     "revision": 4
+    }
+   ]
+  },
+  "eval-parking": {
+   "gt_positives": 3,
+   "gt_other": 0,
+   "predicted": 2,
+   "tp": 2,
+   "fp": 0,
+   "missed": 1,
+   "duplicates": 0,
+   "boundary_hits": 0,
+   "precision": 1.0,
+   "recall": 0.667,
+   "f1": 0.8,
+   "false_alarms_per_hour": 0.0,
+   "start_mae_s": 1.84,
+   "end_mae_s": 0.04,
+   "dwell": {
+    "tp_dwell_correct": 2,
+    "tp_dwell_wrong": 0
+   },
+   "duration_s": 53.9,
+   "denominators": {
+    "precision": "TP+FP (duplicates and boundary hits excluded)",
+    "recall": "TP+missed (GT intrusion events)",
+    "false_alarms_per_hour": "FP / video hours"
+   },
+   "details": {
+    "tp": [
+     [
+      "c67a2fdb-7461-57c6-927c-f62d06eb86df",
+      "e02"
+     ],
+     [
+      "6992afe6-b684-53e1-8547-bc3dfa4b7e4c",
+      "e03"
+     ]
+    ],
+    "fp": [],
+    "missed": [
+     "e01"
+    ],
+    "duplicates": [],
+    "boundary_hits": []
+   },
+   "run": {
+    "frames": 647,
+    "wall_s": 23.69,
+    "fps": 27.31,
+    "timings": {
+     "evidence_encode": {
+      "mean": 0.8336174533542362,
+      "p50": 0.788708000072802,
+      "p95": 0.9955355995771243,
+      "n": 300
+     },
+     "preprocess": {
+      "mean": 0.6139618033618414,
+      "p50": 0.5516139999599545,
+      "p95": 0.8067832508459105,
+      "n": 300
+     },
+     "infer": {
+      "mean": 34.717960830002994,
+      "p50": 33.67911500026821,
+      "p95": 46.857356549389806,
+      "n": 300
+     },
+     "postprocess": {
+      "mean": 0.651224049973583,
+      "p50": 0.6258465000428259,
+      "p95": 0.8277170500150532,
+      "n": 300
+     },
+     "track": {
+      "mean": 0.18150357998820255,
+      "p50": 0.10380749972682679,
+      "p95": 0.39102620003177435,
+      "n": 300
+     },
+     "zones": {
+      "mean": 0.15315855997566055,
+      "p50": 0.022775000616093166,
+      "p95": 0.054361500042432453,
+      "n": 300
+     },
+     "total": {
+      "mean": 37.16685235664651,
+      "p50": 36.03960349937552,
+      "p95": 50.162205599644956,
+      "n": 300
+     },
+     "clip": {
+      "mean": 272.8727699995943,
+      "p50": 272.8727699995943,
+      "p95": 334.23616050022247,
+      "n": 2
+     }
+    },
+    "detector": {
+     "model_name": "yolox_tiny",
+     "model_version": "427cc366d34e",
+     "backend": "onnxruntime-cpu",
+     "backend_version": "1.31.1",
+     "input_width": 416,
+     "input_height": 416,
+     "conf_thresh": 0.4,
+     "nms_thresh": 0.45
+    }
+   },
+   "gt_annotation": {
+    "method": "yolox_s@640 conf0.3 초안 → 확대 크롭 육안 검토(원거리 소형 객체) → 점유 타임라인 대조",
+    "status": "reviewed",
+    "reviewer": "사용자(저장소 주인), tools/review/gt_review.html",
+    "reviewed_at": "2026-11-11",
+    "review_changes": [
+     "e02 boundary_pass -> intrusion (보행자의 발이 구역 안으로 들어감)",
+     "e03 시작 45.8s -> 45.5s"
+    ],
+    "review_kept": [
+     "e01 시작 27.0s·끝 29.0s 맞음",
+     "e03 끝 49.2s 맞음"
+    ],
+    "review_questions": [
+     "e02 보행자의 경계 안쪽 진입 여부(원거리라 발 위치 판독 어려움)",
+     "e01/e03 시작·종료 시각(±0.5s)"
+    ]
+   },
+   "predictions": [
+    {
+     "event_id": "c67a2fdb-7461-57c6-927c-f62d06eb86df",
+     "start_s": 45.25,
+     "end_s": 45.75,
+     "dwell": false,
+     "track_id": 61,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    },
+    {
+     "event_id": "6992afe6-b684-53e1-8547-bc3dfa4b7e4c",
+     "start_s": 48.333333333333336,
+     "end_s": 49.166666666666664,
+     "dwell": false,
+     "track_id": 63,
+     "close_reason": "CLOSE_REASON_TRACK_LOST",
+     "revision": 3
+    }
+   ]
+  }
+ }
+}
