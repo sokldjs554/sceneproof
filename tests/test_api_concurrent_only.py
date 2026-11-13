@@ -1,9 +1,4 @@
-"""과제 4 — 사건 목록 API에 '묶인 사건만' 조건 추가 (src/sceneproof/server/api.py)
-
-GET /api/events?concurrent_only=true 이면 동시에 구역 안에 있던 사건(concurrent가 null이 아닌 것)만 돌려줍니다.
-묶음 계산은 지금처럼 '거르기 전' 목록 전체로 해야 합니다(거른 뒤에 계산하면 묶음이 깨짐).
-응답의 counts(처리 상태별 개수)는 지금처럼 전체 기준 그대로 둡니다. 기본값은 false(지금과 같음).
-"""
+"""GET /api/events?concurrent_only=true: 동시에 구역 안에 있던 사건만 돌려준다.  묶음은 전체 사건으로 먼저 계산하고, 처리 상태 조건과 페이지는 그 뒤에 적용한다. counts는 전체 기준. """
 
 import pytest
 from fastapi.testclient import TestClient

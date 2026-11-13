@@ -1,9 +1,4 @@
-"""과제 2 — 구역 판정 테스트를 직접 쓰기 (src/sceneproof/edge/zones.py는 고치지 않음)
-
-아래 두 테스트의 TODO를 채우세요. 도우미(T, meta, zone)는 tests/test_zones.py와 같습니다.
-두 테스트가 지금 코드에서 통과하면 성공입니다. 일부러 코드를 망가뜨렸을 때(예: exit_confirm_frames를 1로)
-테스트가 실패하는지도 확인해 보세요.
-"""
+"""구역 판정: 한 프레임 이탈로는 사건이 닫히지 않고, 제외 영역(마네킹 자리)에서는 사건이 열리지 않는다.  도우미(T, meta, zone)는 tests/test_zones.py와 같다. """
 
 import numpy as np
 

@@ -1,9 +1,4 @@
-"""과제 1 — 거의 이어진 사건도 묶기 (src/sceneproof/server/groups.py)
-
-concurrent_groups(events, now=None, gap_s=0.0)에 gap_s를 추가합니다.
-gap_s 초 이하로 떨어진 사건(앞 사건이 끝나고 gap_s 초 안에 다음 사건이 시작)도 같은 묶음으로 봅니다.
-영상 시각과 실제 시각 두 쪽 모두에 같은 여유를 적용합니다. gap_s=0.0이면 지금과 똑같이 동작해야 합니다.
-"""
+"""concurrent_groups의 gap_s: 거의 이어진 사건(추적 번호가 바뀌어 잠깐 끊긴 경우)도 같은 묶음으로 본다.  gap_s초 이하로 떨어진 사건을 영상 시각·실제 시각 모두에서 겹친 것으로 본다. gap_s=0이면 딱 붙은 사건은 묶지 않는다. """
 
 import pytest
 
