@@ -13,6 +13,7 @@ detector:
   model: models/yolox_tiny.onnx
   conf_threshold: 0.4
   nms_threshold: 0.45
+  min_box_height_px: 0         # drop person boxes lower than this many pixels, after NMS (0 = off; decisions D15)
   intra_op_threads: 4
   graph_optimization: all
 

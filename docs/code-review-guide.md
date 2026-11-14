@@ -24,6 +24,7 @@ PY
 - 판단 지점: `letterbox`(114 패딩, 정규화 없음 — YOLOX 규약), `decode_raw`(그리드/스트라이드), `postprocess`(사람 클래스만, NMS), 백엔드가 전·후처리를 공유.
 - 해 볼 것: `conf_threshold`를 0.25로 낮추고 `python -m sceneproof.eval.run_eval --variant yolox_tiny --conf 0.25 --out /tmp/e.json` → FP/h와 recall이 어떻게 움직이는지.
 - 테스트: `tests/test_detector.py` (단일 상자 디코딩 수식, PyTorch↔ONNX 일치).
+- 설정 `min_box_height_px`(기본 0 = 끔): NMS 뒤에 기준보다 낮은 상자를 뺀다. 왜 NMS 뒤인가, 왜 실행 기록(`DetectorInfo`)에 남기는가(D15). 테스트 `tests/test_min_box_height.py`, `tests/test_min_box_metadata.py`, 실험 `docs/experiments/min-box-height-20261113/`.
 
 ## 3. 추적: `src/sceneproof/edge/tracker.py`
 - 입력: 상자·점수. 출력: `TrackOutput(track_id, xyxy, score, hits, age)`.
@@ -34,7 +35,7 @@ PY
 - 입력: 트랙 목록 + `FrameMeta`. 출력: `EpisodeEvent(OPENED|DWELL|CLOSED)`.
 - 판단 지점: 앵커=발, 시간 기반 디바운스, `box_clipped_at_bottom` 상태 유지, 추적 끊김 유예, 결정적 `episode_id`(uuid5).
 - 해 볼 것: `exit_confirm_seconds`를 0.1로 줄이고 `cam-worker`를 오프라인 실행 → 사건 수가 늘고 짧아지는지.
-- 테스트: `tests/test_zones.py`.
+- 테스트: `tests/test_zones.py`, `tests/test_zones_flicker_exclude.py`(한 프레임 이탈로는 닫히지 않음, 제외 영역에서는 열리지 않음). 실험: `docs/experiments/entry-confirm-20261113/`(들어감 확인 시간 0.3초 vs 1.0초).
 
 ## 5. 버퍼: `src/sceneproof/edge/frames.py`
 - `FrameQueue`(폐기 vs 무손실), `FrameRing`(초·바이트 상한, pin), `StageTimer`.
@@ -54,6 +55,7 @@ PY
 - `upsert_event`의 revision 비교가 멱등성의 전부. `record_evidence` → `evidence_ready`.
 - 워커: 큐 → 실행 중 → 완료/실패/타임아웃/형식오류/예산초과, 재시작 시 `requeue_running`+`backfill`.
 - `api.py`의 상태 전이 표(`ALLOWED_TRANSITIONS`)와 CSV 열(실행 조건 포함).
+- `groups.py`: 동시에 구역 안에 있던 사건 묶기(유니온 파인드, 영상 시각과 실제 시각을 모두 보는 이유, `gap_s`). `api.py`의 `concurrent_only`는 왜 거르기 전에 묶는가(D14). 테스트 `tests/test_groups.py`, `test_groups_gap.py`, `test_groups_edge_cases.py`, `test_api_concurrent_only.py`. 해 볼 것: `python scripts/bench_event_list.py --events 5000` → 두 조회의 시간과 묶음 정보 차이.
 - 해 볼 것: `SP_SERVER_VLM_MOCK_FAIL_EVERY=2 SP_SERVER_VLM_TIMEOUT_S=1 SP_SERVER_VLM_MOCK_DELAY_S=3` 으로 서버를 띄우고 콘솔에서 상태 칩과 "다시 해석" 동작 확인.
 
 ## 9. 평가: `src/sceneproof/eval/metrics.py`, `run_eval.py`, `bench_detector.py`
