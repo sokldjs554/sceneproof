@@ -105,7 +105,7 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 | [docs/eval/ground-truth.md](docs/eval/ground-truth.md) | 정답 기준·작성 방법·남은 검수 |
 | [data/README.md](data/README.md) | 데이터 출처·라이선스·분할 |
 | [docs/ops/runbook.md](docs/ops/runbook.md) · [failure-modes.md](docs/ops/failure-modes.md) | 실행·상태 확인·복구 |
-| [docs/dev-log.md](docs/dev-log.md) | 발견한 실패·원인·수정 전후, 리팩토링, AI 활용 |
+| [docs/dev-log.md](docs/dev-log.md) | 발견한 실패·원인·수정 전후, 리팩토링 |
 | [docs/code-review-guide.md](docs/code-review-guide.md) | 읽을 순서·입출력·판단 지점·직접 해 볼 항목 |
 | [docs/papers-and-docs.md](docs/papers-and-docs.md) | 논문·공식 문서 요약과 적용·재현 범위 |
 | [gateway/README.md](gateway/README.md) | Go 게이트웨이 설계 |
