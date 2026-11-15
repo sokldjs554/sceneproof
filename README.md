@@ -1,17 +1,40 @@
-# SceneProof — 산업현장 제한구역 접근·체류 영상 사건 검토
+# SceneProof
 
-**어느 카메라에서 어떤 일이 있었고, 어떤 장면을 근거로 확인이 필요하다고 판단했으며, 담당자가 어떻게 처리했는가** — 현장 관리자가 이 질문에 답할 수 있도록, CV가 사건을 만들고 VLM이 장면을 해석하고 사람이 검토하는 흐름을 하나로 연결한 서비스입니다.
+제한구역에 들어오거나 머문 사람을 찾고, 근거 영상·VLM 설명·처리 이력을 한 화면에서 확인하는 영상 사건 검토 서비스입니다.
+
+**[데모 열기](https://sokldjs554.github.io/sceneproof/) · [시연 영상](docs/images/replay-vlm/demo.webm) · [직접 수행한 실험](docs/experiments/README.md)**
+
+![저장된 사건의 근거와 VLM 설명](docs/images/replay-vlm/03_event_vlm.png)
+
+## 먼저 사건 한 건을 확인해 보세요
+
+공개 데모 위쪽의 **대표 사건 → 근거 장면 → VLM 설명 → 처리 기록**을 순서대로 누릅니다. 사건이 발생한 구간과 설명을 대조하고, 같은 시간·구역의 사건 묶음도 확인할 수 있습니다.
+
+공개 화면은 저장된 사건 15건과 실제 생성된 설명을 **읽기 전용으로 재생**합니다. 새 영상 분석·새 설명 생성·처리 상태 저장은 아래 로컬 서버에서 실행합니다. 화면의 작업대·통로 이름은 샘플에 설정한 구역 이름이며, 고객 사업장 운영 자료가 아닙니다.
+
+## 결과 세 가지
+
+| 확인한 내용 | 결과 | 조건과 해석 |
+| --- | --- | --- |
+| 진입 확정 시간을 늘려도 되는가 | 중복 6 → 2건, 놓친 사건 0 → 3건 | 직접 비교한 4편에서 0.3초 유지. [실험 원본](docs/experiments/entry-confirm-20261113/README.md) |
+| 추가 학습으로 사건을 더 찾는가 | 찾은 사건 160 → 198 / 정답 207건 | 최종 34편. 중복도 18 → 49건으로 증가. [평가 기록](docs/eval/bench/README.md) |
+| 추론을 더 빠르게 할 수 있는가 | TensorRT FP32 3.5 → FP16 2.7ms | T4·YOLOX-tiny·배치 1·300프레임·3회·추론 p50. 전체 프레임은 5.1ms. [GPU 기록](docs/eval/gpu.md) |
+
+위 세 결과는 서로 다른 실험입니다. 추론 시간은 영상 수신부터 화면 표시까지의 지연이나 지원 카메라 대수가 아닙니다.
+
+## 내가 맡은 일
+
+윤기혁의 개인 프로젝트입니다. 목표·평가 기준·예산을 정하고, 정답 검수와 화면 확인, Mac·Colab 실행을 수행했습니다.
+
+- **직접 구현**: 사건 묶기의 시간 여유(`gap_s`), 최소 사람 상자 높이(`min_box_height_px`), 묶인 사건만 조회하는 API 조건(`concurrent_only`). 기능 3개와 테스트 함수 10개를 작성하고 두 번의 PR로 반영했습니다.
+- **직접 실험과 판단**: 진입 확정 시간 비교, 최소 상자 높이 비교와 반복 실행. 애매한 정답 14곳을 검토해 5곳을 수정하고 VLM 설명 19건을 채점했습니다.
+- **AI 도구 활용**: 제품 코드 대부분과 평가 도구·문서의 작성에는 Claude Code를 활용했습니다. 위 직접 작성·검증 범위와 구분합니다. 개인 프로젝트의 PR 기록을 사람 간 팀 협업 성과로 제시하지 않습니다.
+
+코드: [사건 묶기](src/sceneproof/server/groups.py) · [탐지기](src/sceneproof/edge/detector.py) · [사건 API](src/sceneproof/server/app.py)
 
 [![ci](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml) [![k8s-runtime](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml)
 
-> 노타 AI **[Solution] AI Software Engineer Intern (전환형)** 지원용 프로젝트입니다. 공고 항목별 대응은 [`docs/job-mapping.md`](docs/job-mapping.md)에 있습니다.
-> 샘플 영상은 공개 데이터(Intel IoT DevKit CC BY 4.0, OpenCV Apache-2.0)이고, 성능 평가에는 연구용 공개 데이터(CAVIAR CC BY-SA, MOT16/20 CC BY-NC-SA 3.0)를 원 사이트에서 내려받아 씁니다(저장소에는 올리지 않음). 신원 식별 기능은 없습니다.
-
-**공개 데모: [https://sokldjs554.github.io/sceneproof/](https://sokldjs554.github.io/sceneproof/)** — 저장된 실행 결과(사건 15건, 근거 클립·키 프레임, Claude Opus 5.5 해석, 처리 상태 전이)를 서버 없이 브라우저에서 재생하는 정적 페이지입니다. GitHub Pages(`pages` 워크플로)가 `demo/bundle`에서 생성합니다. 카메라 명령·실시간 분석·새 해석 생성은 아래 "바로 실행"의 로컬 서버(또는 `render.yaml`)에서만 동작합니다.
-
-![콘솔 첫 화면](docs/images/01_overview.png)
-
-위 화면은 실시간 모드(mock 제공자)입니다. Claude Opus 5.5가 실제로 생성한 해석이 표시된 재생 모드 화면은 [`docs/images/replay-vlm/03_event_vlm.png`](docs/images/replay-vlm/03_event_vlm.png).
+노타 **[Solution] AI Software Engineer Intern (전환형)** 지원용 프로젝트입니다. [공고 대조](docs/job-mapping.md) · [데이터 출처와 사용 조건](data/README.md). 샘플은 공개 데이터이며 신원 식별 기능은 없습니다.
 
 ## 무엇을 하는가
 
@@ -53,7 +76,7 @@ docker compose(`docker compose up --build`)와 Kubernetes(`scripts/k8s_verify.sh
 
 VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Claude, 구조화 JSON) / `openai_compat`(vLLM 등 자체 호스팅) / `transformers`(SmolVLM 로컬). 선택과 비용 상한은 runbook 참조.
 
-## 결과 요약 (실측; 상세는 [`docs/eval/bench/README.md`](docs/eval/bench/README.md), [`docs/eval/README.md`](docs/eval/README.md))
+## 상세 평가 기록 (실측; 상세는 [`docs/eval/bench/README.md`](docs/eval/bench/README.md), [`docs/eval/README.md`](docs/eval/README.md))
 
 - **연구용 벤치마크(사람이 손으로 그린 정답, 최종 분할 34편·27.5분·정답 사건 207건, 한 번 측정)**: CAVIAR·MOT 정지 카메라 86편(84편으로 시작해 두 번째 최종 분할용 2편 추가)을 학습/조정/최종으로 측정 전에 고정해 나누고, 데이터의 사람 상자를 제품과 같은 구역 규칙에 넣어 정답 사건을 만들었습니다. 제품 기본 모델은 찾은 비율 0.77·맞힌 비율 0.94였고, 위에서 내려다보는 로비에서 26건 중 7건만 찾았습니다. 같은 모델을 학습 분할로 CPU에서 추가 학습하자 **찾은 비율 0.96·맞힌 비율 0.94, 로비 26건 모두**를 찾았습니다. 본 적 있는 종류의 카메라에서는 놓침이 22건에서 1건이 됐습니다. 3배 큰 모델은 놓침을 줄였지만 잘못 울림이 늘었습니다. 표: [`docs/eval/bench/README.md`](docs/eval/bench/README.md), 해석: [`docs/eval/bench/findings.md`](docs/eval/bench/findings.md).
 - **두 번째 최종 측정(어디에도 쓰지 않은 붐비는 밤 광장 2곳, 정답 사건 503건, 한 번 측정)**: 첫 측정 뒤 바꾼 것을 공정하게 재려고 새로 고정한 분할입니다. 기본 모델은 찾은 비율 **0.10**에 그쳤고, 추가 학습 모델은 **0.97**(맞힌 비율 0.99)이었습니다. 첫 측정에서 드러난 마네킹 헛알림은 **제외 영역** 기능으로(조정 분할 잘못 울림 5→1, 놓침 변화 없음), 학습 코드 결함은 다시 학습으로 고쳤습니다. 붐비는 장면에서 같은 출입이 여러 사건으로 쪼개지는 문제는 원인(같은 사람에게 추적 번호가 새로 붙음)을 찾아 **카메라별 붐비는 현장용 추적 설정**으로 약 40% 줄일 수 있게 했고(놓침 약 1% 증가라 기본값은 유지), 느슨한 사건 이어받기는 붐비는 장면에서 잘못 울림을 늘려 쓰지 않습니다. 시간당 잘못 울림은 영상이 짧아 아직 믿을 숫자가 아닙니다.
@@ -64,11 +87,15 @@ VLM 제공자: `mock`(형식 검증, 결과에 `[MOCK]` 표시) / `anthropic`(Cl
 - **실시간·장애 대응**: 과입력(입력 30 fps·1스레드 → 처리 19 fps, 폐기 417, 지연 최대 202 ms), 스트림 단절·복구(RTSP 14초 단절 → 4초 만에 재연결), VLM 지연·실패(수신 ack p95 2.7 ms 유지, 타임아웃·재시도·재요청), 장치–서버 단절(큐잉 → 재전송, 중복 0), 중복 전달, 재시작 — 6가지 모두 스크립트로 재현·통과. 이 과정에서 VLM 워커의 실제 버그 2개를 찾아 고침(`docs/dev-log.md` L9–L10). §4와 [`docs/evidence/failure-scenarios/`](docs/evidence/failure-scenarios/).
 - **CV만 vs CV+VLM(Claude Opus 5.5, held-out 19건, CI 실행, 프롬프트 2회)**: 두 실행 모두 해석 19/19 완료(스키마 위반 0, p50 약 20초, 각 약 $1). 프롬프트 v1.2(assessment 값만 열거)에서는 정답 침입 10건 중 '확인 필요' 유지 4건, '정상 가능성 높음' 3건 — 모델이 '위험해 보이는가'로 판단해 기하학적 침입 정답과 어긋났습니다. 규칙을 한 문장 적은 v1.3(구역 안 확인=확인 필요, 경계·불명=불확실)에서는 8건 유지·'정상' 0건, 대신 경계 통과 3건 중 2건이 '확인 필요'로 올라갔습니다(보수적). CV의 잘못 울림 1건은 두 버전 모두 '구역 안의 사람'을 봤다고 했는데, 확인해 보니 정답 사건과 같은 자전거 탄 사람이 화면 끝에서 새 추적 번호를 받은 조각이었습니다. **정답을 사람이 검수한 뒤** 다시 맞춰 보니 v1.2가 '경계 통과'라 '정상'으로 본 2건이 실제 침입이어서, 정답 침입 12건 중 '정상 가능성 높음'으로 빠진 것이 v1.2 4건, v1.3 0건(유지 9건)입니다. **결론: 문제는 모델의 시각이 아니라 계약(프롬프트)의 빈칸이었고, VLM 판단은 보조 표시로만 쓰며 모든 사건을 '확인 필요'로 유지하는 설계(D7)는 그대로입니다.** 같은 19건으로 재측정한 비교라, **처음 보는 영상**(연구용 조정 분할 12편, 18건, 측정 규칙을 실행 전에 고정)으로 다시 쟀습니다: 정답 침입 14건 중 '정상'으로 뺀 것 0건(확인 필요 9·불확실 5), CV 잘못 울림 2건(마네킹)은 '불확실'로 두며 "사람인지 마네킹인지 판별되지 않는다"고 적음. 사람 채점(2명이 따로, 19건): 관찰이 사진과 맞음 두 사람 모두 19/19, 지어낸 내용 0건, 불확실한 점 타당 19/19 — 두 사람의 답이 19건 모두 같음. 사례·전후 비교는 [`docs/eval/vlm-findings.md`](docs/eval/vlm-findings.md), 원시 결과는 `docs/eval/raw/vlm_eval*.json`.
 
+### 다중 카메라 측정의 현재 범위
+
+2026-11-15 CPU 4코어에서 1280×720·30fps 입력을 실시간 재생한 새 측정은 기본 설정 1채널 29.0fps로, 사전에 정한 98% 처리 기준을 충족하지 못했습니다. `ring_fps: 10`에서도 29.2fps로 통과 대수는 늘지 않았습니다. 이는 이전 스트림 확대 실험과 별도 조건입니다. **GPU 다중 채널 측정 도구는 준비됐지만 T4 실행 결과는 아직 없습니다.** [조건·원시 결과·동시 처리 검증](docs/eval/gpu.md#3-gpu-한-장으로-30fps-카메라-몇-대까지--측정-방법-결과는-colab-실행-뒤-기록)
+
 ## 기술 선택 (왜)
 
 | 영역 | 선택 | 이유 (대안·한계는 decisions.md) |
 |---|---|---|
-| 탐지 | YOLOX nano/tiny/s (Apache-2.0) → 자체 ONNX 내보내기 | 라이선스가 명확하고, PyTorch/ONNX를 같은 전후처리로 비교 가능. CPU 4코어에서 tiny가 30fps 입력을 처리 |
+| 탐지 | YOLOX nano/tiny/s (Apache-2.0) → 자체 ONNX 내보내기 | 라이선스가 명확하고, PyTorch/ONNX를 같은 전후처리로 비교 가능. CPU와 T4에서 동일한 전후처리로 비교; 처리 가능한 채널 수는 별도 측정 |
 | 추적 | ByteTrack 자체 구현 | 체류 시간은 ID 안정성에 달림. 저신뢰 상자 2차 연계를 테스트로 고정 |
 | 구역 판정 | 발 위치 앵커 + 시간 기반 디바운스 + 추적 끊김 유예 + 하단 클리핑 보정 | 평가 데이터에서 발견한 실패(사건 쪼개짐)를 고친 결과 |
 | 입력 | GStreamer(rtspsrc/appsink), OpenCV 대체 경로 | RTSP 재연결·백오프, 파일은 실시간 페이싱 |

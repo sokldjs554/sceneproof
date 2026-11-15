@@ -9,7 +9,7 @@
 // ---------------------------------------------------------------- 1. labels
 const L = {
   review: { needs_review: '확인 필요', in_review: '검토 중', resolved: '처리 완료' },
-  resolution: { confirmed: '침입 확인', dismissed: '오탐 처리', escalated: '상위 보고', no_action: '조치 불필요' },
+  resolution: { confirmed: '침입 확인', dismissed: '잘못된 알림', escalated: '상위 보고', no_action: '조치 불필요' },
   kind: { EVENT_KIND_ZONE_ENTRY: '진입', EVENT_KIND_ZONE_DWELL: '체류' },
   closeReason: { CLOSE_REASON_EXITED: '구역 이탈', CLOSE_REASON_TRACK_LOST: '추적 끊김', CLOSE_REASON_STREAM_ENDED: '영상 종료', CLOSE_REASON_SHUTDOWN: '분석 중지' },
   camState: { CAMERA_STATE_CONNECTING: '연결 중', CAMERA_STATE_STREAMING: '분석 중', CAMERA_STATE_RECONNECTING: '재연결 중', CAMERA_STATE_ENDED: '영상 종료', CAMERA_STATE_STOPPED: '정지', CAMERA_STATE_ERROR: '오류', CAMERA_STATE_UNSPECIFIED: '알 수 없음' },
@@ -316,6 +316,11 @@ function maybeRefreshDetail() {
 function renderAll() {
   renderTopbar(); renderBanner(); renderCameras(); renderUplink(); renderVlm();
   renderFilters(); renderList(); renderSelHeader(); renderStage(); renderDetail(); updateExportLinks();
+  if (IS_STATIC) {
+    document.querySelectorAll('[data-guide]').forEach((el) => { el.disabled = !state.events.length; });
+    if (!state.events.length) $('#demo-guide-hint').textContent = '표시할 사건이 없습니다.';
+    else if ($('#demo-guide-hint').textContent === '사건을 불러오는 중입니다.') $('#demo-guide-hint').textContent = '1 대표 사건을 누르면 근거 영상과 설명이 있는 사건으로 이동합니다.';
+  }
 }
 
 function renderTopbar() {
@@ -1122,6 +1127,31 @@ function updateExportLinks() {
 }
 
 // ---------------------------------------------------------------- 7. actions
+function followDemoGuide(step) {
+  if (!IS_STATIC || !state.events.length) return;
+  toggleAudit(false);
+  if (step === 'event') {
+    const candidates = state.events.filter((ev) => ev.evidence && ev.evidence.clip_available && ev.explanation && ev.explanation.status === 'done');
+    const ev = candidates.find((item) => item.review.state === 'resolved') || candidates[0] || state.events[0];
+    state.filters = { camera: '', state: '', kind: '', q: '' };
+    renderFilters();
+    state.tab = 'cv'; state.stageMode = 'clip';
+    selectEvent(ev.event_id, { seek: true, play: true, scroll: true });
+    $('#stage').scrollIntoView({ block: 'nearest' });
+  } else {
+    if (!currentEvent()) selectEvent(state.events[0].event_id);
+    setTab(step);
+    $('#detail').scrollIntoView({ block: 'nearest' });
+  }
+  const hints = {
+    event: '선택한 사건의 진입·체류 구간을 영상에서 확인하세요. 다른 사건도 오른쪽 목록에서 고를 수 있습니다.',
+    cv: '진입 전·진입·체류·이탈 장면과 구역 경계를 대조하세요. 상자 표시를 켜거나 원본 영상으로 확인할 수 있습니다.',
+    vlm: '모델이 관찰한 내용과 판단의 한계를 근거 장면과 비교하세요. 저장된 설명이며 새로 생성하지 않습니다.',
+    review: '저장된 검토 상태와 처리 이력을 확인하세요. 공개 데모에서는 상태를 변경하지 않습니다.',
+  };
+  $('#demo-guide-hint').textContent = hints[step];
+}
+
 function selectEvent(id, opts = {}) {
   if (!id) return;
   const changed = id !== state.selectedId;
@@ -1281,6 +1311,11 @@ function onKey(e) {
 }
 function init() {
   if (IS_STATIC) document.title += ' — 정적 재생';
+  if (IS_STATIC) {
+    $('#demo-guide').classList.remove('hidden');
+    document.body.classList.add('has-demo-guide');
+    document.querySelectorAll('[data-guide]').forEach((el) => el.addEventListener('click', () => followDemoGuide(el.dataset.guide)));
+  }
   try { state.actor = localStorage.getItem('sp.actor') || '담당자'; } catch { /* storage unavailable */ }
   $('#f-camera').addEventListener('change', (e) => setFilter('camera', e.target.value));
   $('#f-state').addEventListener('change', (e) => setFilter('state', e.target.value));
