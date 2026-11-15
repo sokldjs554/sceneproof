@@ -1,0 +1,630 @@
+{
+ "what": "channels of 30 fps video one analyser process keeps up with; a channel count passes when every channel analysed >= min_processed_ratio of target_fps over the window",
+ "git": "c534418",
+ "git_dirty": false,
+ "time": "2026-11-15T15:34:24",
+ "env": {
+  "python": "3.13.18",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_count": 4,
+  "nvidia_smi": "unavailable: [Errno 2] No such file or directory: 'nvidia-smi'",
+  "onnxruntime": "1.31.1",
+  "onnxruntime_providers": [
+   "AzureExecutionProvider",
+   "CPUExecutionProvider"
+  ],
+  "torch": "2.15.0+cu132",
+  "torch_cuda": "13.2",
+  "gpu": null,
+  "tensorrt": "unavailable: ModuleNotFoundError: No module named 'tensorrt'"
+ },
+ "plan": {
+  "target_fps": 30,
+  "detector": {
+   "variant": "yolox_nano",
+   "backend": "onnxruntime",
+   "precision": "fp16"
+  },
+  "video": "worker-zone",
+  "stagger_s": 2,
+  "channels": [
+   1,
+   2
+  ],
+  "warmup_s": 8,
+  "measure_s": 30,
+  "pass": {
+   "min_processed_ratio": 0.98
+  },
+  "stop_after_failures": 2,
+  "variants": [
+   {
+    "name": "as-built",
+    "pipeline": {}
+   },
+   {
+    "name": "ring-fps-10",
+    "pipeline": {
+     "ring_fps": 10
+    }
+   },
+   {
+    "name": "clip-encoder-as-in-run-1",
+    "pipeline": {},
+    "clip_encoder": {
+     "nice": 0,
+     "threads": 0
+    },
+    "channels": [
+     1,
+     2
+    ]
+   }
+  ],
+  "cpu_reference": {
+   "backend": "onnxruntime",
+   "channels": [
+    1,
+    2
+   ]
+  },
+  "isolation": {
+   "videos": [
+    "campus-walkway",
+    "people-indoor",
+    "store-aisle",
+    "parking-lot"
+   ]
+  },
+  "evidence_check": {
+   "videos": [
+    "worker-zone",
+    "store-aisle"
+   ],
+   "ring_fps": 10
+  }
+ },
+ "overrides": {
+  "detector.variant": "yolox_nano",
+  "detector.backend": "onnxruntime",
+  "channels": [
+   1,
+   2
+  ],
+  "isolation": "skipped",
+  "evidence_check": "skipped"
+ },
+ "video": {
+  "name": "worker-zone",
+  "width": 1280,
+  "height": 720,
+  "native_fps": 30.0,
+  "frames": 2278
+ },
+ "sweeps": [
+  {
+   "role": "main",
+   "label": "onnxruntime",
+   "variant": "as-built",
+   "pipeline": {},
+   "detector_config": {
+    "conf_threshold": 0.4,
+    "nms_threshold": 0.45,
+    "variant": "yolox_nano",
+    "backend": "onnxruntime",
+    "model": "models/yolox_nano.onnx",
+    "intra_op_threads": 1
+   },
+   "load_s": 0.0,
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "clip_encoder": {
+    "nice": 10,
+    "threads": 1
+   },
+   "rows": [
+    {
+     "channels": 1,
+     "pass": true,
+     "window_s": 30.04,
+     "processed_fps_total": 30.0,
+     "processed_ratio_min": 1.001,
+     "processed_ratio_mean": 1.001,
+     "received_fps_min": 30.0,
+     "dropped_total": 0,
+     "lag_ms_p50_median": 28.2,
+     "lag_ms_p95_worst": 96.9,
+     "cpu_percent_process": 79.7,
+     "cpu_percent_system": 23.0,
+     "rss_mb": 725.1,
+     "gpu": null,
+     "clips_written": 2,
+     "clip_write_ms_mean": 5514.0,
+     "stage_ms_mean": {
+      "evidence_encode": 8.24,
+      "preprocess": 1.1,
+      "infer": 16.18,
+      "postprocess": 0.96,
+      "track": 0.33,
+      "zones": 0.18,
+      "total": 27.01
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.0,
+       "processed_fps": 30.03,
+       "processed_ratio": 1.001,
+       "dropped": 0,
+       "dropped_ratio": 0.0,
+       "lag_ms_p50": 28.2,
+       "lag_ms_p95": 96.9,
+       "lag_ms_max": 130.9,
+       "queue_depth_mean": 0.25,
+       "stage_ms_mean": {
+        "evidence_encode": 8.24,
+        "preprocess": 1.1,
+        "infer": 16.18,
+        "postprocess": 0.96,
+        "track": 0.33,
+        "zones": 0.18,
+        "total": 27.01
+       },
+       "infer_ms_p50": 14.66,
+       "clips_written": 2,
+       "clip_write_ms_mean": 5514.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 15
+    },
+    {
+     "channels": 2,
+     "pass": false,
+     "window_s": 30.08,
+     "processed_fps_total": 35.0,
+     "processed_ratio_min": 0.583,
+     "processed_ratio_mean": 0.583,
+     "received_fps_min": 29.99,
+     "dropped_total": 753,
+     "lag_ms_p50_median": 175.1,
+     "lag_ms_p95_worst": 198.2,
+     "cpu_percent_process": 94.6,
+     "cpu_percent_system": 25.1,
+     "rss_mb": 840.9,
+     "gpu": null,
+     "clips_written": 2,
+     "clip_write_ms_mean": 12431.0,
+     "stage_ms_mean": {
+      "evidence_encode": 16.31,
+      "preprocess": 2.25,
+      "infer": 32.77,
+      "postprocess": 2.16,
+      "track": 0.64,
+      "zones": 0.36,
+      "total": 54.51
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 29.99,
+       "processed_fps": 17.49,
+       "processed_ratio": 0.583,
+       "dropped": 376,
+       "dropped_ratio": 0.4169,
+       "lag_ms_p50": 175.1,
+       "lag_ms_p95": 198.2,
+       "lag_ms_max": 212.7,
+       "queue_depth_mean": 3.72,
+       "stage_ms_mean": {
+        "evidence_encode": 16.38,
+        "preprocess": 2.34,
+        "infer": 32.8,
+        "postprocess": 2.06,
+        "track": 0.55,
+        "zones": 0.34,
+        "total": 54.5
+       },
+       "infer_ms_p50": 31.92,
+       "clips_written": 2,
+       "clip_write_ms_mean": 12431.0,
+       "last_error": ""
+      },
+      {
+       "camera_id": "ch02",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 29.99,
+       "processed_fps": 17.49,
+       "processed_ratio": 0.583,
+       "dropped": 377,
+       "dropped_ratio": 0.418,
+       "lag_ms_p50": 175.1,
+       "lag_ms_p95": 198.0,
+       "lag_ms_max": 244.5,
+       "queue_depth_mean": 3.79,
+       "stage_ms_mean": {
+        "evidence_encode": 16.25,
+        "preprocess": 2.15,
+        "infer": 32.74,
+        "postprocess": 2.26,
+        "track": 0.72,
+        "zones": 0.38,
+        "total": 54.52
+       },
+       "infer_ms_p50": 32.42,
+       "clips_written": 0,
+       "clip_write_ms_mean": 0.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 30
+    }
+   ],
+   "capacity_channels": 1,
+   "first_failing_channels": 2,
+   "largest_passing_channels": 1,
+   "network_only_ceiling_channels": 2,
+   "status": "ok"
+  },
+  {
+   "role": "main",
+   "label": "onnxruntime",
+   "variant": "ring-fps-10",
+   "pipeline": {
+    "ring_fps": 10
+   },
+   "detector_config": {
+    "conf_threshold": 0.4,
+    "nms_threshold": 0.45,
+    "variant": "yolox_nano",
+    "backend": "onnxruntime",
+    "model": "models/yolox_nano.onnx",
+    "intra_op_threads": 1
+   },
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "clip_encoder": {
+    "nice": 10,
+    "threads": 1
+   },
+   "rows": [
+    {
+     "channels": 1,
+     "pass": true,
+     "window_s": 30.06,
+     "processed_fps_total": 30.1,
+     "processed_ratio_min": 1.0036,
+     "processed_ratio_mean": 1.0036,
+     "received_fps_min": 30.01,
+     "dropped_total": 0,
+     "lag_ms_p50_median": 24.6,
+     "lag_ms_p95_worst": 30.9,
+     "cpu_percent_process": 66.3,
+     "cpu_percent_system": 19.5,
+     "rss_mb": 740.1,
+     "gpu": null,
+     "clips_written": 3,
+     "clip_write_ms_mean": 3195.0,
+     "stage_ms_mean": {
+      "evidence_encode": 2.74,
+      "preprocess": 1.04,
+      "infer": 15.42,
+      "postprocess": 0.97,
+      "track": 0.29,
+      "zones": 0.23,
+      "total": 20.71
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 30.11,
+       "processed_ratio": 1.0036,
+       "dropped": 0,
+       "dropped_ratio": 0.0,
+       "lag_ms_p50": 24.6,
+       "lag_ms_p95": 30.9,
+       "lag_ms_max": 45.0,
+       "queue_depth_mean": 0.0,
+       "stage_ms_mean": {
+        "evidence_encode": 2.74,
+        "preprocess": 1.04,
+        "infer": 15.42,
+        "postprocess": 0.97,
+        "track": 0.29,
+        "zones": 0.23,
+        "total": 20.71
+       },
+       "infer_ms_p50": 14.3,
+       "clips_written": 3,
+       "clip_write_ms_mean": 3195.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 15
+    },
+    {
+     "channels": 2,
+     "pass": false,
+     "window_s": 30.06,
+     "processed_fps_total": 40.2,
+     "processed_ratio_min": 0.6698,
+     "processed_ratio_mean": 0.6704,
+     "received_fps_min": 30.01,
+     "dropped_total": 594,
+     "lag_ms_p50_median": 165.1,
+     "lag_ms_p95_worst": 201.8,
+     "cpu_percent_process": 95.1,
+     "cpu_percent_system": 25.2,
+     "rss_mb": 815.3,
+     "gpu": null,
+     "clips_written": 2,
+     "clip_write_ms_mean": 13413.0,
+     "stage_ms_mean": {
+      "evidence_encode": 8.87,
+      "preprocess": 2.31,
+      "infer": 35.69,
+      "postprocess": 2.36,
+      "track": 0.58,
+      "zones": 0.54,
+      "total": 50.36
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 20.09,
+       "processed_ratio": 0.6698,
+       "dropped": 298,
+       "dropped_ratio": 0.3304,
+       "lag_ms_p50": 163.6,
+       "lag_ms_p95": 193.6,
+       "lag_ms_max": 230.2,
+       "queue_depth_mean": 3.77,
+       "stage_ms_mean": {
+        "evidence_encode": 9.02,
+        "preprocess": 2.27,
+        "infer": 35.47,
+        "postprocess": 2.48,
+        "track": 0.66,
+        "zones": 0.53,
+        "total": 50.44
+       },
+       "infer_ms_p50": 34.3,
+       "clips_written": 2,
+       "clip_write_ms_mean": 13413.0,
+       "last_error": ""
+      },
+      {
+       "camera_id": "ch02",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 20.13,
+       "processed_ratio": 0.6709,
+       "dropped": 296,
+       "dropped_ratio": 0.3282,
+       "lag_ms_p50": 166.7,
+       "lag_ms_p95": 201.8,
+       "lag_ms_max": 220.4,
+       "queue_depth_mean": 3.62,
+       "stage_ms_mean": {
+        "evidence_encode": 8.71,
+        "preprocess": 2.35,
+        "infer": 35.91,
+        "postprocess": 2.24,
+        "track": 0.51,
+        "zones": 0.54,
+        "total": 50.28
+       },
+       "infer_ms_p50": 34.13,
+       "clips_written": 0,
+       "clip_write_ms_mean": 0.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 30
+    }
+   ],
+   "capacity_channels": 1,
+   "first_failing_channels": 2,
+   "largest_passing_channels": 1,
+   "network_only_ceiling_channels": 2,
+   "status": "ok"
+  },
+  {
+   "role": "main",
+   "label": "onnxruntime",
+   "variant": "clip-encoder-as-in-run-1",
+   "pipeline": {},
+   "detector_config": {
+    "conf_threshold": 0.4,
+    "nms_threshold": 0.45,
+    "variant": "yolox_nano",
+    "backend": "onnxruntime",
+    "model": "models/yolox_nano.onnx",
+    "intra_op_threads": 1
+   },
+   "runtime": "onnxruntime-cpu 1.31.1",
+   "clip_encoder": {
+    "nice": 0,
+    "threads": 0
+   },
+   "rows": [
+    {
+     "channels": 1,
+     "pass": false,
+     "window_s": 30.05,
+     "processed_fps_total": 27.6,
+     "processed_ratio_min": 0.9184,
+     "processed_ratio_mean": 0.9184,
+     "received_fps_min": 30.01,
+     "dropped_total": 73,
+     "lag_ms_p50_median": 28.0,
+     "lag_ms_p95_worst": 180.0,
+     "cpu_percent_process": 75.1,
+     "cpu_percent_system": 22.0,
+     "rss_mb": 777.1,
+     "gpu": null,
+     "clips_written": 3,
+     "clip_write_ms_mean": 2326.0,
+     "stage_ms_mean": {
+      "evidence_encode": 8.45,
+      "preprocess": 1.24,
+      "infer": 17.25,
+      "postprocess": 1.19,
+      "track": 0.33,
+      "zones": 0.17,
+      "total": 28.64
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 27.55,
+       "processed_ratio": 0.9184,
+       "dropped": 73,
+       "dropped_ratio": 0.0809,
+       "lag_ms_p50": 28.0,
+       "lag_ms_p95": 180.0,
+       "lag_ms_max": 220.9,
+       "queue_depth_mean": 0.98,
+       "stage_ms_mean": {
+        "evidence_encode": 8.45,
+        "preprocess": 1.24,
+        "infer": 17.25,
+        "postprocess": 1.19,
+        "track": 0.33,
+        "zones": 0.17,
+        "total": 28.64
+       },
+       "infer_ms_p50": 13.94,
+       "clips_written": 3,
+       "clip_write_ms_mean": 2326.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 15
+    },
+    {
+     "channels": 2,
+     "pass": false,
+     "window_s": 30.16,
+     "processed_fps_total": 27.0,
+     "processed_ratio_min": 0.4498,
+     "processed_ratio_mean": 0.4498,
+     "received_fps_min": 30.01,
+     "dropped_total": 995,
+     "lag_ms_p50_median": 194.4,
+     "lag_ms_p95_worst": 246.8,
+     "cpu_percent_process": 80.1,
+     "cpu_percent_system": 25.1,
+     "rss_mb": 822.0,
+     "gpu": null,
+     "clips_written": 6,
+     "clip_write_ms_mean": 4448.0,
+     "stage_ms_mean": {
+      "evidence_encode": 20.29,
+      "preprocess": 2.88,
+      "infer": 44.92,
+      "postprocess": 3.08,
+      "track": 0.79,
+      "zones": 0.53,
+      "total": 72.52
+     },
+     "per_channel": [
+      {
+       "camera_id": "ch01",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 13.5,
+       "processed_ratio": 0.4498,
+       "dropped": 497,
+       "dropped_ratio": 0.5492,
+       "lag_ms_p50": 195.3,
+       "lag_ms_p95": 236.8,
+       "lag_ms_max": 277.2,
+       "queue_depth_mean": 3.79,
+       "stage_ms_mean": {
+        "evidence_encode": 19.71,
+        "preprocess": 3.03,
+        "infer": 44.67,
+        "postprocess": 3.28,
+        "track": 0.85,
+        "zones": 0.46,
+        "total": 72.02
+       },
+       "infer_ms_p50": 43.59,
+       "clips_written": 3,
+       "clip_write_ms_mean": 3853.0,
+       "last_error": ""
+      },
+      {
+       "camera_id": "ch02",
+       "frame_wh": [
+        1280,
+        720
+       ],
+       "received_fps": 30.01,
+       "processed_fps": 13.5,
+       "processed_ratio": 0.4498,
+       "dropped": 498,
+       "dropped_ratio": 0.5503,
+       "lag_ms_p50": 193.5,
+       "lag_ms_p95": 246.8,
+       "lag_ms_max": 285.2,
+       "queue_depth_mean": 3.81,
+       "stage_ms_mean": {
+        "evidence_encode": 20.87,
+        "preprocess": 2.72,
+        "infer": 45.18,
+        "postprocess": 2.89,
+        "track": 0.73,
+        "zones": 0.6,
+        "total": 73.01
+       },
+       "infer_ms_p50": 44.15,
+       "clips_written": 3,
+       "clip_write_ms_mean": 5043.0,
+       "last_error": ""
+      }
+     ],
+     "events_written": 30
+    }
+   ],
+   "capacity_channels": 0,
+   "first_failing_channels": 1,
+   "largest_passing_channels": 0,
+   "network_only_ceiling_channels": 2,
+   "status": "ok"
+  }
+ ],
+ "isolation": null,
+ "evidence_check": null
+}
