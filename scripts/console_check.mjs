@@ -78,7 +78,7 @@ async function runLiveFlow(page) {
   await page.waitForSelector('#btn-reopen', { timeout: 10000 });
   const reviewText = await page.locator('#detail').innerText();
   check(reviewText.includes('처리 완료'), 'state changed to 처리 완료');
-  check(reviewText.includes('오탐 처리'), 'resolution 오탐 처리 shown');
+  check(reviewText.includes('잘못된 알림'), 'resolution 잘못된 알림 shown');
   check(reviewText.includes('스모크 테스트'), 'review log shows the note');
   check((await page.locator('.ev-row.selected .chip.st-resolved').count()) === 1, 'list row chip updated to 처리 완료');
   await page.waitForTimeout(400);
