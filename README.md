@@ -30,7 +30,7 @@
 - **직접 실험과 판단**: 진입 확정 시간 비교, 최소 상자 높이 비교와 반복 실행. 애매한 정답 14곳을 검토해 5곳을 수정하고 VLM 설명 19건을 채점했습니다.
 - **AI 도구 활용**: 제품 코드 대부분과 평가 도구·문서의 작성에는 Claude Code를 활용했습니다. 위 직접 작성·검증 범위와 구분합니다. 개인 프로젝트의 PR 기록을 사람 간 팀 협업 성과로 제시하지 않습니다.
 
-코드: [사건 묶기](src/sceneproof/server/groups.py) · [탐지기](src/sceneproof/edge/detector.py) · [사건 API](src/sceneproof/server/app.py)
+코드: [사건 묶기](src/sceneproof/server/groups.py) · [탐지기](src/sceneproof/edge/detector.py) · [사건 API](src/sceneproof/server/api.py)
 
 [![ci](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/ci.yml) [![k8s-runtime](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml/badge.svg)](https://github.com/sokldjs554/sceneproof/actions/workflows/k8s-runtime.yml)
 

@@ -945,6 +945,10 @@ function seekToFrame(ev, role) {
 }
 const sec = (title, body) => h('div', { class: 'vlm-sec' }, h('h3', null, title), body);
 const ul = (arr) => (arr && arr.length ? h('ul', null, arr.map((t) => h('li', null, String(t)))) : h('p', { class: 'muted', style: 'margin:2px 0' }, '없음'));
+function formatPpeVisible(value) {
+  if (!Array.isArray(value)) return '불명';
+  return value.length ? value.join(' · ') : '보이는 보호구 없음';
+}
 function buildVlmTab(ev) {
   const x = ev.explanation; const vs = x ? x.status : null; const out = [];
   const prov = state.status && state.status.vlm ? state.status.vlm.provider : '';
@@ -972,7 +976,7 @@ function buildVlmTab(ev) {
       sec('사람 정보', h('dl', { class: 'fields' },
         dt('구역 내 인원'), dd(p.count_in_zone == null ? '불명' : String(p.count_in_zone)),
         dt('외형'), dd(p.appearance || '불명'),
-        dt('보호구'), dd(p.ppe_visible == null ? '불명' : p.ppe_visible ? '착용 보임' : '안 보임'))),
+        dt('보호구'), dd(formatPpeVisible(p.ppe_visible)))),
       sec('판단 근거', ul(r.reasons)),
       h('div', { class: 'vlm-sec limits' }, h('h3', null, '판단의 한계'), ul(r.uncertainties))));
     if (r.operator_question) out.push(sec('담당자에게 묻는 질문', h('p', { style: 'margin:2px 0' }, `❓ ${r.operator_question}`)));
