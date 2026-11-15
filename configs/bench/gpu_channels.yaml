@@ -9,6 +9,8 @@
 #   after run 1: the clip encoder now runs at low priority, on one thread, one clip at a time (product default,
 #     edge/evidence.py). Added the variant clip-encoder-as-in-run-1 so one session measures before and after.
 #     Pass rule, video, channel counts, window and the two original variants are unchanged.
+#   run 2 (2026-11-15, Colab T4, this file as it is): docs/eval/raw/gpu_channels_t4_run2.json.
+#     as-built holds 1 channel, ring-fps-10 holds 2, clip-encoder-as-in-run-1 holds 0.
 target_fps: 30
 
 detector:                     # the path being measured
