@@ -1,6 +1,14 @@
 # How many 30 fps camera channels one GPU keeps up with — measurement plan for scripts/gpu_channels.py.
 # Written on 2026-11-15, before the first GPU run. Anything overridden on the command line is recorded in the
 # result file as an override, so a result always says whether it followed this plan.
+#
+# History
+#   run 1 (2026-11-15, Colab T4, the plan as first written: variants as-built and ring-fps-10):
+#     docs/eval/raw/gpu_channels_t4_run1.json. No channel count passed (one channel: 27.1 fps, GPU 9% busy).
+#     A trace showed the frames are dropped while an evidence clip is being encoded.
+#   after run 1: the clip encoder now runs at low priority, on one thread, one clip at a time (product default,
+#     edge/evidence.py). Added the variant clip-encoder-as-in-run-1 so one session measures before and after.
+#     Pass rule, video, channel counts, window and the two original variants are unchanged.
 target_fps: 30
 
 detector:                     # the path being measured
@@ -27,6 +35,10 @@ variants:                     # one sweep each, same detector
     pipeline: {}
   - name: ring-fps-10         # evidence frames kept at 10 per video second (clips are written at 10 fps anyway)
     pipeline: {ring_fps: 10}
+  - name: clip-encoder-as-in-run-1   # the evidence clip encoder as it ran in run 1: normal priority, every core
+    pipeline: {}
+    clip_encoder: {nice: 0, threads: 0}
+    channels: [1, 2]
 
 cpu_reference:                # as-built with the product's default detector path (ONNX Runtime on the CPU)
   backend: onnxruntime

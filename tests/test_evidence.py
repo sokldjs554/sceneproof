@@ -45,3 +45,21 @@ def test_draw_annotations_does_not_mutate_input():
     zone = ZoneSpec("z", "zone", [(0.2, 0.2), (0.8, 0.2), (0.8, 0.9), (0.2, 0.9)])
     out = draw_annotations(img, zone, (10, 10, 40, 80), "track 1")
     assert img.sum() == 0 and out.sum() > 0
+
+
+def test_clip_encoder_runs_on_one_thread_at_low_priority(monkeypatch):
+    import shutil
+
+    from sceneproof.edge import evidence
+
+    cmd = evidence.clip_command("ffmpeg", "libx264", 10.0, "clip.mp4")
+    assert cmd[cmd.index("-threads") + 1] == "1" and cmd[-1] == "clip.mp4"
+    assert cmd.index("-threads") > cmd.index("-c:v")  # an output (encoder) option, not a decoder one
+    if shutil.which("nice"):
+        assert cmd[:3] == [shutil.which("nice"), "-n", "10"] and cmd[3] == "ffmpeg"
+    else:
+        assert cmd[0] == "ffmpeg"
+    monkeypatch.setattr(evidence, "CLIP_ENCODER_NICE", 0)
+    monkeypatch.setattr(evidence, "CLIP_ENCODER_THREADS", 0)
+    plain = evidence.clip_command("ffmpeg", "mpeg4", 10.0, "clip.mp4")
+    assert plain[0] == "ffmpeg" and "-threads" not in plain and "-q:v" in plain

@@ -8,7 +8,8 @@ analysis lag, CPU and GPU load and the time per stage. A channel count passes wh
 30 fps (configs/bench/gpu_channels.yaml, written before the first GPU run). The answer is the largest passing channel
 count below the first failing one.
 
-The plan runs the sweep for more than one pipeline setting (as built, and with fewer evidence frames kept), and adds:
+The plan runs the sweep for more than one setting (as built, fewer evidence frames kept, the evidence clip encoder
+as it was before it was made low-priority), and adds:
   * CPU reference: the as-built sweep with ONNX Runtime on the CPU.
   * Isolation: videos analysed at the same time (every frame) must give the same events as one at a time. Cameras
     share the detector, so this is the check that frames and results are not mixed up between cameras.
@@ -39,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from gpu_bench import _env, _preload_ort_gpu  # noqa: E402  (same directory)
+from sceneproof.edge import evidence as evidence_mod  # noqa: E402
 from sceneproof.edge.agent import EdgeAgent  # noqa: E402
 from sceneproof.edge.config import EdgeConfig  # noqa: E402
 from sceneproof.edge.detector import PersonDetector, build_detector  # noqa: E402
@@ -66,14 +68,32 @@ def capacity(rows: list[dict]) -> tuple[int, int | None]:
     return best, first_fail
 
 
+def usable_cpus() -> int:
+    """CPUs this process may run on (taskset / container limits), not the machine's total."""
+    return len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else (os.cpu_count() or 1)
+
+
 def detector_dict(variant: str, backend: str, precision: str | None) -> dict:
     d = {"conf_threshold": 0.4, "nms_threshold": 0.45, "variant": variant, "backend": backend,
          "model": f"models/{variant}.pth" if backend == "torch" else f"models/{variant}.onnx"}
     if backend == "tensorrt":
         d["precision"] = precision or "fp16"
     if backend == "onnxruntime":
-        d["intra_op_threads"] = os.cpu_count() or 1
+        d["intra_op_threads"] = usable_cpus()
     return d
+
+
+@contextlib.contextmanager
+def clip_encoder(settings: dict | None):
+    """A plan variant may run the evidence clip encoder differently (`nice`, `threads`; 0 = no limit) for its sweep."""
+    saved = (evidence_mod.CLIP_ENCODER_NICE, evidence_mod.CLIP_ENCODER_THREADS)
+    if settings:
+        evidence_mod.CLIP_ENCODER_NICE = int(settings.get("nice", saved[0]))
+        evidence_mod.CLIP_ENCODER_THREADS = int(settings.get("threads", saved[1]))
+    try:
+        yield {"nice": evidence_mod.CLIP_ENCODER_NICE, "threads": evidence_mod.CLIP_ENCODER_THREADS}
+    finally:
+        evidence_mod.CLIP_ENCODER_NICE, evidence_mod.CLIP_ENCODER_THREADS = saved
 
 
 def final_events(jsonl: str | Path, camera_id: str) -> list[dict]:
@@ -224,7 +244,10 @@ def measure(agent: EdgeAgent, target_fps: float, measure_s: float, min_ratio: fl
             "lag_ms_p50": round(float(np.percentile(lag[cid], 50)), 1), "lag_ms_p95": round(float(np.percentile(lag[cid], 95)), 1),
             "lag_ms_max": round(max(lag[cid]), 1), "queue_depth_mean": round(float(np.mean(depth[cid])), 2),
             "stage_ms_mean": {s: round(p.timer.mean(s), 2) for s in STAGES},
-            "infer_ms_p50": round(p.timer.percentile("infer", 50), 2), "last_error": p.stats.last_error})
+            "infer_ms_p50": round(p.timer.percentile("infer", 50), 2),
+            # evidence clips this camera wrote so far (warm-up included) and how long one took, key frames + encoding
+            "clips_written": len(p.timer.samples.get("clip", ())), "clip_write_ms_mean": round(p.timer.mean("clip"), 0),
+            "last_error": p.stats.last_error})
     ratios = [c["processed_ratio"] for c in per_channel]
     return {
         "channels": len(per_channel), "pass": judge(per_channel, min_ratio), "window_s": round(dt, 2),
@@ -237,6 +260,8 @@ def measure(agent: EdgeAgent, target_fps: float, measure_s: float, min_ratio: fl
         # process CPU: 100 = one core fully used; system CPU: 100 = all cores fully used
         "cpu_percent_process": round(cpu_process, 1), "cpu_percent_system": round(cpu_system, 1),
         "rss_mb": round(proc.memory_info().rss / (1 << 20), 1), "gpu": gpu.result,
+        "clips_written": sum(c["clips_written"] for c in per_channel),
+        "clip_write_ms_mean": round(float(np.mean([c["clip_write_ms_mean"] for c in per_channel if c["clips_written"]] or [0.0])), 0),
         # per analysed frame, averaged over the channels. infer includes waiting for the shared detector
         "stage_ms_mean": {s: round(float(np.mean([c["stage_ms_mean"][s] for c in per_channel])), 2) for s in STAGES},
         "per_channel": per_channel,
@@ -380,11 +405,13 @@ def main() -> int:
     run_dir = ROOT / "data" / "runs" / "gpu-channels" / time.strftime("%Y%m%d-%H%M%S")
     run_dir.mkdir(parents=True, exist_ok=True)
     git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
+    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], capture_output=True, text=True,
+                                cwd=ROOT).stdout.strip())  # tracked files changed since that commit
     out: dict = {
         "what": "channels of 30 fps video one analyser process keeps up with; a channel count passes when every "
                 "channel analysed >= min_processed_ratio of target_fps over the window",
-        "git": git, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "env": _env(), "plan": plan, "overrides": overrides,
-        "video": {"name": plan["video"], **info}, "sweeps": [], "isolation": None, "evidence_check": None}
+        "git": git, "git_dirty": dirty, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "env": _env(), "plan": plan,
+        "overrides": overrides, "video": {"name": plan["video"], **info}, "sweeps": [], "isolation": None, "evidence_check": None}
 
     def save() -> None:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
@@ -397,14 +424,17 @@ def main() -> int:
     d = plan["detector"]
     main_cfg = detector_dict(d["variant"], d["backend"], d.get("precision"))
     main_label = d["backend"] + (f"-{main_cfg['precision']}" if d["backend"] == "tensorrt" else "")
-    jobs = [("main", main_label, main_cfg, v["name"], v.get("pipeline") or {}, plan["channels"]) for v in plan["variants"]]
+    jobs = [("main", main_label, main_cfg, v["name"], v.get("pipeline") or {}, v.get("channels") or plan["channels"],
+             v.get("clip_encoder")) for v in plan["variants"]]
     ref = plan.get("cpu_reference")
     if ref and not args.skip_cpu_reference and d["backend"] != ref["backend"]:
-        jobs.append(("cpu_reference", ref["backend"], detector_dict(d["variant"], ref["backend"], None), "as-built", {}, ref["channels"]))
+        jobs.append(("cpu_reference", ref["backend"], detector_dict(d["variant"], ref["backend"], None), "as-built", {},
+                     ref["channels"], None))
     detectors: dict[str, PersonDetector] = {}
-    for role, label, det_cfg, variant, pipeline, channels in jobs:
+    for role, label, det_cfg, variant, pipeline, channels, encoder in jobs:
         entry: dict = {"role": role, "label": label, "variant": variant, "pipeline": pipeline, "detector_config": det_cfg}
-        print(f"[channels] {role}: {det_cfg['variant']} {label}, {variant} {pipeline or ''}, channel counts {channels}", flush=True)
+        print(f"[channels] {role}: {det_cfg['variant']} {label}, {variant} {pipeline or ''} {encoder or ''}, channel counts {channels}",
+              flush=True)
         try:
             if label not in detectors:
                 t0 = time.perf_counter()
@@ -412,7 +442,9 @@ def main() -> int:
                 entry["load_s"] = round(time.perf_counter() - t0, 1)
             det = detectors[label]
             entry["runtime"] = f"{det.backend.name} {det.backend.version}"
-            entry["rows"] = sweep(det, det_cfg, pipeline, plan, channels, info, run_dir, f"{label}-{variant}")
+            with clip_encoder(encoder) as used:
+                entry["clip_encoder"] = used
+                entry["rows"] = sweep(det, det_cfg, pipeline, plan, channels, info, run_dir, f"{label}-{variant}")
             entry["capacity_channels"], entry["first_failing_channels"] = capacity(entry["rows"])
             entry["largest_passing_channels"] = max((r["channels"] for r in entry["rows"] if r["pass"]), default=0)
             one = next((r for r in entry["rows"] if r["channels"] == 1), None)
@@ -445,17 +477,17 @@ def main() -> int:
         save()
 
     fps = plan["target_fps"]
-    print(f"\n{'path':16s} {'setting':12s} {'ch':>3s} {'':5s} {'slowest fps':>11s} {'dropped':>8s} {'lag p95':>8s} {'cpu %':>6s} {'gpu %':>6s}")
+    print(f"\n{'path':16s} {'setting':24s} {'ch':>3s} {'':5s} {'slowest fps':>11s} {'dropped':>8s} {'lag p95':>8s} {'cpu %':>6s} {'gpu %':>6s}")
     for s in out["sweeps"]:
         if s["status"] != "ok":
-            print(f"{s['label']:16s} {s['variant']:12s} FAILED: {s['error'][:100]}")
+            print(f"{s['label']:16s} {s['variant']:24s} FAILED: {s['error'][:100]}")
             continue
         for r in s["rows"]:
             gpu = f"{r['gpu']['util_percent_mean']:6.0f}" if r["gpu"] else f"{'-':>6s}"
-            print(f"{s['label']:16s} {s['variant']:12s} {r['channels']:3d} {'PASS' if r['pass'] else 'FAIL':5s} "
+            print(f"{s['label']:16s} {s['variant']:24s} {r['channels']:3d} {'PASS' if r['pass'] else 'FAIL':5s} "
                   f"{r['processed_ratio_min'] * fps:11.1f} {r['dropped_total']:8d} {r['lag_ms_p95_worst']:8.0f} "
                   f"{r['cpu_percent_system']:6.0f} {gpu}")
-        print(f"{s['label']:16s} {s['variant']:12s} -> holds {fps} fps on up to {s['capacity_channels']} channel(s)"
+        print(f"{s['label']:16s} {s['variant']:24s} -> holds {fps} fps on up to {s['capacity_channels']} channel(s)"
               + (f"; first failing count {s['first_failing_channels']}" if s["first_failing_channels"] else "; no failing count tested"))
     iso, evc = out["isolation"], out["evidence_check"]
     if iso:

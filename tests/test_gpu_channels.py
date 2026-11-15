@@ -140,14 +140,15 @@ def test_script_records_what_it_cannot_run_and_measures_the_cpu_reference(tmp_pa
     assert r.returncode == 0, r.stderr[-2000:]
     res = json.loads(out.read_text())
     assert res["overrides"] == {"channels": [1], "measure_s": 2.0, "warmup_s": 1.0}
-    assert [(s["role"], s["variant"]) for s in res["sweeps"]] == [("main", "as-built"), ("main", "ring-fps-10"),
-                                                                  ("cpu_reference", "as-built")]
-    cpu = res["sweeps"][2]
+    assert [(s["role"], s["variant"]) for s in res["sweeps"]] == [
+        ("main", "as-built"), ("main", "ring-fps-10"), ("main", "clip-encoder-as-in-run-1"), ("cpu_reference", "as-built")]
+    cpu = res["sweeps"][-1]
+    assert cpu["clip_encoder"] == {"nice": 10, "threads": 1}  # the product default; one plan variant runs it unrestrained
     assert cpu["status"] == "ok" and [row["channels"] for row in cpu["rows"]] == [1, 2]
     for row in cpu["rows"]:
         assert len(row["per_channel"]) == row["channels"] and row["processed_fps_total"] > 0
         assert row["pass"] == all(c["processed_ratio"] >= 0.98 for c in row["per_channel"])
-    for s in res["sweeps"][:2]:  # TensorRT: runs on a GPU machine, otherwise the reason is recorded
+    for s in res["sweeps"][:3]:  # TensorRT: runs on a GPU machine, otherwise the reason is recorded
         assert s["status"] in ("ok", "failed") and (s["status"] == "ok" or s["error"])
     if res["sweeps"][0]["status"] == "failed":
         assert res["isolation"]["status"] == res["evidence_check"]["status"] == "skipped"

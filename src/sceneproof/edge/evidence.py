@@ -10,6 +10,7 @@ is decoded twice. H.264 is used when libx264 is present (browser-playable); mpeg
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import threading
 import time
@@ -24,6 +25,28 @@ from .frames import FrameRing, RingEntry
 from .zones import Episode, ZoneSpec
 
 CONTEXT_OFFSET_S = 1.5
+
+# Encoding a clip takes a second or two of CPU. Analysis must not pay for it: on a small machine the encoder
+# competing for the same cores made the analyser fall behind and drop frames (docs/eval/gpu.md 3). So the encoder
+# runs one clip at a time for the whole process, on one thread, at low priority — the clip is ready a little later.
+CLIP_ENCODER_NICE = 10     # 0 = normal priority. Needs the POSIX `nice` command; without it priority is unchanged
+CLIP_ENCODER_THREADS = 1   # 0 = let the encoder use every core
+_CLIP_SLOT = threading.Semaphore(1)
+
+
+def clip_command(exe: str, codec: str, clip_fps: float, path: str | Path) -> list[str]:
+    """ffmpeg: JPEG frames on stdin -> a browser-playable clip (H.264 when available)."""
+    nice = shutil.which("nice") if CLIP_ENCODER_NICE else None
+    cmd = [nice, "-n", str(CLIP_ENCODER_NICE)] if nice else []
+    cmd += [exe, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-vcodec", "mjpeg",
+            "-framerate", f"{clip_fps}", "-i", "-", "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", codec]
+    if CLIP_ENCODER_THREADS:
+        cmd += ["-threads", str(CLIP_ENCODER_THREADS)]
+    if codec == "libx264":
+        cmd += ["-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p", "-movflags", "+faststart"]
+    else:
+        cmd += ["-q:v", "5"]
+    return [*cmd, str(path)]
 
 
 @dataclass
@@ -177,22 +200,20 @@ class EvidenceWriter:
             codec = "mjpeg"
         else:
             codec = self.codec
-            vf = "scale=trunc(iw/2)*2:trunc(ih/2)*2"
-            cmd = [exe, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-vcodec", "mjpeg",
-                   "-framerate", f"{self.clip_fps}", "-i", "-", "-vf", vf, "-c:v", codec]
-            if codec == "libx264":
-                cmd += ["-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p", "-movflags", "+faststart"]
-            else:
-                cmd += ["-q:v", "5"]
-            cmd.append(str(path))
-            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-            assert proc.stdin is not None
-            for e in picked:
-                proc.stdin.write(e.jpeg)
-            proc.stdin.close()
-            err = proc.stderr.read().decode(errors="ignore") if proc.stderr else ""
-            if proc.wait(timeout=120) != 0:
-                raise RuntimeError(f"ffmpeg failed: {err[-400:]}")
+            cmd = clip_command(exe, codec, self.clip_fps, path)
+            with _CLIP_SLOT:  # the frames are already picked above, so waiting here does not shorten the clip
+                proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+                try:
+                    assert proc.stdin is not None
+                    for e in picked:
+                        proc.stdin.write(e.jpeg)
+                    proc.stdin.close()
+                    err = proc.stderr.read().decode(errors="ignore") if proc.stderr else ""
+                    if proc.wait(timeout=300) != 0:
+                        raise RuntimeError(f"ffmpeg failed: {err[-400:]}")
+                except subprocess.TimeoutExpired:
+                    proc.kill()  # a starved low-priority encoder must not linger
+                    raise
         ms = (time.perf_counter() - t0) * 1e3
         meta = {"start_media_s": picked[0].media_s, "end_media_s": picked[-1].media_s, "fps": self.clip_fps,
                 "frames": len(picked), "codec": codec, "encode_ms": round(ms, 1)}

@@ -91,6 +91,13 @@ class CameraPipeline:
             self._threads.append(t)
         log.info("camera %s started: %s", self.cam.camera_id, self.source_uri)
 
+    def request_stop(self) -> None:
+        """Stop taking and analysing frames, without waiting. EdgeAgent.shutdown asks every camera first, so the
+        evidence still to be written is not written while other cameras keep the CPU busy."""
+        self._stop.set()
+        self.source.request_stop()
+        self.queue.close()
+
     def stop(self, reason: CloseReason = CloseReason.SHUTDOWN) -> None:
         self._stop.set()
         self.source.stop()

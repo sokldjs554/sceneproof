@@ -75,6 +75,9 @@ class VideoSource:
         self._thread = threading.Thread(target=self._run_guarded, name=f"source:{self.uri[:40]}", daemon=True)
         self._thread.start()
 
+    def request_stop(self) -> None:
+        self._stop.set()
+
     def stop(self, timeout: float = 5.0) -> None:
         self._stop.set()
         if self._thread:

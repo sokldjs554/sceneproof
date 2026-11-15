@@ -176,6 +176,8 @@ class EdgeAgent:
         with self._lock:
             ps = list(self.pipelines.values())
             self.pipelines.clear()
+        for p in ps:  # every camera stops analysing first; then each closes its events and writes what is pending
+            p.request_stop()
         for p in ps:
             p.stop(CloseReason.SHUTDOWN)
         self.sink.close()
