@@ -71,8 +71,11 @@ class CameraPipeline:
                                                rtsp_protocols=pc.rtsp_protocols, max_width=cam.max_width)
         self.timer = StageTimer()
         self.stats = PipelineStats()
+        self._ring_every_s = 1.0 / pc.ring_fps if pc.ring_fps > 0 else 0.0  # 0: keep every analysed frame
+        self._ring_next_s = float("-inf")
         self._evidence_state: dict[str, EvidenceState] = {}
         self._pending_final: list[tuple[Episode, float]] = []  # (episode, finalize_after_media_s)
+        self._finalizing = 0  # episodes the finalizer has taken and not finished writing yet
         self._final_cv = threading.Condition()
         self._stop = threading.Event()
         self._frame_wh = (0, 0)
@@ -103,6 +106,15 @@ class CameraPipeline:
             self._finalize_pending(force=True)
         log.info("camera %s stopped", self.cam.camera_id)
 
+    def _ring_due(self, media_s: float) -> bool:
+        """pipeline.ring_fps: keep at most that many evidence frames per second of video (0 = every frame). The due
+        times stay on a fixed grid, so a 25 fps camera capped at 10 keeps 10 per second on average, not every third."""
+        if media_s + 1e-6 < self._ring_next_s:
+            return False
+        step = self._ring_every_s
+        self._ring_next_s = media_s + step if self._ring_next_s + step < media_s else self._ring_next_s + step
+        return True
+
     def _last_meta(self) -> FrameMeta:
         return FrameMeta(self.stats.frames_processed, self.stats.media_time_s, time.time(), *self._frame_wh)
 
@@ -123,7 +135,9 @@ class CameraPipeline:
                 continue
             try:
                 t0 = time.perf_counter()
-                ring.append(frame)
+                kept = self._ring_due(frame.media_s)
+                if kept:
+                    ring.append(frame)
                 t1 = time.perf_counter()
                 d = det.detect(frame.image)
                 t2 = time.perf_counter()
@@ -132,6 +146,8 @@ class CameraPipeline:
                 self._frame_wh = (frame.width, frame.height)
                 meta = FrameMeta(frame.index, frame.media_s, frame.wall_ts, frame.width, frame.height)
                 transitions = mon.update(tracks, meta)
+                if transitions and not kept:
+                    ring.append(frame)  # an event opened / escalated / closed on this frame: its key frame is this picture
                 for ev in transitions:
                     self._on_transition(ev.transition, ev.episode)
                 t4 = time.perf_counter()
@@ -158,9 +174,22 @@ class CameraPipeline:
                 st.processed_fps = len(st._fps_window) / 2.0
                 with self._final_cv:
                     self._final_cv.notify_all()
+                if self.queue.lossless:
+                    self._wait_for_due_evidence()
             except Exception as e:
                 log.exception("frame %s failed", frame.index)
                 self.stats.last_error = str(e)[:200]
+
+    def _wait_for_due_evidence(self) -> None:
+        """Every-frame (offline) mode: let the finalizer write the clips that are due before analysing further.
+
+        Offline the analyser runs faster than the video, so by the time a clip is written the ring has already moved
+        on by however far the machine got — the clip's start then depends on the machine's speed. Waiting here keeps
+        the ring exactly where a real-time run has it at that moment, so offline evidence is reproducible."""
+        with self._final_cv:
+            while not self._stop.is_set() and (
+                    self._finalizing or any(t <= self.stats.media_time_s for _, t in self._pending_final)):
+                self._final_cv.wait(0.1)
 
     # ------------------------------------------------------------------ transitions
     def _on_transition(self, tr: Transition, ep: Episode) -> None:
@@ -202,6 +231,15 @@ class CameraPipeline:
         with self._final_cv:
             ready = [(ep, t) for ep, t in self._pending_final if force or self.stats.media_time_s >= t]
             self._pending_final = [(ep, t) for ep, t in self._pending_final if (ep, t) not in ready]
+            self._finalizing += len(ready)
+        try:
+            self._write_final_evidence(ready)
+        finally:
+            with self._final_cv:
+                self._finalizing -= len(ready)
+                self._final_cv.notify_all()
+
+    def _write_final_evidence(self, ready: list[tuple[Episode, float]]) -> None:
         for ep, _ in ready:
             ev = self._evidence_state.setdefault(ep.episode_id, EvidenceState())
             try:

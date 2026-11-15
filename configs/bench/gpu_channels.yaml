@@ -1,0 +1,40 @@
+# How many 30 fps camera channels one GPU keeps up with — measurement plan for scripts/gpu_channels.py.
+# Written on 2026-11-15, before the first GPU run. Anything overridden on the command line is recorded in the
+# result file as an override, so a result always says whether it followed this plan.
+target_fps: 30
+
+detector:                     # the path being measured
+  variant: yolox_tiny
+  backend: tensorrt
+  precision: fp16
+
+video: worker-zone            # 1280x720, 30 fps, 76 s. Every channel replays it in a loop with its zone (configs/edge.yaml)
+stagger_s: 2                  # cameras start this far apart, so they are at different points of the video
+
+channels: [1, 2, 3, 4, 5, 6, 8, 10, 12]
+warmup_s: 8                   # after the last camera started, before counting
+measure_s: 30
+
+pass:
+  # a channel count passes when EVERY channel analysed at least this share of target_fps * measure_s frames.
+  # Frames can be lost in two places: the decoder falls behind (fewer frames arrive), or the analyser falls behind
+  # and the bounded queue drops the oldest waiting frame. Both show up as fewer analysed frames.
+  min_processed_ratio: 0.98
+stop_after_failures: 2        # stop a sweep after this many failing channel counts in a row
+
+variants:                     # one sweep each, same detector
+  - name: as-built            # product defaults: every analysed frame is JPEG-encoded into the evidence ring
+    pipeline: {}
+  - name: ring-fps-10         # evidence frames kept at 10 per video second (clips are written at 10 fps anyway)
+    pipeline: {ring_fps: 10}
+
+cpu_reference:                # as-built with the product's default detector path (ONNX Runtime on the CPU)
+  backend: onnxruntime
+  channels: [1, 2]
+
+isolation:                    # cameras share one detector: the four evaluation videos analysed at the same time
+  videos: [campus-walkway, people-indoor, store-aisle, parking-lot]   # (every frame) must give the same events as one at a time
+
+evidence_check:               # what ring_fps changes in the evidence, on the two 30 fps sample videos (every frame)
+  videos: [worker-zone, store-aisle]
+  ring_fps: 10

@@ -35,6 +35,8 @@ pipeline:
   source_backend: auto         # auto | gstreamer | opencv
   queue_capacity: 4            # frames waiting for analysis; oldest dropped when full
   ring_seconds: 12             # pre-roll evidence memory (seconds)
+  ring_fps: 0                  # evidence frames kept per video second (0 = every analysed frame). Clips use clip_fps,
+                               # so e.g. 10 saves the JPEG encoding of 2 of 3 frames on a 30 fps camera (docs/eval/gpu.md)
   ring_max_mb: 128             # hard cap for the ring buffer
   ring_max_side: 960           # evidence frames are stored at most this wide/high
   pre_roll_s: 3

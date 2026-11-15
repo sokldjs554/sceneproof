@@ -8,6 +8,7 @@ pre/post-processing in one place (here, in numpy) is what makes the comparison f
 from __future__ import annotations
 
 import re
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -178,6 +179,11 @@ class TensorRTBackend:
     PyTorch is present wherever this is used here (Colab, Jetson images). An engine only runs on the GPU model and
     TensorRT version it was built with, so the cache file name carries both; the first run builds it (tens of
     seconds), later runs load it.
+
+    One analyser process shares this backend between all its cameras (EdgeAgent), and each camera calls ``run`` from
+    its own thread. There is one execution context and one input/output buffer pair, so ``run`` takes a lock: without
+    it one camera's frame could be overwritten by another's before the engine runs, and each would read the other's
+    detections. The GPU does one inference at a time either way.
     """
 
     def __init__(self, model_path: str | Path, precision: str = "fp16", engine_dir: str | Path | None = None,
@@ -228,6 +234,7 @@ class TensorRTBackend:
         self.input = next(iter(self.inputs.values()))
         self.output = next(iter(self.outputs.values()))
         self.stream = torch.cuda.Stream()
+        self._lock = threading.Lock()
         self.name = f"tensorrt-{precision}"
         self.version = trt.__version__
         self.precision = precision
@@ -237,13 +244,14 @@ class TensorRTBackend:
 
     def run(self, blob_nchw: np.ndarray) -> np.ndarray:
         torch = self._torch
-        with torch.cuda.stream(self.stream):
-            self.input.copy_(torch.from_numpy(np.ascontiguousarray(blob_nchw)).to(self.input.dtype))
-            if not self.context.execute_async_v3(self.stream.cuda_stream):
-                raise RuntimeError("TensorRT execute_async_v3 failed")
-            out = self.output.float()
-        self.stream.synchronize()
-        return out.cpu().numpy()[0]
+        with self._lock:  # shared buffers: copy in, execute and copy out must not interleave between cameras
+            with torch.cuda.stream(self.stream):
+                self.input.copy_(torch.from_numpy(np.ascontiguousarray(blob_nchw)).to(self.input.dtype))
+                if not self.context.execute_async_v3(self.stream.cuda_stream):
+                    raise RuntimeError("TensorRT execute_async_v3 failed")
+                out = self.output.float()
+            self.stream.synchronize()
+            return out.cpu().numpy()[0]
 
 
 def onnx_to_fp16(model_path: str | Path) -> bytes:

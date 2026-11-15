@@ -17,6 +17,7 @@ the gate makes the result equivalent for all but degenerate ties.
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass
 from enum import Enum
 
@@ -92,7 +93,10 @@ def xyah_to_xyxy(m: np.ndarray) -> np.ndarray:
 
 
 class STrack:
+    # one counter for every camera's tracker in the process: ids never repeat, and the lock keeps the increment
+    # atomic when several camera threads start tracks at the same moment
     _next_id = 0
+    _id_lock = threading.Lock()
 
     def __init__(self, xyxy: np.ndarray, score: float) -> None:
         self._det_xyxy = xyxy.astype(np.float32)
@@ -109,8 +113,9 @@ class STrack:
 
     @classmethod
     def next_id(cls) -> int:
-        cls._next_id += 1
-        return cls._next_id
+        with cls._id_lock:
+            cls._next_id += 1
+            return cls._next_id
 
     @classmethod
     def reset_ids(cls) -> None:

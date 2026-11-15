@@ -14,7 +14,7 @@ from sceneproof import __version__
 from sceneproof.proto.sceneproof.v1 import sceneproof_pb2 as pb
 
 from .config import CameraConfig, EdgeConfig
-from .detector import build_detector
+from .detector import PersonDetector, build_detector
 from .events import EventSink, GatewaySink, JsonlSink, ts
 from .pipeline import CameraPipeline, process_cpu_rss
 from .zone_proto import fill_pb, from_pb
@@ -32,11 +32,13 @@ def edge_version() -> str:
 
 
 class EdgeAgent:
-    def __init__(self, cfg: EdgeConfig, sink: EventSink | None = None, run_id: str | None = None) -> None:
+    def __init__(self, cfg: EdgeConfig, sink: EventSink | None = None, run_id: str | None = None,
+                 detector: PersonDetector | None = None) -> None:
         self.cfg = cfg
         self.run_id = run_id or f"run-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
         self.version = edge_version()
-        self.detector = build_detector(cfg.detector.model_dump())
+        # `detector`: an already built one (a benchmark that restarts the agent keeps one engine loaded)
+        self.detector = detector or build_detector(cfg.detector.model_dump())
         self.detector.warmup()
         self.sink = sink or GatewaySink(cfg.gateway)
         self.pipelines: dict[str, CameraPipeline] = {}

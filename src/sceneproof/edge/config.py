@@ -100,6 +100,9 @@ class PipelineConfig(BaseModel):
     source_backend: str = "auto"
     queue_capacity: int = 4
     ring_seconds: float = 12.0
+    # evidence frames kept per second of video; 0 = every analysed frame. Clips are written at clip_fps, so a camera
+    # faster than that pays JPEG encoding for frames no clip uses; only key frames get coarser (nearest kept frame).
+    ring_fps: float = Field(default=0.0, ge=0)
     ring_max_mb: int = 128
     ring_max_side: int = 960
     ring_jpeg_quality: int = 80
