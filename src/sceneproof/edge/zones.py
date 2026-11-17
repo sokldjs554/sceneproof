@@ -1,27 +1,3 @@
-"""Zone geometry and the per-track zone state machine.
-
-Why a state machine instead of "inside = event": a detector flickers at polygon edges, people
-step on the line, and the tracker loses boxes for a few frames behind pillars. Entry/exit are
-therefore *debounced* (N consecutive frames), dwell is measured on media time (not wall clock,
-so a slow analyser does not inflate it), and a lost track gets a grace period before its
-episode is closed. Every transition is explicit so tests can pin the behaviour.
-
-States per (track_id, zone_id):
-    OUTSIDE --inside xN--> INSIDE(episode) --outside xM--> OUTSIDE   (close: EXITED)
-    INSIDE --track missing > grace--> OUTSIDE                        (close: TRACK_LOST)
-    INSIDE --dwell >= T--> INSIDE (dwell escalated once)
-
-Two corrections for what the tracker and detector get wrong:
-  * rejoin: in a crowd the tracker often loses a person and starts a NEW track id for the same person a moment
-    later. While the old episode is still in its grace period, a track that first appeared after the loss, close
-    to where the person should be by now and of similar size, continues that episode instead of opening a second
-    one. Strict mode (default) does it only when the choice is unambiguous: exactly one visible person near the
-    expected spot, and that person is the new track, inside the zone. In a dense crowd a guess hands one person's
-    event to another (measured: more false alarms than the duplicates it removed), so no guess is made there.
-  * exclude: polygons inside a zone where a person-shaped object stands (mannequin, signboard). A box whose feet
-    are there cannot OPEN an episode; an already open episode is held (a real person walking past the spot is
-    neither cut nor closed).
-"""
 
 from __future__ import annotations
 
@@ -37,23 +13,24 @@ import numpy as np
 def point_in_polygon(x: float, y: float, poly: list[tuple[float, float]]) -> bool:
     """Ray casting (even-odd). Points exactly on an edge count as inside-ish; fine for our use."""
     inside = False
-    n = len(poly)
-    j = n - 1
-    for i in range(n):
-        xi, yi = poly[i]
-        xj, yj = poly[j]
-        if (yi > y) != (yj > y):
-            x_int = (xj - xi) * (y - yi) / ((yj - yi) or 1e-12) + xi
-            if x < x_int:
+    if not poly:
+        return inside
+    previous = poly[-1]
+    for current in poly:
+        x1, y1 = previous
+        x2, y2 = current
+        if (y1 > y) != (y2 > y):
+            crossing_x = x1 + (y - y1) * (x2 - x1) / (y2 - y1)
+            if crossing_x > x:
                 inside = not inside
-        j = i
+        previous = current
     return inside
 
 
 def anchor_point(xyxy: np.ndarray) -> tuple[float, float]:
     """Bottom-centre of the box = where the feet touch the ground. Using the box centre would
     flag a person whose upper body overlaps a zone drawn on the floor while standing outside it."""
-    return float((xyxy[0] + xyxy[2]) / 2), float(xyxy[3])
+    return (float((float(xyxy[0]) + float(xyxy[2])) / 2), float(xyxy[3]))
 
 
 @dataclass
