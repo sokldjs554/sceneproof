@@ -1,10 +1,3 @@
-"""Person detector: YOLOX pre/post-processing shared by the ONNX Runtime and PyTorch backends.
-
-The two backends must produce the same numbers for the same input; that property is
-what tests/test_detector_parity.py and eval/bench_detector.py check. Keeping
-pre/post-processing in one place (here, in numpy) is what makes the comparison fair.
-"""
-
 from __future__ import annotations
 
 import re
@@ -61,23 +54,21 @@ def decode_raw(raw: np.ndarray, grids: np.ndarray, strides: np.ndarray) -> np.nd
 
 def nms_xyxy(boxes: np.ndarray, scores: np.ndarray, iou_thresh: float) -> np.ndarray:
     """Greedy NMS; returns kept indices sorted by score desc."""
-    if boxes.shape[0] == 0:
-        return np.zeros(0, dtype=np.int64)
-    x1, y1, x2, y2 = boxes[:, 0], boxes[:, 1], boxes[:, 2], boxes[:, 3]
-    areas = (x2 - x1) * (y2 - y1)
-    order = scores.argsort()[::-1]
-    keep = []
-    while order.size > 0:
-        i = order[0]
-        keep.append(i)
-        xx1 = np.maximum(x1[i], x1[order[1:]])
-        yy1 = np.maximum(y1[i], y1[order[1:]])
-        xx2 = np.minimum(x2[i], x2[order[1:]])
-        yy2 = np.minimum(y2[i], y2[order[1:]])
-        inter = np.clip(xx2 - xx1, 0, None) * np.clip(yy2 - yy1, 0, None)
-        iou = inter / (areas[i] + areas[order[1:]] - inter + 1e-9)
-        order = order[1:][iou <= iou_thresh]
-    return np.asarray(keep, dtype=np.int64)
+    remaining = np.argsort(scores)[::-1]
+    kept = []
+    while len(remaining):
+        chosen = remaining[0]
+        kept.append(chosen)
+        rest = remaining[1:]
+        upper_left = np.maximum(boxes[chosen, :2], boxes[rest, :2])
+        lower_right = np.minimum(boxes[chosen, 2:], boxes[rest, 2:])
+        dimensions = np.maximum(lower_right - upper_left, 0)
+        intersection = dimensions[:, 0] * dimensions[:, 1]
+        chosen_wh = np.maximum(boxes[chosen, 2:] - boxes[chosen, :2], 0)
+        rest_wh = np.maximum(boxes[rest, 2:] - boxes[rest, :2], 0)
+        union = chosen_wh[0] * chosen_wh[1] + rest_wh[:, 0] * rest_wh[:, 1] - intersection
+        remaining = rest[intersection / (union + 1e-9) <= iou_thresh]
+    return np.asarray(kept, dtype=np.int64)
 
 
 def postprocess(

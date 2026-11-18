@@ -1,16 +1,3 @@
-"""Frame container, bounded latest-frame queue, and the evidence ring buffer.
-
-Two different buffers with two different policies on purpose:
-
-* ``FrameQueue`` sits between the decoder thread and the analyser thread. When input arrives
-  faster than the analyser can process, it **drops the oldest** waiting frame. For a live
-  camera the newest frame is the one that matters; letting the queue grow would only push the
-  analysis lag up without bound. Drops are counted and shown to the operator.
-* ``FrameRing`` keeps the last N seconds of frames as JPEG so that, when an episode opens or
-  closes, the pre-roll context is still available. It is bounded by **both** seconds and
-  bytes and never drops frames that an open episode will need (eviction only trims the past).
-"""
-
 from __future__ import annotations
 
 import threading
@@ -71,33 +58,27 @@ class FrameQueue:
         """Returns False if an older frame had to be dropped to make room (never in lossless mode)."""
         with self._cv:
             self.received += 1
-            if self.lossless:
-                while len(self._dq) >= self.capacity and not self._closed:
-                    self._cv.wait(0.5)
-                if self._closed:
-                    return False
-                self._dq.append(frame)
-                self._cv.notify_all()
-                return True
-            dropped = False
-            while len(self._dq) >= self.capacity:
+            while self.lossless and len(self._dq) >= self.capacity and not self._closed:
+                self._cv.wait()
+            if self._closed:
+                return False
+            dropped = len(self._dq) >= self.capacity
+            if dropped:
                 self._dq.popleft()
                 self.dropped += 1
-                dropped = True
             self._dq.append(frame)
             self._cv.notify_all()
             return not dropped
 
     def get(self, timeout: float | None = 0.5) -> Frame | None:
         with self._cv:
-            if not self._dq and not self._closed:
-                self._cv.wait(timeout)
+            self._cv.wait_for(lambda: bool(self._dq) or self._closed, timeout=timeout)
             if not self._dq:
                 return None
+            frame = self._dq.popleft()
             self.taken += 1
-            f = self._dq.popleft()
-            self._cv.notify_all()  # wake a blocked lossless producer
-            return f
+            self._cv.notify_all()
+            return frame
 
     def close(self) -> None:
         with self._cv:
@@ -183,25 +164,23 @@ class FrameRing:
         return e
 
     def _evict_locked(self, now_media_s: float) -> None:
-        floor = now_media_s - self.max_seconds
+        cutoff = now_media_s - self.max_seconds
         if self.pinned_from is not None:
-            floor = min(floor, self.pinned_from)
-        while self._dq and self._dq[0].media_s < floor:
+            cutoff = min(cutoff, self.pinned_from)
+        while self._dq and self._dq[0].media_s < cutoff:
             self._bytes -= len(self._dq.popleft().jpeg)
             self.evicted_by_time += 1
-        while self._dq and self._bytes > self.max_bytes:  # hard cap wins over the pin
+        while self._dq and self._bytes > self.max_bytes:
             self._bytes -= len(self._dq.popleft().jpeg)
             self.evicted_by_bytes += 1
 
     def slice(self, start_media_s: float, end_media_s: float) -> list[RingEntry]:
         with self._lock:
-            return [e for e in self._dq if start_media_s <= e.media_s <= end_media_s]
+            return [entry for entry in self._dq if start_media_s <= entry.media_s <= end_media_s]
 
     def nearest(self, media_s: float) -> RingEntry | None:
         with self._lock:
-            if not self._dq:
-                return None
-            return min(self._dq, key=lambda e: abs(e.media_s - media_s))
+            return min(self._dq, key=lambda entry: (abs(entry.media_s - media_s), entry.media_s), default=None)
 
     def stats(self) -> RingStats:
         with self._lock:
