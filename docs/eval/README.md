@@ -100,6 +100,35 @@
 | yolox_s | 1 | torch_vs_onnxruntime | 150 | 0 | 869 | 0 | 0.0 | 0.0 |
 | yolox_s | 1 | onnxruntime_vs_noopt | 150 | 0 | 869 | 0 | 0.0 | 0.0 |
 
+### 다시 측정 (2026-11-18, 커밋 `5268581`)
+
+같은 명령을 다시 돌린 기록입니다(`raw/bench_detector_20261118.json`). CPU 모델, vCPU 수, 라이브러리 버전, 입력은 처음 측정과 같고 장비(컨테이너)는 다릅니다. 절대 시간은 장비에 따라 달라지므로, 같은 실행 안의 PyTorch 대 ONNX Runtime 비를 함께 봅니다.
+
+| 모델 | 스레드 | 설정 | infer p50 처음 (ms) | infer p50 다시 (ms) | 후처리 p50 처음 → 다시 (ms) |
+|---|---|---|---|---|---|
+| yolox_nano | 4 | onnxruntime | 8.6 | 8.0 | 0.84 → 0.92 |
+| yolox_nano | 4 | onnxruntime-noopt | 18.1 | 15.0 | 0.95 → 0.97 |
+| yolox_nano | 4 | torch | 26.8 | 26.1 | 1.19 → 1.05 |
+| yolox_nano | 1 | onnxruntime | 12.7 | 13.5 | 0.78 → 0.90 |
+| yolox_nano | 1 | onnxruntime-noopt | 26.7 | 25.5 | 0.88 → 1.01 |
+| yolox_nano | 1 | torch | 40.0 | 36.7 | 0.99 → 1.00 |
+| yolox_tiny | 4 | onnxruntime | 21.6 | 17.6 | 0.85 → 0.92 |
+| yolox_tiny | 4 | onnxruntime-noopt | 32.1 | 27.2 | 0.92 → 0.99 |
+| yolox_tiny | 4 | torch | 44.6 | 37.9 | 1.25 → 1.02 |
+| yolox_tiny | 1 | onnxruntime | 57.0 | 52.4 | 0.98 → 1.12 |
+| yolox_tiny | 1 | onnxruntime-noopt | 75.3 | 73.7 | 1.07 → 1.14 |
+| yolox_tiny | 1 | torch | 90.8 | 85.2 | 1.05 → 0.98 |
+| yolox_s | 4 | onnxruntime | 69.8 | 60.6 | 2.33 → 2.33 |
+| yolox_s | 4 | onnxruntime-noopt | 100.3 | 88.3 | 2.31 → 2.30 |
+| yolox_s | 4 | torch | 123.3 | 99.6 | 2.24 → 2.08 |
+| yolox_s | 1 | onnxruntime | 210.3 | 195.2 | 2.18 → 2.16 |
+| yolox_s | 1 | onnxruntime-noopt | 306.2 | 281.2 | 2.23 → 2.17 |
+| yolox_s | 1 | torch | 316.1 | 310.6 | 2.50 → 2.38 |
+
+PyTorch ÷ ONNX Runtime (infer p50, 처음 → 다시): yolox_nano 스레드 4: 3.12배 → 3.24배, yolox_nano 스레드 1: 3.14배 → 2.71배, yolox_tiny 스레드 4: 2.07배 → 2.15배, yolox_tiny 스레드 1: 1.59배 → 1.63배, yolox_s 스레드 4: 1.77배 → 1.64배, yolox_s 스레드 1: 1.50배 → 1.59배.
+
+변환 전후 출력 일치: 비교 12건 모두에서 상자 수가 다른 프레임 0개, 비매칭 상자 0개, 최대 좌표 차 0.0px.
+
 ## 3. 스트림 수 증가 — 한 분석기 프로세스, RTSP 시뮬레이터 입력
 
 yolox_tiny, intra-op 4스레드, 4 vCPU, 각 설정 40초 관측(워밍업 8초 제외). 입력은 샘플 영상의 실제 fps(10–30).

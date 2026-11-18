@@ -60,6 +60,41 @@ def event_section() -> str:
     return "\n".join(out)
 
 
+def bench_remeasure_lines(base: dict) -> list[str]:
+    """Later runs of the same benchmark (raw/bench_detector_<date>.json) next to the first one."""
+    out: list[str] = []
+    key = lambda r: (r["variant"], r["threads"], r["setting"])  # noqa: E731
+    med = lambda r, k: float(np.median([x["stages_ms"][k]["p50"] for x in r["runs"]]))  # noqa: E731
+    first = {key(r): r for r in base["results"] if r["setting"] != "parity"}
+    for path in sorted(RAW.glob("bench_detector_*.json")):
+        d = json.loads(path.read_text())
+        env, prov = d["env"], d.get("provenance", {})
+        again = {key(r): r for r in d["results"] if r["setting"] != "parity"}
+        same_setup = all(env[k] == base["env"][k] for k in ("cpu_model", "cpu_count", "python", "torch", "onnxruntime", "video", "frames", "repeats"))
+        out += [f"### 다시 측정 ({env['time'][:10]}" + (f", 커밋 `{prov['source_commit']}`" if prov.get("source_commit") else "") + ")", "",
+                f"같은 명령을 다시 돌린 기록입니다(`raw/{path.name}`). " +
+                ("CPU 모델, vCPU 수, 라이브러리 버전, 입력은 처음 측정과 같고 장비(컨테이너)는 다릅니다. " if same_setup else "측정 환경이 처음과 다릅니다. ") +
+                "절대 시간은 장비에 따라 달라지므로, 같은 실행 안의 PyTorch 대 ONNX Runtime 비를 함께 봅니다.", "",
+                "| 모델 | 스레드 | 설정 | infer p50 처음 (ms) | infer p50 다시 (ms) | 후처리 p50 처음 → 다시 (ms) |", "|---|---|---|---|---|---|"]
+        for k, r in again.items():
+            if k in first:
+                out.append(f"| {k[0]} | {k[1]} | {k[2]} | {med(first[k], 'infer'):.1f} | {med(r, 'infer'):.1f} | "
+                           f"{med(first[k], 'postprocess'):.2f} → {med(r, 'postprocess'):.2f} |")
+        ratios = []
+        for (variant, threads, setting), r in again.items():
+            t, o = (variant, threads, "torch"), (variant, threads, "onnxruntime")
+            if setting == "torch" and o in again and t in first and o in first:
+                ratios.append(f"{variant} 스레드 {threads}: {med(first[t], 'infer') / med(first[o], 'infer'):.2f}배 → {med(r, 'infer') / med(again[o], 'infer'):.2f}배")
+        if ratios:
+            out += ["", "PyTorch ÷ ONNX Runtime (infer p50, 처음 → 다시): " + ", ".join(ratios) + "."]
+        par = [p for r in d["results"] if r["setting"] == "parity" for p in r["parity"].values()]
+        if par:
+            out += ["", f"변환 전후 출력 일치: 비교 {len(par)}건 모두에서 상자 수가 다른 프레임 {sum(p['frames_with_count_diff'] for p in par)}개, "
+                        f"비매칭 상자 {sum(p['unmatched_boxes'] for p in par)}개, 최대 좌표 차 {max(p['max_box_delta_px'] for p in par)}px."]
+        out.append("")
+    return out
+
+
 def bench_section() -> str:
     d = load("bench_detector.json")
     if not d:
@@ -89,6 +124,7 @@ def bench_section() -> str:
         for k, p in r["parity"].items():
             out.append(f"| {r['variant']} | {r['threads']} | {k} | {p['frames']} | {p['frames_with_count_diff']} | {p['matched_boxes']} | {p['unmatched_boxes']} | {p['max_box_delta_px']} | {p['max_score_delta']} |")
     out.append("")
+    out += bench_remeasure_lines(d)
     return "\n".join(out)
 
 
