@@ -40,7 +40,9 @@
     "s-coco",
     "tiny-ft"
    ],
-   "reason": "regression check at 5268581 after eight core functions (point_in_polygon, anchor_point, nms_xyxy, FrameQueue.put/get, FrameRing._evict_locked/slice/nearest) were re-implemented by hand in PR #3; same candidates, zones, split and settings; nothing was tuned on this split; note added while the run was in progress: zones.yaml has a different hash than in run 2 only because zones for other sites and an exclude area (used only by +exclude candidates) were added later; the polygons of the test sequences are unchanged. Tracker, zone and matching code also changed between run 2 (83fdad3) and this commit, so a difference from run 2 would not be attributable to PR #3 alone"
+   "reason": "regression check at 5268581 after eight core functions (point_in_polygon, anchor_point, nms_xyxy, FrameQueue.put/get, FrameRing._evict_locked/slice/nearest) were re-implemented by hand in PR #3; same candidates, zones, split and settings; nothing was tuned on this split; note added while the run was in progress: zones.yaml has a different hash than in run 2 only because zones for other sites and an exclude area (used only by +exclude candidates) were added later; the polygons of the test sequences are unchanged. Tracker, zone and matching code also changed between run 2 (83fdad3) and this commit, so a difference from run 2 would not be attributable to PR #3 alone",
+   "completed": "2026-11-18T09:40:32",
+   "result_file": "docs/eval/bench/raw/bench_test_final_run3.json"
   }
  ]
 }

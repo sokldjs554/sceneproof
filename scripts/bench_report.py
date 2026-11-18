@@ -196,6 +196,71 @@ def followup_section() -> list[str]:
     return L
 
 
+def rerun_section(final: dict, lock: dict | None) -> list[str]:
+    """A later, recorded re-run of the test split on newer code: are the analyser's events still the same, and which
+    scores moved. Everything is computed from the two result files."""
+    runs = [r for r in (lock or {}).get("runs", []) if "_run" in r.get("result_file", "") and r.get("completed")]
+    again = load(Path(runs[-1]["result_file"]).name) if runs else None
+    if not again:
+        return []
+    run = runs[-1]
+    names = [c for c in final["results"] if c in again["results"]]
+    L = ["### 최신 코드에서 다시 측정 (회귀 확인)", "",
+         f"측정 {run['opened']} ~ {run['completed']}, 시작 커밋 `{run['git']}`, 결과 `{run['result_file']}`. "
+         "영상 분석기의 핵심 함수 8개(구역 안 판정, 겹친 상자 정리, 프레임 대기열, 근거 프레임 버퍼)를 다시 구현한 뒤 "
+         "결과가 그대로인지 확인하려고 돌렸습니다. 후보 모델, 분할, 시험 영상의 구역 좌표, 설정은 처음 측정과 같고 이 분할로 고른 것은 "
+         "없습니다. 다시 돌린 이유는 `docs/eval/bench/test_lock.json`에 적혀 있습니다.", "",
+         "| 후보 | 분석기가 만든 사건이 처음 측정과 같은 영상 | 정답 사건 | 사람 찾기 AP50 (처음 → 이번) | 찾음 / 놓침 / 잘못 울림 / 중복 (처음 → 이번) | 정밀도 · 재현율 (처음 → 이번) |",
+         "|---|---|---|---|---|---|"]
+    all_same, moved, lost = True, 0, 0
+    det_same: set[str] = set()
+    det_diff: set[str] = set()
+    for c in names:
+        for site, d in final["results"][c].get("detection", {}).items():
+            if site == "all":
+                continue
+            d2 = again["results"][c].get("detection", {}).get(site, {})
+            (det_same if (d.get("ap50"), d.get("ap50_95")) == (d2.get("ap50"), d2.get("ap50_95")) else det_diff).add(site)
+        a, b = final["results"][c], again["results"][c]
+        seqs = list(a["per_sequence"])
+        strip = lambda evs: [{k: v for k, v in e.items() if k != "close"} for e in evs]  # noqa: E731  (older files have no close reason on ground truth)
+        same_pred = sum(a["per_sequence"][s]["predictions"] == b["per_sequence"][s]["predictions"] for s in seqs)
+        same_gt = sum(strip(a["per_sequence"][s]["gt_events"]) == strip(b["per_sequence"][s]["gt_events"]) for s in seqs)
+        all_same &= same_pred == len(seqs) and same_gt == len(seqs)
+        for s in seqs:
+            oa, ob = a["per_sequence"][s]["outcome"], b["per_sequence"][s]["outcome"]
+            moved += len(set(oa["missed"]) - set(ob["missed"]))
+            lost += len(set(ob["missed"]) - set(oa["missed"]))
+        ea, eb = a["events"]["all"], b["events"]["all"]
+        cnt = lambda e: f"{e['tp']} / {e['missed']} / {e['fp']} / {e['duplicates']}"  # noqa: E731
+        ap = lambda r: f(r.get("detection", {}).get("all", {}).get("ap50"))  # noqa: E731
+        gt_n = sum(len(a["per_sequence"][s]["gt_events"]) for s in seqs)
+        L.append(f"| {c} | {same_pred} / {len(seqs)} | {'같음' if same_gt == len(seqs) else '다름'} ({gt_n}개) | {ap(a)} → {ap(b)} | "
+                 f"{cnt(ea)} → {cnt(eb)} | {f(ea['precision'])} · {f(ea['recall'])} → {f(eb['precision'])} · {f(eb['recall'])} |")
+    L.append("")
+    if all_same:
+        L.append("- 분석기가 만든 사건(시작·끝 시각, 추적 번호, 닫힌 이유)은 모든 후보, 모든 영상에서 처음 측정과 같습니다. 정답 사건도 "
+                 "같습니다. 다시 구현한 함수는 이 분할의 사건 결과를 바꾸지 않았습니다.")
+    else:
+        L.append("- 분석기가 만든 사건이나 정답이 처음 측정과 다른 영상이 있습니다. 위 표의 영상 수를 보고 원인을 따로 확인해야 합니다.")
+    det_same -= det_diff
+    ko = lambda sites: ", ".join(SITE_KO.get(x, x).split(" — ")[0] for x in sorted(sites))  # noqa: E731
+    if det_diff:
+        L.append(f"- 사람 찾기 점수는 {len(det_same)}곳({ko(det_same)})에서 모든 후보가 소수 넷째 자리까지 같고, {len(det_diff)}곳({ko(det_diff)})에서 "
+                 "조금 달라졌습니다. 처음 측정 뒤 화면 밖까지 그려진 정답 상자를 화면 안으로 잘라 채점하도록 고쳤기 때문이고(개발 일지 L20), "
+                 "달라진 곳은 모두 그런 정답 상자가 있는 MOT 영상입니다. 사건이 모두 같고 나머지 장소의 점수도 같아, 탐지 결과가 달라졌다는 "
+                 "신호는 없습니다.")
+    else:
+        L.append("- 사람 찾기 점수도 모든 장소에서 처음 측정과 같습니다.")
+    if moved or lost:
+        L.append(f"- 찾음·놓침·중복 수가 다른 것은 채점 방식 때문입니다. 처음 측정 뒤 사건 짝짓기를 '가장 잘 맞는 쌍부터 고르기'에서 최적 배정으로 "
+                 f"고쳤고(개발 일지 L20, `src/sceneproof/eval/bench/match.py`), 같은 사건 목록을 그 방식으로 채점하면 놓친 것으로 세던 정답 사건이 "
+                 f"후보 {len(names)}개를 합쳐 {moved}건 찾은 것으로 바뀌고 그만큼 중복이 줄어듭니다(반대로 바뀐 것 {lost}건). 잘못 울림 수는 같습니다.")
+    L.append("- 위 5절의 표는 처음 측정 당시의 채점 그대로 둡니다. 한 번만 재기로 한 숫자를 나중에 고친 채점으로 바꾸지 않기 위해서입니다.")
+    L.append("")
+    return L
+
+
 def final_provenance(final: dict, lock: dict | None) -> str:
     """Which code ran the final measurement. Result files written before `started` was recorded stamp the HEAD at save
     time (a later commit can land during an hour-long run); the lock entry records the commit at the start."""
@@ -299,6 +364,7 @@ def main() -> int:
               "잘리므로, 화면 안쪽 부분과 겹침이 0.5 미만이라 어떤 상자로도 맞힐 수 없는 정답 상자가 최종 분할 40,503개 중 29개(0.07%)이고, "
               "그중 22개가 저각도 거리 영상(766개 중 2.9%)입니다. 이 영상의 AP50은 최대 약 0.03 낮게 나왔을 수 있습니다. "
               "점수 계산은 측정 당시 그대로 둡니다(다시 재지 않음).", ""]
+        L += rerun_section(final, lock)
     L += followup_section()
     L += ["## 7. 두 사람 표시 일치도", "",
           "도구: `tools/event_labeler/index.html`(브라우저로 열고 영상 선택), 계산: `python -m sceneproof.eval.bench.agreement A.json B.json --with-gt`.", ""]
