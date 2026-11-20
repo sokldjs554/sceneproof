@@ -11,6 +11,8 @@
 #     Pass rule, video, channel counts, window and the two original variants are unchanged.
 #   run 2 (2026-11-15, Colab T4, this file as it is): docs/eval/raw/gpu_channels_t4_run2.json.
 #     as-built holds 1 channel, ring-fps-10 holds 2, clip-encoder-as-in-run-1 holds 0.
+#   run 3 (2026-11-20, Colab T4, this file as it is, code 081d8ac after PR #3 re-implemented eight core functions):
+#     docs/eval/raw/gpu_channels_t4_run3.json. Same outcome: as-built 1, ring-fps-10 2, clip-encoder-as-in-run-1 0.
 target_fps: 30
 
 detector:                     # the path being measured
