@@ -8,6 +8,7 @@ even when A and C do not directly overlap.
 
 import time
 from collections import defaultdict
+from math import isnan
 
 
 def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float = 0.0) -> dict[str, dict]:
@@ -43,16 +44,26 @@ def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float
         wall_end = max(now, wall_start) if wall_end_value is None else float(wall_end_value)
         spans.append((media_start, media_end, wall_start, wall_end))
         zone_key = (event.get("camera_id"), event.get("zone_id"))
-        for j in by_zone[zone_key]:
-            other_media_start, other_media_end, other_wall_start, other_wall_end = spans[j]
-            if gap_s == 0:
-                media_match = media_start < other_media_end and other_media_start < media_end
-            else:
-                media_match = media_start - other_media_end <= gap_s and other_media_start - media_end <= gap_s
-            if (media_match and wall_start - other_wall_end <= gap_s
-                    and other_wall_start - wall_end <= gap_s):
-                parents[find(i)] = find(j)
-        by_zone[zone_key].append(i)
+        if not isnan(media_start):
+            by_zone[zone_key].append(i)
+
+    for indices in by_zone.values():
+        indices.sort(key=lambda i: spans[i][0])
+        active = []
+        for i in indices:
+            media_start, media_end, wall_start, wall_end = spans[i]
+            # Later starts cannot reach an expired end, even for a reversed interval.
+            active = [j for j in active if not (media_start - spans[j][1] > gap_s)]
+            for j in active:
+                other_media_start, other_media_end, other_wall_start, other_wall_end = spans[j]
+                if gap_s == 0:
+                    media_match = media_start < other_media_end and other_media_start < media_end
+                else:
+                    media_match = media_start - other_media_end <= gap_s and other_media_start - media_end <= gap_s
+                if (media_match and wall_start - other_wall_end <= gap_s
+                        and other_wall_start - wall_end <= gap_s):
+                    parents[find(i)] = find(j)
+            active.append(i)
 
     components = {}
     for i, event in enumerate(events):
