@@ -135,7 +135,7 @@ def build_router(app_state: Any) -> APIRouter:
     def list_events(camera_id: str | None = None, state: str | None = None, kind: str | None = None,
                     device_id: str | None = None, since: float | None = None, until: float | None = None,
                     limit: int = Query(200, le=2000), offset: int = 0, concurrent_only: bool = False,
-                    group_gap_s: float = Query(0.0, ge=0)):
+                    group_gap_s: float = Query(0.0, ge=0, le=60)):
         groups = group_index.groups(gap_s=group_gap_s)
         if concurrent_only:
             rows = store.list_events(camera_id, state, kind, since, until, -1, 0, device_id)

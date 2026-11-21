@@ -158,8 +158,12 @@ const API_STATIC = {
   displayed: async () => ({ ok: true, static: true }),   // silent no-op: one toast per rendered row would be noise
   review: staticWrite, explain: staticWrite, command: staticWrite, commandStatus: staticWrite,
 };
+function eventsApiPath(gapSeconds) {
+  const path = '/api/events?limit=500';
+  return gapSeconds > 0 ? `${path}&group_gap_s=${encodeURIComponent(gapSeconds)}` : path;
+}
 function liveEvents() {
-  return api(`/api/events?limit=500&group_gap_s=${encodeURIComponent(state.filters.gapSeconds)}`);
+  return api(eventsApiPath(state.filters.gapSeconds));
 }
 const API_LIVE = {
   status: () => api('/api/status'),
@@ -217,11 +221,14 @@ function currentEvent() {
 const hasFullDetail = (ev) => !!(ev && state.detail && state.detail.event_id === ev.event_id);
 
 function parseGapSeconds(value) {
+  if (value == null) return 0;
+  if (typeof value === 'number') return value >= 0 && value <= 60 ? value : null;
   if (typeof value !== 'string') return null;
   const text = value.trim();
+  if (text === '') return 0;
   if (!/^(?:\d+|\d*\.\d+)$/.test(text)) return null;
   const seconds = Number(text);
-  return Number.isFinite(seconds) ? seconds : null;
+  return seconds <= 60 ? seconds : null;
 }
 
 function filterEvents(events, f) {
@@ -1222,12 +1229,14 @@ function setFilter(key, value) {
 }
 function changeGroupGap(event) {
   const input = event.target;
-  const seconds = parseGapSeconds(input.value);
+  const seconds = input.validity?.badInput ? null : parseGapSeconds(input.value);
   if (seconds === null) {
+    input.setAttribute('aria-invalid', 'true');
     input.value = String(state.filters.gapSeconds);
-    toast('시간 여유는 0 이상의 숫자로 입력하세요. 예: 1.5', 'err');
+    toast('시간 여유는 0~60초 사이의 숫자로 입력하세요.', 'err');
     return;
   }
+  input.removeAttribute('aria-invalid');
   if (seconds === state.filters.gapSeconds) return;
   state.filters.gapSeconds = seconds;
   poll();
