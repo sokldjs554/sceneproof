@@ -25,8 +25,8 @@ jobs:
           pip install -e ".[server,dev,gst]" onnx
       - name: Lint
         run: ruff check src tests scripts
-      - name: Console labels
-        run: node --test tests/test_console_labels.cjs
+      - name: Console unit tests
+        run: node --test tests/test_console_labels.cjs tests/test_console_grouping.cjs
       - name: Fetch models (nano+tiny) and sample videos
         run: |
           VARIANTS="yolox_nano yolox_tiny" bash scripts/fetch_models.sh

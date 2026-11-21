@@ -291,7 +291,10 @@ pre.raw { background: #16202c; color: #d6e0ea; font-family: var(--mono); font-si
 .counts .chip.on { outline: 2px solid currentColor; }
 .filters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
 .filters select, .filters input { padding: 4px 6px; border: 1px solid var(--border-strong); border-radius: 4px; background: #fff; font-size: 12px; min-width: 0; }
-.filters input { grid-column: 1 / -1; }
+.filters input[type="search"], .group-filters { grid-column: 1 / -1; }
+.group-filters, .group-filters label { display: flex; align-items: center; gap: 4px; }
+.group-filters { flex-wrap: wrap; justify-content: space-between; }
+.group-filters input[type="number"] { width: 5em; }
 .col-right > .event-list { flex: 1 1 auto; min-height: 0; overflow: auto; outline: none; }
 .ev-row { padding: 7px 10px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; flex-direction: column; gap: 3px; border-left: 3px solid transparent; }
 .ev-row:hover { background: var(--panel-2); }

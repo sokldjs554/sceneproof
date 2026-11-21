@@ -105,6 +105,10 @@ class Store:
             self._conn.close()
 
     # ------------------------------------------------------------------ events
+    def events_version(self) -> int:
+        """Return the number of committed event inserts and revision updates since tracking began."""
+        return int(self.get_meta("events_version") or 0)
+
     def upsert_event(self, ev: dict[str, Any], ingest_source: str = "live") -> tuple[bool, bool, int]:
         """Returns (accepted, duplicate, stored_revision). ``ev`` is the protobuf JSON dict."""
         now = time.time()
@@ -137,6 +141,8 @@ class Store:
             have = {r["path"] for r in c.execute("SELECT path FROM evidence_files WHERE event_id=?", (eid,))}
             ready = 1 if paths and all(p in have for p in paths) else 0
             c.execute("UPDATE events SET evidence_ready=? WHERE event_id=?", (ready, eid))
+            c.execute("INSERT INTO meta(key, value) VALUES ('events_version', 1) "
+                      "ON CONFLICT(key) DO UPDATE SET value = meta.value + 1")
         return True, False, rev
 
     def get_event(self, event_id: str) -> dict | None:
