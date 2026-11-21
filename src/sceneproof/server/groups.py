@@ -9,6 +9,11 @@ even when A and C do not directly overlap.
 import time
 from collections import defaultdict
 from math import isnan
+from threading import Lock
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .db import Store
 
 
 def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float = 0.0) -> dict[str, dict]:
@@ -79,3 +84,27 @@ def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float
         for event_id in ids:
             result[event_id] = group
     return result
+
+
+class GroupIndex:
+    """Cache group membership for each gap at the current event version."""
+
+    def __init__(self, store: "Store") -> None:
+        self._store = store
+        self._lock = Lock()
+        self._version: int | None = None
+        self._by_gap: dict[float, dict[str, dict]] = {}
+
+    def groups(self, gap_s: float = 0.0) -> dict[str, dict]:
+        """Return shared group metadata. Callers should treat it as read-only."""
+        if gap_s < 0:
+            raise ValueError("gap_s must be non-negative")
+        with self._lock:
+            version = self._store.events_version()
+            if version != self._version:
+                self._by_gap.clear()
+                self._version = version
+            if gap_s not in self._by_gap:
+                events = self._store.list_events(limit=-1)
+                self._by_gap[gap_s] = concurrent_groups(events, gap_s=gap_s)
+            return self._by_gap[gap_s]
