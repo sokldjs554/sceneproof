@@ -158,9 +158,16 @@ const API_STATIC = {
   displayed: async () => ({ ok: true, static: true }),   // silent no-op: one toast per rendered row would be noise
   review: staticWrite, explain: staticWrite, command: staticWrite, commandStatus: staticWrite,
 };
+function eventsApiPath(gapSeconds) {
+  const path = '/api/events?limit=500';
+  return gapSeconds > 0 ? `${path}&group_gap_s=${encodeURIComponent(gapSeconds)}` : path;
+}
+function liveEvents() {
+  return api(eventsApiPath(state.filters.gapSeconds));
+}
 const API_LIVE = {
   status: () => api('/api/status'),
-  events: () => api('/api/events?limit=500'),
+  events: liveEvents,
   event: (id) => api(`/api/events/${encodeURIComponent(id)}`),
   review: (id, body) => api(`/api/events/${encodeURIComponent(id)}/review`, { method: 'POST', body }),
   explain: (id) => api(`/api/events/${encodeURIComponent(id)}/explain`, { method: 'POST' }),
@@ -179,7 +186,7 @@ const state = {
   status: null, events: [], eventsById: new Map(), counts: {},
   loaded: false, serverDown: false, lastError: '', lastOk: null,
   videos: new Set(), videosLoaded: false,
-  filters: { camera: '', state: '', kind: '', q: '' },
+  filters: { camera: '', state: '', kind: '', q: '', grouped: false, gapSeconds: 0 },
   selectedId: null, detail: null, detailSig: null, detailLoading: null, detailError: null,
   tab: 'cv', annot: true, frameRole: 'entry', engOpen: false,
   videoMode: 'clip',      // user preference: 'clip' | 'original'
@@ -213,13 +220,26 @@ function currentEvent() {
 }
 const hasFullDetail = (ev) => !!(ev && state.detail && state.detail.event_id === ev.event_id);
 
-function filteredEvents() {
-  const f = state.filters; const q = f.q.trim().toLowerCase();
-  return state.events.filter((e) => (!f.camera || e.camera_id === f.camera)
-    && (!f.state || e.review.state === f.state)
+function parseGapSeconds(value) {
+  if (value == null) return 0;
+  if (typeof value === 'number') return value >= 0 && value <= 60 ? value : null;
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  if (text === '') return 0;
+  if (!/^(?:\d+|\d*\.\d+)$/.test(text)) return null;
+  const seconds = Number(text);
+  return seconds <= 60 ? seconds : null;
+}
+
+function filterEvents(events, f) {
+  const q = (f.q || '').trim().toLowerCase();
+  return events.filter((e) => (!f.camera || e.camera_id === f.camera)
+    && (!f.state || e.review?.state === f.state)
     && (!f.kind || e.kind === f.kind)
+    && (!f.grouped || e.concurrent?.size > 1)
     && (!q || (e.zone_name || '').toLowerCase().includes(q) || e.event_id.toLowerCase().includes(q) || (e.camera_name || '').toLowerCase().includes(q)));
 }
+function filteredEvents() { return filterEvents(state.events, state.filters); }
 /** Group of events that were inside the same zone at the same time (server: groups.py), from the list data. */
 function groupOf(id) { const e = state.eventsById.get(id); const g = e && e.concurrent; return g && g.size > 1 ? g : null; }
 const groupMembers = (g) => g.event_ids.map((id) => state.eventsById.get(id)).filter(Boolean);
@@ -265,10 +285,13 @@ const frameCount = (ev) => ((ev.evidence && ev.evidence.key_frames) || []).filte
 
 // ---------------------------------------------------------------- 5. polling
 let pollTimer = null;
+let pollSequence = 0;
 async function poll() {
   clearTimeout(pollTimer);
+  const sequence = ++pollSequence;
   try {
     const [status, events] = await Promise.all([API.status(), API.events()]);
+    if (sequence !== pollSequence) return;
     const wasDown = state.serverDown;
     state.status = status;
     applyEvents(events);
@@ -286,6 +309,7 @@ async function poll() {
     if (state.auditOpen) refreshAudit();
     if (wasDown) toast('서버 연결이 복구되었습니다', 'ok');
   } catch (e) {
+    if (sequence !== pollSequence) return;
     state.serverDown = true; state.lastError = e.message || String(e);
     renderBanner(); renderTopbar();
   }
@@ -1137,7 +1161,8 @@ function followDemoGuide(step) {
   if (step === 'event') {
     const candidates = state.events.filter((ev) => ev.evidence && ev.evidence.clip_available && ev.explanation && ev.explanation.status === 'done');
     const ev = candidates.find((item) => item.review.state === 'resolved') || candidates[0] || state.events[0];
-    state.filters = { camera: '', state: '', kind: '', q: '' };
+    Object.assign(state.filters, { camera: '', state: '', kind: '', q: '', grouped: false });
+    for (const key of ['camera', 'state', 'kind', 'q', 'grouped']) syncFilterControl(key);
     renderFilters();
     state.tab = 'cv'; state.stageMode = 'clip';
     selectEvent(ev.event_id, { seek: true, play: true, scroll: true });
@@ -1192,11 +1217,29 @@ function setVideoMode(m) {
   if (state.selectedId) state.pendingSeek = { id: state.selectedId, play: true };
   renderStage(); renderSelHeader(); renderTimeline();
 }
+function syncFilterControl(key) {
+  const input = $('#f-' + key);
+  if (key === 'grouped') input.checked = state.filters.grouped;
+  else input.value = state.filters[key];
+}
 function setFilter(key, value) {
   state.filters[key] = value;
-  const map = { camera: '#f-camera', state: '#f-state', kind: '#f-kind', q: '#f-q' };
-  if ($(map[key]).value !== value) $(map[key]).value = value;
+  syncFilterControl(key);
   renderList(); renderCameras(); updateExportLinks(); refreshTimeline();
+}
+function changeGroupGap(event) {
+  const input = event.target;
+  const seconds = input.validity?.badInput ? null : parseGapSeconds(input.value);
+  if (seconds === null) {
+    input.setAttribute('aria-invalid', 'true');
+    input.value = String(state.filters.gapSeconds);
+    toast('시간 여유는 0~60초 사이의 숫자로 입력하세요.', 'err');
+    return;
+  }
+  input.removeAttribute('aria-invalid');
+  if (seconds === state.filters.gapSeconds) return;
+  state.filters.gapSeconds = seconds;
+  poll();
 }
 function toggleCameraFilter(cameraId) { setFilter('camera', state.filters.camera === cameraId ? '' : cameraId); }
 
@@ -1325,6 +1368,14 @@ function init() {
   $('#f-state').addEventListener('change', (e) => setFilter('state', e.target.value));
   $('#f-kind').addEventListener('change', (e) => setFilter('kind', e.target.value));
   $('#f-q').addEventListener('input', (e) => setFilter('q', e.target.value));
+  $('#f-grouped').addEventListener('change', function (e) { setFilter('grouped', e.target.checked); });
+  const gapInput = $('#f-gap');
+  if (IS_STATIC) {
+    gapInput.disabled = true;
+    gapInput.title = '정적 재생은 파일에 저장된 묶음을 표시하므로 시간 여유를 바꿀 수 없습니다.';
+  } else {
+    gapInput.addEventListener('change', changeGroupGap);
+  }
   $('#retry').addEventListener('click', () => { $('#banner-detail').textContent = '(재시도 중…)'; poll(); });
   $('#audit-toggle').addEventListener('click', () => toggleAudit());
   $('#audit-close').addEventListener('click', () => toggleAudit(false));

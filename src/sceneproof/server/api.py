@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sceneproof import __version__
 
 from .db import Store
-from .groups import concurrent_groups
+from .groups import GroupIndex
 
 REVIEW_STATES = ("needs_review", "in_review", "resolved")
 ALLOWED_TRANSITIONS = {
@@ -105,6 +105,7 @@ def _camera_name(devices: dict[str, dict], device_id: str | None, camera_id: str
 def build_router(app_state: Any) -> APIRouter:
     r = APIRouter(prefix="/api")
     store: Store = app_state.store
+    group_index = GroupIndex(store)
     s = app_state.settings
 
     def devices_view() -> dict[str, dict]:
@@ -133,10 +134,10 @@ def build_router(app_state: Any) -> APIRouter:
     @r.get("/events")
     def list_events(camera_id: str | None = None, state: str | None = None, kind: str | None = None,
                     device_id: str | None = None, since: float | None = None, until: float | None = None,
-                    limit: int = Query(200, le=2000), offset: int = 0, concurrent_only: bool = False):
+                    limit: int = Query(200, le=2000), offset: int = 0, concurrent_only: bool = False,
+                    group_gap_s: float = Query(0.0, ge=0, le=60)):
+        groups = group_index.groups(gap_s=group_gap_s)
         if concurrent_only:
-            # Calculate groups before applying review-state filters or page boundaries.
-            groups = concurrent_groups(store.list_events(limit=-1))
             rows = store.list_events(camera_id, state, kind, since, until, -1, 0, device_id)
             rows = [row for row in rows if row["event_id"] in groups]
             start = max(offset, 0)
@@ -146,9 +147,6 @@ def build_router(app_state: Any) -> APIRouter:
         expl = store.latest_explanation_map([x["event_id"] for x in rows])
         devs = devices_view()
         items = [_event_view(store, x, expl.get(x["event_id"]), devs) for x in rows]
-        # The default retains existing page-scoped grouping; concurrent_only uses all events above.
-        if not concurrent_only:
-            groups = concurrent_groups(items)
         for it in items:
             it["concurrent"] = groups.get(it["event_id"])
         for it in items:  # list view: keep payload small

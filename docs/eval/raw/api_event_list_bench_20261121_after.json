@@ -1,0 +1,42 @@
+{
+ "what": "GET /api/events timed in-process (TestClient) on synthetic closed events; median of repeats",
+ "git": "08f5599",
+ "time": "2026-11-21T03:20:51",
+ "python": "3.13.18",
+ "cpu_count": 4,
+ "events": 5000,
+ "cameras": 5,
+ "media_span_s": 36000.0,
+ "page_limit": 500,
+ "repeats": 5,
+ "seed": 1,
+ "default": {
+  "median_ms": 50.5,
+  "min_ms": 48.9,
+  "max_ms": 131.2,
+  "items": 500,
+  "items_with_group_info": 204
+ },
+ "concurrent_only": {
+  "median_ms": 106.7,
+  "min_ms": 105.1,
+  "max_ms": 107.2,
+  "items": 500
+ },
+ "slowdown_x": 2.1,
+ "group_info_default_vs_concurrent_only": {
+  "why": "default groups among the rows it returns; concurrent_only groups over all events before filtering and paging",
+  "no_filter": {
+   "compared_events": 833,
+   "different": 0,
+   "no_group_info_in_default": 0
+  },
+  "state_needs_review_filter": {
+   "compared_events": 837,
+   "different": 0,
+   "no_group_info_in_default": 0,
+   "events_moved_to_in_review": 1505,
+   "in_review_share": 0.3
+  }
+ }
+}

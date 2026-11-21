@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SceneProof 관제 콘솔</title>
-  <link rel="stylesheet" href="styles.css?v=20261116">
+  <link rel="stylesheet" href="styles.css?v=20261120">
 </head>
 <body>
   <header class="topbar">
@@ -102,6 +102,10 @@
             <option value="EVENT_KIND_ZONE_DWELL">체류</option>
           </select>
           <input id="f-q" type="search" placeholder="구역 이름 / 사건 ID 검색" aria-label="검색">
+          <div class="group-filters">
+            <label><input id="f-grouped" type="checkbox"> 묶인 사건만</label>
+            <label>시간 여유(초) <input id="f-gap" type="number" min="0" max="60" step="any" value="0"></label>
+          </div>
         </div>
       </div>
       <div id="event-list" class="event-list" role="listbox" aria-label="사건 목록" tabindex="0">
@@ -122,6 +126,6 @@
   </div>
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
-  <script src="app.js?v=20261116"></script>
+  <script src="app.js?v=20261120"></script>
 </body>
 </html>

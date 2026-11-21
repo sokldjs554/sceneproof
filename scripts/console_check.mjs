@@ -40,6 +40,42 @@ const consoleErrors = [];
 const check = (cond, msg) => { if (cond) console.log(`  ok   ${msg}`); else { console.log(`  FAIL ${msg}`); failures.push(msg); } };
 const shot = async (page, name) => { const p = join(OUT, name); await page.screenshot({ path: p }); console.log(`  shot ${p}`); };
 
+/** The "grouped only" filter and the grouping gap (task I). Leaves both controls as it found them.
+ *  The counts rely on the demo bundle: 3 of its 15 events are grouped, 5 with a 2 s gap. */
+async function checkGrouping(page, isStatic) {
+  console.log('\n[G] grouped-only filter / grouping gap');
+  const all = await page.locator('.ev-row').count();
+  const grouped = page.locator('#f-grouped');
+  check((await grouped.count()) === 1, '"묶인 사건만" filter exists');
+  await grouped.check();
+  await page.waitForFunction((n) => document.querySelectorAll('.ev-row').length < n, all, { timeout: 5000 }).catch(() => {});
+  const inGroups = await page.locator('.ev-row').count();
+  check(inGroups > 0 && inGroups < all, `"묶인 사건만" lists fewer events (${inGroups} of ${all})`);
+  check(await page.locator('.ev-row').evaluateAll((rows) => rows.every((r) => r.closest('.ev-group'))), 'every listed row belongs to a group');
+  await grouped.uncheck();
+  await page.waitForFunction((n) => document.querySelectorAll('.ev-row').length === n, all, { timeout: 5000 }).catch(() => {});
+  check((await page.locator('.ev-row').count()) === all, 'unchecking restores the full list');
+  const gap = page.locator('#f-gap');
+  check((await gap.count()) === 1, 'grouping-gap box exists');
+  if (isStatic) { check(await gap.isDisabled(), 'grouping-gap box is disabled in static mode'); return; }
+  check(await gap.isEnabled(), 'grouping-gap box is enabled when a server answers');
+  const asked = page.waitForRequest((r) => r.url().includes('/api/events') && r.url().includes('group_gap_s=2'), { timeout: 8000 }).then(() => true, () => false);
+  await gap.fill('2'); await gap.dispatchEvent('change');
+  check(await asked, 'changing the gap to 2 asks the server with group_gap_s=2');
+  await grouped.check();
+  await page.waitForFunction((n) => document.querySelectorAll('.ev-row').length > n, inGroups, { timeout: 8000 }).catch(() => {});
+  const wider = await page.locator('.ev-row').count();
+  check(wider > inGroups, `a 2 s gap groups more events (${inGroups} -> ${wider})`);
+  await gap.fill('99'); await gap.dispatchEvent('change');
+  check((await gap.getAttribute('aria-invalid')) === 'true', 'a value above 60 is marked invalid');
+  await grouped.uncheck();
+  const reset = page.waitForRequest((r) => r.url().includes('/api/events') && !r.url().includes('group_gap_s'), { timeout: 8000 }).then(() => true, () => false);
+  await gap.fill('0'); await gap.dispatchEvent('change');
+  check(await reset, 'setting the gap back to 0 asks without group_gap_s');
+  check((await gap.getAttribute('aria-invalid')) === null, 'a valid value clears the invalid mark');
+  await page.waitForFunction((n) => document.querySelectorAll('.ev-row').length === n, all, { timeout: 5000 }).catch(() => {});
+}
+
 async function runLiveFlow(page) {
 
   const first = page.locator('.ev-row').first();
@@ -194,6 +230,7 @@ try {
   await page.waitForTimeout(700);
   await shot(page, STATIC_URL ? 'static_00_loaded.png' : '01_overview.png');
 
+  await checkGrouping(page, !!STATIC_URL);
   if (STATIC_URL) await runStatic(page); else await runLiveFlow(page);
 } catch (e) {
   failures.push(`exception: ${e.message}`);
