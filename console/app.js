@@ -10,13 +10,13 @@
 const L = {
   review: { needs_review: '확인 필요', in_review: '검토 중', resolved: '처리 완료' },
   resolution: { confirmed: '침입 확인', dismissed: '잘못된 알림', escalated: '상위 보고', no_action: '조치 불필요' },
-  kind: { EVENT_KIND_ZONE_ENTRY: '진입', EVENT_KIND_ZONE_DWELL: '체류' },
+  kind: { EVENT_KIND_ZONE_ENTRY: '진입', EVENT_KIND_ZONE_DWELL: '머무름' },
   closeReason: { CLOSE_REASON_EXITED: '구역 이탈', CLOSE_REASON_TRACK_LOST: '추적 끊김', CLOSE_REASON_STREAM_ENDED: '영상 종료', CLOSE_REASON_SHUTDOWN: '분석 중지' },
   camState: { CAMERA_STATE_CONNECTING: '연결 중', CAMERA_STATE_STREAMING: '분석 중', CAMERA_STATE_RECONNECTING: '재연결 중', CAMERA_STATE_ENDED: '영상 종료', CAMERA_STATE_STOPPED: '정지', CAMERA_STATE_ERROR: '오류', CAMERA_STATE_UNSPECIFIED: '알 수 없음' },
   assessment: { needs_attention: '확인 필요', likely_benign: '정상 가능성 높음', unclear: '판단 어려움' },
   zoneRelation: { clearly_inside: '구역 안', near_boundary: '경계 부근', outside: '구역 밖', unclear: '불명확' },
   vlmStatus: { queued: '대기', running: '실행 중', done: '완료', failed: '실패', invalid: '형식 오류', timeout: '시간 초과', skipped: '건너뜀' },
-  frameRole: { context_before: '진입 전', entry: '진입', dwell: '체류', exit: '이탈', context_after: '이탈 후' },
+  frameRole: { context_before: '진입 전', entry: '진입', dwell: '머무름', exit: '이탈', context_after: '이탈 후' },
   eventStatus: { EVENT_STATUS_OPEN: '진행 중', EVENT_STATUS_CLOSED: '종료됨' },
 };
 const ROLES = ['context_before', 'entry', 'dwell', 'exit', 'context_after'];
@@ -555,7 +555,7 @@ function buildRow(ev) {
     h('span', { class: 'ev-media', title: '원본 영상 기준 시간' }, `영상 ${fmtMedia(ev.media_entry_s)}`),
     h('span', { class: `kind-badge ${kindClass(ev.kind)}` }, kindLabel(ev.kind)),
     ev.ingest_source === 'replay' && !IS_STATIC ? h('span', { class: 'tag tag-replay', title: '저장된 실행 결과에서 재생된 사건' }, '재생') : null,
-    h('span', { class: 'ev-dwell' }, `체류 ${fmtSec(ev.dwell_seconds)}`)));
+    h('span', { class: 'ev-dwell' }, `머문 시간 ${fmtSec(ev.dwell_seconds)}`)));
   row.append(h('div', { class: 'ev-l2' }, h('span', { class: 'ev-cam' }, ev.camera_name || ev.camera_id), h('span', { class: 'ev-zone' }, ev.zone_name || ev.zone_id)));
   const retry = !IS_STATIC && (vs == null || RETRYABLE.includes(vs));
   // Public demo: every stored event is "needs review / VLM done / evidence ready", so those three labels would repeat on
@@ -660,7 +660,7 @@ function renderSelHeader() {
       rv.state === 'resolved' && rv.resolution ? h('span', { class: 'chip chip-lg' }, L.resolution[rv.resolution] || rv.resolution) : null),
     h('div', { class: 'sel-sub' },
       `${fmtDateTime(ev.entry_ts)} 진입 (영상 ${fmtMedia(ev.media_entry_s)}) → ${ev.exit_ts ? fmtClock(ev.exit_ts) : '—'} 이탈 (영상 ${fmtMedia(ev.media_exit_s)})`
-      + ` · 체류 ${fmtSec(ev.dwell_seconds)} · ${L.closeReason[ev.close_reason] || '종료 사유 없음'} · 트랙 #${ev.track_id ?? '—'}`),
+      + ` · 머문 시간 ${fmtSec(ev.dwell_seconds)} · ${L.closeReason[ev.close_reason] || '종료 사유 없음'} · 트랙 #${ev.track_id ?? '—'}`),
     h('div', { class: 'sel-flow' },
       h('span', { class: `flow-step ${state.stageMode === 'frames' ? 'warn' : 'ok'}` },
         '영상: ' + (state.stageMode === 'original' ? '원본 영상' : state.stageMode === 'clip' ? '근거 클립' : '클립 대기 · 프레임만')),
@@ -834,7 +834,7 @@ function renderTimeline() {
   head.dataset.sig = '';
   head.replaceChildren(h('span', null, '타임라인'), h('b', null, camName), h('span', { class: 'muted' }, `사건 ${tl.items.length}건 · 영상 시간(분:초) 기준 · 막대를 클릭하면 선택·이동`),
     h('div', { class: 'tl-legend' }, leg('rs-needs_review', '확인 필요'), leg('rs-in_review', '검토 중'), leg('rs-resolved', '처리 완료'),
-      h('span', null, h('i', { style: 'background:#9aa5b1;background-image:repeating-linear-gradient(135deg, rgba(255,255,255,.5) 0 2px, transparent 2px 4px)' }), '빗금 = 체류')));
+      h('span', null, h('i', { style: 'background:#9aa5b1;background-image:repeating-linear-gradient(135deg, rgba(255,255,255,.5) 0 2px, transparent 2px 4px)' }), '빗금 = 머무름')));
   // Overlapping events (two tracks in the zone at once) go to separate lanes so no bar hides another.
   const laneEnd = []; const laneOf = new Map();
   for (const it of tl.items.slice().sort((a, b) => num(a.media_entry_s) - num(b.media_entry_s))) {
@@ -853,7 +853,7 @@ function renderTimeline() {
   for (const it of tl.items) {
     const l = (num(it.media_entry_s) / domain) * 100;
     const w = Math.max(0.4, ((num(it.media_exit_s ?? it.media_entry_s) - num(it.media_entry_s)) / domain) * 100);
-    const tip = `${kindLabel(it.kind)} · ${fmtMedia(it.media_entry_s, true)}–${fmtMedia(it.media_exit_s, true)} · 체류 ${fmtSec(it.dwell_seconds)} · ${L.review[it.review_state] || it.review_state}`;
+    const tip = `${kindLabel(it.kind)} · ${fmtMedia(it.media_entry_s, true)}–${fmtMedia(it.media_exit_s, true)} · 머문 시간 ${fmtSec(it.dwell_seconds)} · ${L.review[it.review_state] || it.review_state}`;
     track.append(h('div', { class: `tl-bar rs-${it.review_state}${it.kind === 'EVENT_KIND_ZONE_DWELL' ? ' kind-dwell-bar' : ''}${it.event_id === state.selectedId ? ' selected' : ''}`,
       style: `left:${l}%;width:${w}%;top:${8 + laneOf.get(it.event_id) * (barH + barGap)}px;height:${barH}px`, role: 'button', tabindex: '0', 'aria-label': tip, dataset: { id: it.event_id },
       onclick: () => selectEvent(it.event_id, { seek: true, play: true, scroll: true }),
@@ -941,7 +941,7 @@ function buildCvTab(ev) {
     dt('트랙 ID'), dd(`#${ev.track_id ?? '—'}`),
     dt('진입'), dd(`${fmtDateTime(ev.entry_ts)} · 영상 ${fmtMedia(ev.media_entry_s, true)}`),
     dt('이탈'), dd(ev.exit_ts ? `${fmtDateTime(ev.exit_ts)} · 영상 ${fmtMedia(ev.media_exit_s, true)}` : '— (진행 중)'),
-    dt('체류 시간'), dd(fmtSec(ev.dwell_seconds)),
+    dt('머문 시간'), dd(fmtSec(ev.dwell_seconds)),
     dt('종료 사유'), dd(L.closeReason[ev.close_reason] || ev.close_reason || '—'),
     dt('근거 상태'), dd(ev.evidence_ready
       ? `✓ 수신 완료 · 프레임 ${frameCount(ev)}장 · ${ev.evidence.clip_available ? '클립 있음' : '클립 없음'}`
@@ -1203,8 +1203,8 @@ function followDemoGuide(step) {
     $('#detail').scrollIntoView({ block: 'nearest' });
   }
   const hints = {
-    event: '선택한 사건의 진입·체류 구간을 영상에서 확인하세요. 다른 사건도 오른쪽 목록에서 고를 수 있습니다.',
-    cv: '진입 전·진입·체류·이탈 장면과 구역 경계를 대조하세요. 상자 표시를 켜거나 원본 영상으로 확인할 수 있습니다.',
+    event: '선택한 사건의 진입·머문 구간을 영상에서 확인하세요. 다른 사건도 오른쪽 목록에서 고를 수 있습니다.',
+    cv: '진입 전·진입·머무름·이탈 장면과 구역 경계를 대조하세요. 상자 표시를 켜거나 원본 영상으로 확인할 수 있습니다.',
     vlm: '모델이 관찰한 내용과 판단의 한계를 근거 장면과 비교하세요. 저장된 설명이며 새로 생성하지 않습니다.',
     review: '저장된 검토 상태와 처리 이력을 확인하세요. 공개 데모에서는 상태를 변경하지 않습니다.',
   };
