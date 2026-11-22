@@ -331,15 +331,42 @@ pre.raw { background: #16202c; color: #d6e0ea; font-family: var(--mono); font-si
 .toast.ok { background: var(--green); }
 
 /* ---------- responsive ---------- */
-.demo-guide { flex: none; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px 24px; flex-wrap: wrap; }
-.demo-guide-intro { display: flex; flex-direction: column; gap: 2px; }
+.demo-guide { flex: none; padding: 7px 16px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px 18px; flex-wrap: wrap; }
+.demo-guide-intro { display: flex; align-items: baseline; gap: 8px; }
 .demo-guide-intro strong { font-size: 14px; }
 .demo-guide-intro span, #demo-guide-hint { color: var(--muted); font-size: 12px; }
 .demo-guide-steps { display: flex; flex-wrap: wrap; gap: 6px; }
-#demo-guide-hint { flex-basis: 100%; margin: 0; }
+#demo-guide-hint { flex: 1 1 260px; margin: 0; }
 .demo-guide .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* ---------- public demo (static replay): a calmer first screen ----------
+   Only presentation changes, and only under body.demo. The live console keeps the three columns and every label. */
+.stage-row { display: flex; gap: 8px; align-items: stretch; }
+.stage-row > .stage-wrap { flex: 1 1 auto; min-width: 0; }
+.vlm-brief { flex: 0 0 320px; min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; overflow: auto; }
+.vlm-brief h2 { margin: 0; }
+.vlm-brief .vlm-summary { margin: 0; font-size: 13.5px; }
+.vlm-brief .vlm-sec { margin-top: 0; }
+.vlm-brief .btn { align-self: flex-start; }
+.vlm-brief .note { margin-top: auto; }
+.brief-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; }
+.demo .layout { grid-template-columns: minmax(0, 1fr) 380px; }
+.demo .col-left { display: none; }
+.demo.show-sys .layout { grid-template-columns: 280px minmax(0, 1fr) 380px; }
+.demo.show-sys .col-left { display: flex; }
+.demo .sel-flow, .demo .sel-line .tag-replay, .demo #gap-label { display: none; }
+.demo .filters input[type="search"] { grid-column: 1 / span 2; }
+.demo .group-filters { grid-column: 3; justify-content: flex-start; }
+.demo .ev-row { padding: 8px 10px; gap: 2px; }
 @media (max-width: 1240px) {
   .layout { grid-template-columns: 260px minmax(0, 1fr) 340px; }
+  .demo .layout { grid-template-columns: minmax(0, 1fr) 340px; }
+  .demo.show-sys .layout { grid-template-columns: 240px minmax(0, 1fr) 340px; }
+  .vlm-brief { flex-basis: 280px; }
+}
+@media (max-width: 1080px) {
+  .stage-row { flex-direction: column; }
+  .vlm-brief { flex-basis: auto; }
 }
 @media (max-width: 900px) {
   body { height: auto; overflow: auto; }
