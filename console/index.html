@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SceneProof 관제 콘솔</title>
-  <link rel="stylesheet" href="styles.css?v=20261122">
+  <link rel="stylesheet" href="styles.css?v=20261122b">
 </head>
 <body>
   <header class="topbar">
@@ -102,9 +102,9 @@
             <option value="resolved">처리 완료</option>
           </select>
           <select id="f-kind" aria-label="사건 종류 필터">
-            <option value="">진입+체류</option>
+            <option value="">진입+머무름</option>
             <option value="EVENT_KIND_ZONE_ENTRY">진입</option>
-            <option value="EVENT_KIND_ZONE_DWELL">체류</option>
+            <option value="EVENT_KIND_ZONE_DWELL">머무름</option>
           </select>
           <input id="f-q" type="search" placeholder="구역 이름 / 사건 ID 검색" aria-label="검색">
           <div class="group-filters">
@@ -131,6 +131,6 @@
   </div>
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
-  <script src="app.js?v=20261122"></script>
+  <script src="app.js?v=20261122b"></script>
 </body>
 </html>
