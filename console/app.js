@@ -361,14 +361,14 @@ function renderTopbar() {
   const c = state.counts || {};
   const upd = state.lastOk ? fmtClock(state.lastOk / 1000) : '—';
   const sig = JSON.stringify([c, st && st.version, state.serverDown, upd]);
-  renderIfChanged($('#top-stats'), sig, () => [
+  renderIfChanged($('#top-stats'), sig, () => (IS_STATIC ? [h('span', null, '저장된 사건 ', h('b', null, c.total ?? 0), '건')] : [
     h('span', null, '사건 ', h('b', null, c.total ?? 0)), h('span', { class: 'sep' }, '·'),
     h('span', null, '확인 필요 ', h('b', null, c.needs_review ?? 0)), h('span', { class: 'sep' }, '·'),
     h('span', null, '검토 중 ', h('b', null, c.in_review ?? 0)), h('span', { class: 'sep' }, '·'),
     h('span', null, '처리 완료 ', h('b', null, c.resolved ?? 0)), h('span', { class: 'sep' }, '·'),
     h('span', { title: '마지막으로 서버 응답을 받은 시각' }, state.serverDown ? '⚠ 갱신 중단' : `갱신 ${upd}`),
     st && st.version ? [h('span', { class: 'sep' }, '·'), h('span', null, `서버 v${st.version}`)] : null,
-  ]);
+  ]));
 }
 function renderBanner() {
   $('#banner').classList.toggle('hidden', !state.serverDown);
@@ -554,18 +554,22 @@ function buildRow(ev) {
     h('span', { class: 'ev-time', title: fmtDateTime(ev.entry_ts) }, fmtClock(ev.entry_ts)),
     h('span', { class: 'ev-media', title: '원본 영상 기준 시간' }, `영상 ${fmtMedia(ev.media_entry_s)}`),
     h('span', { class: `kind-badge ${kindClass(ev.kind)}` }, kindLabel(ev.kind)),
-    ev.ingest_source === 'replay' ? h('span', { class: 'tag tag-replay', title: '저장된 실행 결과에서 재생된 사건' }, '재생') : null,
+    ev.ingest_source === 'replay' && !IS_STATIC ? h('span', { class: 'tag tag-replay', title: '저장된 실행 결과에서 재생된 사건' }, '재생') : null,
     h('span', { class: 'ev-dwell' }, `체류 ${fmtSec(ev.dwell_seconds)}`)));
   row.append(h('div', { class: 'ev-l2' }, h('span', { class: 'ev-cam' }, ev.camera_name || ev.camera_id), h('span', { class: 'ev-zone' }, ev.zone_name || ev.zone_id)));
   const retry = !IS_STATIC && (vs == null || RETRYABLE.includes(vs));
-  row.append(h('div', { class: 'ev-l3' },
-    h('span', { class: `chip st-${ev.review.state}` }, `● ${L.review[ev.review.state] || ev.review.state}`),
-    h('span', { class: `chip vlm-chip vlm-${vs || 'none'}`, title: x ? `VLM ${L.vlmStatus[vs] || vs}${x.error ? ': ' + x.error : ''}` : '해석이 요청되지 않았습니다' },
+  // Public demo: every stored event is "needs review / VLM done / evidence ready", so those three labels would repeat on
+  // all rows. They are shown there only when an event differs from that; the live console always shows them.
+  const labels = [
+    !IS_STATIC || ev.review.state !== 'needs_review' ? h('span', { class: `chip st-${ev.review.state}` }, `● ${L.review[ev.review.state] || ev.review.state}`) : null,
+    !IS_STATIC || vs !== 'done' ? h('span', { class: `chip vlm-chip vlm-${vs || 'none'}`, title: x ? `VLM ${L.vlmStatus[vs] || vs}${x.error ? ': ' + x.error : ''}` : '해석이 요청되지 않았습니다' },
       `VLM ${vs ? L.vlmStatus[vs] || vs : '미요청'}`,
       retry ? h('button', { class: 'mini-btn', type: 'button', title: '다시 해석 요청', 'aria-label': '다시 해석 요청',
-        onclick: (e) => { e.stopPropagation(); requestExplain(ev.event_id); } }, '↻') : null),
-    h('span', { class: `ev-evid${ev.evidence_ready ? '' : ' no'}`, title: ev.evidence_ready ? '근거(프레임/클립) 수신 완료' : '근거 업로드 대기 중' },
-      ev.evidence_ready ? '▣ 근거 준비됨' : '▢ 근거 대기')));
+        onclick: (e) => { e.stopPropagation(); requestExplain(ev.event_id); } }, '↻') : null) : null,
+    !IS_STATIC || !ev.evidence_ready ? h('span', { class: `ev-evid${ev.evidence_ready ? '' : ' no'}`, title: ev.evidence_ready ? '근거(프레임/클립) 수신 완료' : '근거 업로드 대기 중' },
+      ev.evidence_ready ? '▣ 근거 준비됨' : '▢ 근거 대기') : null,
+  ].filter(Boolean);
+  if (labels.length) row.append(h('div', { class: 'ev-l3' }, ...labels));
   if (!state.displayed.has(ev.event_id)) {
     state.displayed.add(ev.event_id);
     API.displayed(ev.event_id).catch(() => {});
@@ -878,8 +882,34 @@ function updatePlayhead() {
 }
 
 // ---- detail panel (tabs)
+/** Public demo only: the stored VLM explanation of the selected event next to the video. The full version stays in the VLM tab. */
+function renderVlmBrief(ev) {
+  const root = $('#vlm-brief'); root.classList.remove('hidden');
+  if (!ev) {
+    renderIfChanged(root, 'none', () => [h('h2', null, 'VLM 설명'), h('p', { class: 'muted' }, '사건을 선택하면 저장된 설명이 여기에 표시됩니다.')]);
+    return;
+  }
+  const x = ev.explanation; const vs = x ? x.status : null; const r = x && x.result;
+  renderIfChanged(root, JSON.stringify([ev.event_id, vs, x && x.id]), () => {
+    const more = h('button', { class: 'btn btn-sm', type: 'button', title: 'VLM 설명 탭을 엽니다',
+      onclick: () => { setTab('vlm'); $('#detail').scrollIntoView({ block: 'nearest' }); } }, '관찰 · 근거 전체 보기');
+    if (vs !== 'done' || !r) return [h('h2', null, 'VLM 설명'), h('p', { class: 'muted' }, x ? `저장된 설명 상태: ${L.vlmStatus[vs] || vs}` : '이 사건에는 저장된 설명이 없습니다.'), more];
+    const limits = (r.uncertainties || []).slice(0, 2);
+    return [
+      h('h2', null, 'VLM 설명'),
+      h('p', { class: 'vlm-summary' }, r.scene_summary || '(요약 없음)'),
+      h('div', { class: 'brief-row' },
+        h('span', { class: 'muted' }, '판단'), h('span', { class: `assess assess-${r.assessment || 'unclear'}` }, L.assessment[r.assessment] || r.assessment || '—'),
+        h('span', { class: 'muted' }, '구역 관계'), h('b', null, L.zoneRelation[r.zone_relation] || r.zone_relation || '—')),
+      limits.length ? h('div', { class: 'vlm-sec limits' }, h('h3', null, '판단의 한계'), ul(limits)) : null,
+      more,
+      h('p', { class: 'note' }, '모델 응답은 참고용이며 사건의 정답이 아닙니다.'),
+    ];
+  });
+}
 function renderDetail() {
   const root = $('#detail'); const ev = currentEvent();
+  if (IS_STATIC) renderVlmBrief(ev);
   if (!ev) {
     renderIfChanged(root, 'none', () => h('div', { class: 'detail-empty' }, '오른쪽 목록에서 사건을 선택하면 CV 근거, VLM 설명, 처리 상태가 여기에 표시됩니다.'));
     return;
@@ -1359,6 +1389,14 @@ function onKey(e) {
 function init() {
   if (IS_STATIC) document.title += ' — 정적 재생';
   if (IS_STATIC) {
+    // Public demo: device commands, uplink counters and the VLM worker settings cannot be used here, so that column starts
+    // folded away behind one button. Nothing is removed; the live console is unchanged.
+    document.body.classList.add('demo');
+    const sys = $('#sysinfo-toggle'); sys.classList.remove('hidden');
+    sys.addEventListener('click', () => {
+      const on = !document.body.classList.contains('show-sys');
+      document.body.classList.toggle('show-sys', on); sys.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
     $('#demo-guide').classList.remove('hidden');
     document.body.classList.add('has-demo-guide');
     document.querySelectorAll('[data-guide]').forEach((el) => el.addEventListener('click', () => followDemoGuide(el.dataset.guide)));
