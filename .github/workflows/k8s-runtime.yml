@@ -2,7 +2,8 @@ name: k8s-runtime
 on:
   workflow_dispatch:
   push:
-    paths: ["deploy/**", "scripts/k8s_verify.sh", "gateway/**", "src/**", ".github/workflows/k8s-runtime.yml"]
+    paths: ["deploy/**", "scripts/k8s_verify.sh", "scripts/check_k8s_eval.sh", "scripts/k8s_cpu_sweep.sh",
+            "docs/eval/raw/k8s_cpu_limits**", "gateway/**", "src/**", ".github/workflows/k8s-runtime.yml"]
 permissions:
   contents: read
 concurrency:
@@ -31,3 +32,21 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: k8s-evidence, path: docs/evidence/k8s/ }
+  eval-job:
+    # the evaluation as a Job on a kind cluster, and the CPU-limit measurement (scripts/check_k8s_eval.sh)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml
+      - name: Install kind
+        run: |
+          curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/kind
+          kind version
+      - name: Evaluation Job on kind
+        run: bash scripts/check_k8s_eval.sh /tmp/k8s-eval
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: k8s-eval, path: /tmp/k8s-eval }

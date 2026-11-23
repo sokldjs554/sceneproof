@@ -6,6 +6,10 @@
 
 Compares the totals and, per video, every count, timing error and predicted event. Fields that describe the run
 itself (when, how fast, which commit) are ignored. Exit code 0 = same, 1 = different.
+
+    python scripts/compare_event_eval.py --json before.json after.json
+
+prints one line a script can read instead: {"compared": 291, "different": 0}
 """
 
 from __future__ import annotations
@@ -33,15 +37,28 @@ def comparable(result: dict) -> dict:
     return dict(flatten({"aggregate": result["aggregate"], "per_video": videos}))
 
 
+def different_keys(before: dict, after: dict) -> tuple[list[str], int]:
+    """The names of the values that differ between two results, and how many values were compared."""
+    a, b = comparable(before), comparable(after)
+    keys = sorted(set(a) | set(b))
+    return [k for k in keys if a.get(k) != b.get(k)], len(keys)
+
+
 def main() -> int:
-    if len(sys.argv) != 3:
+    args = [a for a in sys.argv[1:] if a != "--json"]
+    as_json = len(args) != len(sys.argv) - 1
+    if len(args) != 2:
         print(__doc__)
         return 2
-    with open(sys.argv[1]) as f:
-        before = comparable(json.load(f))
-    with open(sys.argv[2]) as f:
-        after = comparable(json.load(f))
-    different = [k for k in sorted(set(before) | set(after)) if before.get(k) != after.get(k)]
+    with open(args[0]) as f:
+        before_result = json.load(f)
+    with open(args[1]) as f:
+        after_result = json.load(f)
+    before, after = comparable(before_result), comparable(after_result)
+    different, compared = different_keys(before_result, after_result)
+    if as_json:
+        print(json.dumps({"compared": compared, "different": len(different)}))
+        return 1 if different else 0
     if not different:
         print(f"같음: 비교한 값 {len(before)}개가 모두 같습니다.")
         return 0
