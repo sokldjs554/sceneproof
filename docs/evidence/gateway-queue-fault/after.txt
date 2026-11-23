@@ -1,0 +1,61 @@
+# go test -count=1 -v -run 'Fault|Failed|Fails|Survive|Crash' ./internal/queue/   (queue.go and wal.go of commit 3125156; only the result lines)
+--- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/0_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/1_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/3_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/4_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/7_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/8_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/9_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/40_of_81_bytes_written
+    --- PASS: TestEventsAcceptedAfterAFailedWriteSurviveRestart/80_of_81_bytes_written
+--- PASS: TestCrashRightAfterAFailedWrite
+--- PASS: TestFailedFsyncIsNotAccepted
+--- PASS: TestFailedAckKeepsTheEventAndTheFile
+--- PASS: TestFailedCompactionChangesNothing
+    --- PASS: TestFailedCompactionChangesNothing/fsync_fails
+    --- PASS: TestFailedCompactionChangesNothing/cannot_create_the_new_file
+    --- PASS: TestFailedCompactionChangesNothing/write_fails
+--- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_1
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_2
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_3
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_4
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_5
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_6
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_7
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_8
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_9
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_10
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_11
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_12
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_13
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_14
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_15
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_16
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_17
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_18
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_19
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_20
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_21
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_22
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_23
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_24
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_25
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_26
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_27
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_28
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_29
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_30
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_31
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_32
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_33
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_34
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_35
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_36
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_37
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_38
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_39
+    --- PASS: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_40
+PASS
+ok  	github.com/sokldjs554/sceneproof/gateway/internal/queue	1.398s
