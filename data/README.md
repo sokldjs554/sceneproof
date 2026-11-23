@@ -17,6 +17,7 @@
 
 - CC BY 4.0: 출처 표기 조건으로 사용·수정·재배포 가능. 이 문서와 README에 출처를 표기합니다.
 - Apache-2.0: 사용·수정·재배포 가능. OpenCV 저장소의 NOTICE/LICENSE를 따릅니다.
+- 평가 영상 4편(`campus-walkway`, `people-indoor`, `store-aisle`, `parking-lot`)은 다시 인코딩한 파일 그대로 릴리스 [`eval-videos-v1`](https://github.com/sokldjs554/sceneproof/releases/tag/eval-videos-v1)에 올렸습니다(출처·변경 내용은 릴리스의 `NOTICE.txt`). 인코더 결과가 CPU에 따라 달라 컴퓨터마다 다시 만들면 같은 파일이 나오지 않기 때문입니다. 평가 이미지(`deploy/docker/Dockerfile.eval`)는 이 파일을 받아 `docs/eval/inputs.lock.json`의 해시와 맞춰 봅니다.
 - 사람 얼굴이 식별될 수 있는 공개 샘플 영상입니다. 본 프로젝트는 신원 식별 기능(얼굴 인식·재식별)을 포함하지 않습니다.
 
 ## 개발용(dev)·평가용(eval) 분할

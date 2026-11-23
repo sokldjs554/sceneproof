@@ -1,0 +1,39 @@
+FROM ubuntu:24.04@sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates curl git ffmpeg=7:6.1.1-3ubuntu5 \
+        python3-venv python3-gi \
+        gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good gstreamer1.0-libav \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+ENV PATH="/opt/venv/bin:${PATH}" PIP_NO_CACHE_DIR=1
+RUN python3 -m venv --system-site-packages /opt/venv
+COPY pyproject.toml README.md ./
+COPY src/ src/
+COPY deploy/docker/eval.constraints.txt ./
+RUN python -m pip install -c eval.constraints.txt . \
+    && python -c "import gi; gi.require_version('Gst', '1.0'); from gi.repository import Gst; Gst.init(None); assert Gst.version()[:3] == (1, 24, 2), Gst.version_string()"
+
+COPY scripts/fetch_data.sh scripts/fetch_models.sh scripts/
+COPY docs/eval/inputs.lock.json docs/eval/
+RUN mkdir -p data/videos \
+    && for video in campus-walkway.mp4 people-indoor.mp4 store-aisle.mp4 parking-lot.mp4; do \
+        curl -fsSL --retry 3 -o "data/videos/$video" \
+            "https://github.com/sokldjs554/sceneproof/releases/download/eval-videos-v1/$video" || exit 1; \
+    done \
+    && VARIANTS=yolox_tiny ONNX_FROM=official bash scripts/fetch_models.sh \
+    && python -m sceneproof.eval.provenance verify --lock docs/eval/inputs.lock.json
+
+COPY data/ground_truth/ data/ground_truth/
+COPY configs/eval.yaml configs/eval.yaml
+RUN sed -i 's/^  source_backend: auto$/  source_backend: gstreamer/' configs/eval.yaml \
+    && grep -qx '  source_backend: gstreamer' configs/eval.yaml \
+    && install -d -o ubuntu -g ubuntu data/runs data/evidence-eval /out
+
+ARG GIT_COMMIT
+ENV GIT_COMMIT=${GIT_COMMIT}
+
+USER ubuntu
+ENTRYPOINT ["python", "-m", "sceneproof.eval.run_eval"]

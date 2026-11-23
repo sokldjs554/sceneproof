@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -20,10 +21,20 @@ from pathlib import Path
 import yaml
 
 from sceneproof.edge.agent import run_offline
-from sceneproof.edge.config import EdgeConfig
+from sceneproof.edge.config import CameraConfig, EdgeConfig
 
 from .gt import GroundTruth
 from .metrics import match_events, preds_from_jsonl, summarize
+from .provenance import collect_inputs, environment_info
+
+
+def eval_inputs(cfg: EdgeConfig, cameras: list[CameraConfig] | None = None) -> list[str]:
+    paths = [cfg.detector.model]
+    for camera in cfg.cameras if cameras is None else cameras:
+        source = camera.source
+        if source.startswith("file://") or "://" not in source:
+            paths.append(source.removeprefix("file://"))
+    return list(dict.fromkeys(paths))
 
 
 def main() -> int:
@@ -63,8 +74,15 @@ def main() -> int:
         tag = tag.rstrip("-")
     runs_dir = Path(args.runs_dir) / tag
     runs_dir.mkdir(parents=True, exist_ok=True)
-    git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    try:
+        git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        git = ""
+    if not git:
+        git = os.environ.get("GIT_COMMIT", "")
     cameras = [c for c in cfg.cameras if not args.cameras or c.camera_id in args.cameras.split(",")]
+    environment = environment_info()
+    inputs = {}
     per_video = {}
     agg = {"tp": 0, "fp": 0, "missed": 0, "duplicates": 0, "boundary_hits": 0, "duration_s": 0.0, "gt_positives": 0}
     for cam in cameras:
@@ -73,6 +91,8 @@ def main() -> int:
             print(f"[eval] no ground truth for {cam.camera_id} ({gt_path}); skipping", flush=True)
             continue
         gt = GroundTruth.load(gt_path)
+        paths = eval_inputs(cfg, [cam])
+        inputs.update(collect_inputs(path for path in paths if path not in inputs))
         jsonl = runs_dir / f"{cam.camera_id}.jsonl"
         if jsonl.exists():
             jsonl.unlink()
@@ -100,6 +120,7 @@ def main() -> int:
     agg.update({"precision": round(p, 3), "recall": round(r, 3), "f1": round(2 * p * r / (p + r), 3) if p + r else 0.0,
                 "false_alarms_per_hour": round(fp / (agg["duration_s"] / 3600), 2) if agg["duration_s"] else None})
     out = {"tag": tag, "git": git, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "config": data,
+           "inputs": inputs, "environment": environment,
            "matching": {"min_overlap_s": args.min_overlap, "start_tolerance_s": args.tolerance},
            "aggregate": agg, "per_video": per_video}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
