@@ -1,0 +1,59 @@
+{
+  "recorded": "docs/experiments/rerun-20261121/session_base.json",
+  "runs": [
+    {
+      "cpu_limit": 0.5,
+      "threads": 1,
+      "run": 1,
+      "result": "k8s_cpu_limits/sweep-p7v54lzq/cpu0.5-run1.json",
+      "frames": 1208,
+      "dropped_frames": 2794,
+      "values_different": 168
+    },
+    {
+      "cpu_limit": 0.5,
+      "threads": 1,
+      "run": 2,
+      "result": "k8s_cpu_limits/sweep-kp24ia3p/cpu0.5-run2.json",
+      "frames": 1234,
+      "dropped_frames": 2768,
+      "values_different": 130
+    },
+    {
+      "cpu_limit": 1.0,
+      "threads": 1,
+      "run": 1,
+      "result": "k8s_cpu_limits/sweep-kp24ia3p/cpu1-run1.json",
+      "frames": 2451,
+      "dropped_frames": 1551,
+      "values_different": 65
+    },
+    {
+      "cpu_limit": 1.0,
+      "threads": 1,
+      "run": 2,
+      "result": "k8s_cpu_limits/sweep-kp24ia3p/cpu1-run2.json",
+      "frames": 2426,
+      "dropped_frames": 1576,
+      "values_different": 67
+    },
+    {
+      "cpu_limit": 2.0,
+      "threads": 2,
+      "run": 1,
+      "result": "k8s_cpu_limits/sweep-kp24ia3p/cpu2-run1.json",
+      "frames": 2043,
+      "dropped_frames": 1959,
+      "values_different": 114
+    },
+    {
+      "cpu_limit": 2.0,
+      "threads": 2,
+      "run": 2,
+      "result": "k8s_cpu_limits/sweep-kp24ia3p/cpu2-run2.json",
+      "frames": 2043,
+      "dropped_frames": 1959,
+      "values_different": 102
+    }
+  ]
+}
