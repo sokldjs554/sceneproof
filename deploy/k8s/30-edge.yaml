@@ -9,7 +9,7 @@ data:
     gateway: 127.0.0.1:50051
     status_interval_s: 2.0
     evidence_root: /evidence
-    detector: { variant: yolox_tiny, backend: onnxruntime, model: /models/yolox_tiny.onnx, conf_threshold: 0.4, nms_threshold: 0.45, intra_op_threads: 2 }
+    detector: { variant: yolox_tiny, backend: onnxruntime, model: /models/yolox_tiny.onnx, conf_threshold: 0.4, nms_threshold: 0.45, intra_op_threads: 1 }
     tracker: { track_thresh: 0.5, low_thresh: 0.1, new_track_thresh: 0.6, match_thresh: 0.8, track_buffer_seconds: 1.5 }
     pipeline: { source_backend: auto, queue_capacity: 4, ring_seconds: 12, ring_max_mb: 64, ring_max_side: 960, pre_roll_s: 3, post_roll_s: 3, clip_fps: 10 }
     cameras:
@@ -46,7 +46,7 @@ spec:
           image: sceneproof-edge:local
           imagePullPolicy: IfNotPresent
           args: ["--config", "/config/edge.yaml", "run"]
-          resources: { requests: { cpu: "1", memory: 768Mi }, limits: { cpu: "2", memory: 1536Mi } }
+          resources: { requests: { cpu: "1", memory: 768Mi }, limits: { cpu: "1", memory: 1536Mi } }
           volumeMounts:
             - { name: evidence, mountPath: /evidence }
             - { name: config, mountPath: /config, readOnly: true }
