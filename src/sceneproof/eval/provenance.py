@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import platform
 import subprocess
 import sys
@@ -21,7 +22,16 @@ def file_sha256(path: str | Path, chunk_size: int = 1 << 20) -> str:
     return digest.hexdigest()
 
 
-def environment_info(ffmpeg: str = "ffmpeg") -> dict[str, str | None]:
+def cpu_limit(cgroup_root: str | Path = "/sys/fs/cgroup") -> float | None:
+    """Return the CPU quota in cores when cgroup v2 specifies a finite limit."""
+    try:
+        quota, period = map(int, (Path(cgroup_root) / "cpu.max").read_text().split())
+        return quota / period if quota > 0 and period > 0 else None
+    except (OSError, ValueError, OverflowError):
+        return None
+
+
+def environment_info(ffmpeg: str = "ffmpeg") -> dict[str, str | int | float | None]:
     import cv2
     import numpy
     import onnxruntime
@@ -46,6 +56,8 @@ def environment_info(ffmpeg: str = "ffmpeg") -> dict[str, str | None]:
             ffmpeg_version = lines[0].strip() or None
 
     return {
+        "cpu_limit": cpu_limit(),
+        "cpu_count": os.cpu_count(),
         "python": platform.python_version(),
         "platform": platform.platform(),
         "numpy": numpy.__version__,

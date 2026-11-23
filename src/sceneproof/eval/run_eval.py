@@ -1,6 +1,6 @@
 """Event-level evaluation on the held-out videos.
 
-For each camera in configs/eval.yaml: run the analyser offline (every frame, no drops), load the
+For each camera in configs/eval.yaml: run the analyser (offline by default), load the
 ground truth YAML, match predicted episodes to GT, and write per-video + aggregate metrics with the
 exact run conditions (model, backend, thresholds, config hash, git sha).
 
@@ -46,6 +46,8 @@ def main() -> int:
     ap.add_argument("--variant", default=None, help="override detector variant (model path follows)")
     ap.add_argument("--conf", type=float, default=None)
     ap.add_argument("--cameras", default="")
+    ap.add_argument("--realtime", action="store_true", help="play at source speed and drop frames when behind")
+    ap.add_argument("--threads", type=int, help="override the detector's intra-op thread count")
     ap.add_argument("--min-overlap", type=float, default=0.5)
     ap.add_argument("--tolerance", type=float, default=1.0)
     ap.add_argument("--backend", default=None, help="override detector backend: onnxruntime | torch | tensorrt")
@@ -54,6 +56,10 @@ def main() -> int:
     args = ap.parse_args()
 
     data = yaml.safe_load(Path(args.config).read_text())
+    if args.threads is not None:
+        if args.threads < 1:
+            ap.error("--threads must be a positive integer")
+        data["detector"]["intra_op_threads"] = args.threads
     if args.variant:
         data["detector"]["variant"] = args.variant
         data["detector"]["model"] = f"models/{args.variant}.onnx"
@@ -98,13 +104,13 @@ def main() -> int:
             jsonl.unlink()
         print(f"[eval] {cam.camera_id} ({cam.source}) with {tag} ...", flush=True)
         t0 = time.time()
-        run = run_offline(cfg, cam.camera_id, str(jsonl), run_id=f"eval-{tag}-{cam.camera_id}")
+        run = run_offline(cfg, cam.camera_id, str(jsonl), realtime=args.realtime, run_id=f"eval-{tag}-{cam.camera_id}")
         preds = preds_from_jsonl(str(jsonl))
         duration = gt.duration_s or (run["frames"] / cam.fps_hint)
         m = match_events(preds, gt, args.min_overlap, args.tolerance)
         s = summarize(m, gt, duration)
         s["run"] = {"frames": run["frames"], "wall_s": run["wall_s"], "fps": run["fps"], "timings": run["timings"],
-                    "detector": run["detector"]}
+                    "detector": run["detector"], "dropped": run["dropped"]}
         s["gt_annotation"] = gt.annotation
         s["predictions"] = [{"event_id": p.event_id, "start_s": p.start_s, "end_s": p.end_s, "dwell": p.dwell,
                              "track_id": p.track_id, **p.extra} for p in preds]
@@ -120,6 +126,7 @@ def main() -> int:
     agg.update({"precision": round(p, 3), "recall": round(r, 3), "f1": round(2 * p * r / (p + r), 3) if p + r else 0.0,
                 "false_alarms_per_hour": round(fp / (agg["duration_s"] / 3600), 2) if agg["duration_s"] else None})
     out = {"tag": tag, "git": git, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "config": data,
+           "realtime": args.realtime, "dropped_frames": sum(v["run"]["dropped"] for v in per_video.values()),
            "inputs": inputs, "environment": environment,
            "matching": {"min_overlap_s": args.min_overlap, "start_tolerance_s": args.tolerance},
            "aggregate": agg, "per_video": per_video}

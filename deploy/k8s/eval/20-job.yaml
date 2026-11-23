@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: eval-offline
+  namespace: sceneproof-eval
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 2400
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: eval
+          image: sceneproof-eval:local
+          imagePullPolicy: Never
+          args: ["--out", "/out/offline.json"]
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "2", memory: 2Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: output
+              mountPath: /out
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: eval-output
