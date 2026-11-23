@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -73,7 +74,12 @@ def main() -> int:
         tag = tag.rstrip("-")
     runs_dir = Path(args.runs_dir) / tag
     runs_dir.mkdir(parents=True, exist_ok=True)
-    git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    try:
+        git = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        git = ""
+    if not git:
+        git = os.environ.get("GIT_COMMIT", "")
     cameras = [c for c in cfg.cameras if not args.cameras or c.camera_id in args.cameras.split(",")]
     environment = environment_info()
     inputs = {}

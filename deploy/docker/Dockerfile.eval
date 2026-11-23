@@ -32,5 +32,8 @@ RUN sed -i 's/^  source_backend: auto$/  source_backend: gstreamer/' configs/eva
     && grep -qx '  source_backend: gstreamer' configs/eval.yaml \
     && install -d -o ubuntu -g ubuntu data/runs data/evidence-eval /out
 
+ARG GIT_COMMIT
+ENV GIT_COMMIT=${GIT_COMMIT}
+
 USER ubuntu
 ENTRYPOINT ["python", "-m", "sceneproof.eval.run_eval"]
