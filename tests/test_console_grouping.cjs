@@ -1,4 +1,4 @@
-// Task I: the console's "grouped only" filter and the grouping-gap setting.
+// The console's "grouped only" filter and the grouping-gap setting.
 // Run: node --test tests/test_console_grouping.cjs
 const test = require('node:test');
 const assert = require('node:assert/strict');

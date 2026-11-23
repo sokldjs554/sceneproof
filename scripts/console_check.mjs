@@ -40,7 +40,7 @@ const consoleErrors = [];
 const check = (cond, msg) => { if (cond) console.log(`  ok   ${msg}`); else { console.log(`  FAIL ${msg}`); failures.push(msg); } };
 const shot = async (page, name) => { const p = join(OUT, name); await page.screenshot({ path: p }); console.log(`  shot ${p}`); };
 
-/** The "grouped only" filter and the grouping gap (task I). Leaves both controls as it found them.
+/** The "grouped only" filter and the grouping gap. Leaves both controls as it found them.
  *  The counts rely on the demo bundle: 3 of its 15 events are grouped, 5 with a 2 s gap. */
 async function checkGrouping(page, isStatic) {
   console.log('\n[G] grouped-only filter / grouping gap');
