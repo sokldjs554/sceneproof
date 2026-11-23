@@ -1,0 +1,85 @@
+--- gateway/internal/queue/queue.go	2026-11-07 18:30:09.464841906 +0000
++++ gateway/internal/queue/queue.go (with the file seam)	2026-11-23 16:54:12.188291890 +0000
+@@ -34,6 +34,7 @@
+ 	"container/list"
+ 	"errors"
+ 	"fmt"
++	"io"
+ 	"log/slog"
+ 	"os"
+ 	"path/filepath"
+@@ -81,6 +82,22 @@
+ 	CompactMinBytes int64
+ 	// Logger receives recovery, eviction and compaction messages.
+ 	Logger *slog.Logger
++	// OpenFile opens every file the queue writes (the WAL for appending and
++	// the temporary file of a compaction). nil means os.OpenFile. Tests
++	// replace it to make writes fail.
++	OpenFile func(name string, flag int, perm os.FileMode) (File, error)
++}
++
++// File is the part of *os.File the queue uses to write a WAL file.
++type File interface {
++	io.Writer
++	Sync() error
++	Truncate(size int64) error
++	Close() error
++}
++
++func osOpenFile(name string, flag int, perm os.FileMode) (File, error) {
++	return os.OpenFile(name, flag, perm)
+ }
+ 
+ // PutResult describes what Put did with an event.
+@@ -119,7 +136,7 @@
+ 	path string
+ 
+ 	mu          sync.Mutex
+-	f           *os.File // append handle; nil after Close
++	f           File // append handle; nil after Close
+ 	fileBytes   int64
+ 	liveBytes   int64
+ 	index       map[string]*entry
+@@ -145,6 +162,9 @@
+ 	if opts.Logger == nil {
+ 		opts.Logger = slog.Default()
+ 	}
++	if opts.OpenFile == nil {
++		opts.OpenFile = osOpenFile
++	}
+ 	if err := os.MkdirAll(opts.Dir, 0o755); err != nil {
+ 		return nil, fmt.Errorf("queue: create dir: %w", err)
+ 	}
+@@ -159,12 +179,12 @@
+ 	if err := q.recover(); err != nil {
+ 		return nil, err
+ 	}
+-	f, err := os.OpenFile(q.path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
++	f, err := opts.OpenFile(q.path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("queue: open wal: %w", err)
+ 	}
+ 	q.f = f
+-	st, err := f.Stat()
++	st, err := os.Stat(q.path)
+ 	if err != nil {
+ 		f.Close()
+ 		return nil, err
+@@ -439,7 +459,7 @@
+ // its first enqueue, so replaying the compacted file yields the same order.
+ func (q *Queue) compactLocked() error {
+ 	tmp := q.path + ".compact"
+-	w, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
++	w, err := q.opts.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+ 	if err != nil {
+ 		return fmt.Errorf("queue: compact: %w", err)
+ 	}
+@@ -481,7 +501,7 @@
+ 	if q.f != nil {
+ 		q.f.Close()
+ 	}
+-	f, err := os.OpenFile(q.path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
++	f, err := q.opts.OpenFile(q.path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
+ 	if err != nil {
+ 		q.f = nil
+ 		return fmt.Errorf("queue: reopen after compaction: %w", err)

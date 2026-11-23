@@ -1,0 +1,50 @@
+# go test -count=1 ./internal/queue/   (queue.go of commit eab3df6 with seam.patch applied; only the result lines)
+--- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/1_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/3_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/4_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/7_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/8_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/9_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/40_of_81_bytes_written 
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/80_of_81_bytes_written 
+--- FAIL: TestFailedAckKeepsTheEventAndTheFile 
+--- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_1 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_3 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_4 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_5 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_6 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_7 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_9 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_10 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_13 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_14 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_15 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_16 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_18 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_20 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_21 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_22 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_23 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_24 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_25 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_26 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_28 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_29 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_30 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_31 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_32 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_34 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_35 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_36 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_38 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_39 
+    --- FAIL: TestRandomFaultsNeverLoseAnAcceptedEvent/seed_40 
+FAIL
+FAIL	github.com/sokldjs554/sceneproof/gateway/internal/queue	3.174s
+FAIL
+
+# the first failure in full
+    --- FAIL: TestEventsAcceptedAfterAFailedWriteSurviveRestart/1_of_81_bytes_written 
+        queue_fault_test.go:176: after restart, pending = [a@1], want [a@1 c@1 b@1]: an accepted event was lost
