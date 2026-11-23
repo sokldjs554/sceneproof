@@ -46,14 +46,17 @@ if [ -n "$last_user" ] && [ "$last_user" != root ] && [ "${last_user%%:*}" != 0 
 if [ -s "$CONS" ]; then
   loose="$(grep -vE '^\s*(#|$)' "$CONS" | grep -vE '^[A-Za-z0-9._-]+(\[[A-Za-z0-9._,-]+\])?==[A-Za-z0-9.+!_-]+$' || true)"
   [ -z "$loose" ] && ok "$CONS pins every package to one exact version (name==version)" || { bad "$CONS pins every package to one exact version"; echo "$loose" | head -5 | sed 's/^/       /'; }
-  for pkg in numpy onnxruntime opencv-python-headless scipy; do
+  for pkg in numpy onnxruntime opencv-python-headless scipy grpcio protobuf pydantic pyyaml; do
     check "grep -qiE '^$pkg==' '$CONS'" "$CONS pins $pkg"
   done
 else
   bad "$CONS exists and is not empty"
 fi
 check "grep -q 'eval.constraints.txt' '$DF'" "the image installs Python packages with the constraints file"
+check "! grep -qiE '^sceneproof( |=|@)' '$CONS'" "$CONS does not pin the project itself"
+check "grep -qE '^ARG +GIT_COMMIT' '$DF'" "the image takes the commit it is built from (ARG GIT_COMMIT)"
 check "grep -qE -- '-threads' scripts/fetch_data.sh" "scripts/fetch_data.sh can fix the ffmpeg thread count (-threads)"
+check "git ls-files -s scripts/fetch_data.sh | grep -q '^100755'" "scripts/fetch_data.sh is stored as executable (mode 755)"
 check "grep -qE 'provenance +verify' '$DF'" "the build stops when an input differs from $LOCK (provenance verify)"
 check "[ -s '$LOCK' ]" "$LOCK exists"
 if [ "${STATIC_ONLY:-0}" = 1 ]; then finish; fi
@@ -63,7 +66,9 @@ echo "[2] build"
 if [ "${SKIP_BUILD:-0}" = 1 ]; then
   echo "  skip (SKIP_BUILD=1), using $IMAGE"
 else
-  if docker build -f "$DF" -t "$IMAGE" . > "$OUT/build.log" 2>&1; then ok "docker build ($(grep -c . "$OUT/build.log") log lines in $OUT/build.log)"; else bad "docker build (see $OUT/build.log)"; tail -15 "$OUT/build.log" | sed 's/^/       /'; finish; fi
+  # the image has no .git folder: the commit it was built from is handed over as a build argument
+  COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  if docker build --build-arg GIT_COMMIT="$COMMIT" -f "$DF" -t "$IMAGE" . > "$OUT/build.log" 2>&1; then ok "docker build ($(grep -c . "$OUT/build.log") log lines in $OUT/build.log)"; else bad "docker build (see $OUT/build.log)"; tail -15 "$OUT/build.log" | sed 's/^/       /'; finish; fi
 fi
 
 echo
@@ -75,8 +80,8 @@ chmod 777 "$OUT"
 for n in 1 2; do
   if docker run --rm -v "$OUT:/out" "$IMAGE" --out "/out/run$n.json" > "$OUT/run$n.log" 2>&1 && [ -s "$OUT/run$n.json" ]; then ok "evaluation run $n wrote run$n.json"; else bad "evaluation run $n wrote run$n.json (see $OUT/run$n.log)"; tail -6 "$OUT/run$n.log" | sed 's/^/       /'; finish; fi
 done
-if python3 - "$OUT/run1.json" "$LOCK" <<'PY'
-import json, sys
+if COMMIT="${COMMIT:-}" python3 - "$OUT/run1.json" "$LOCK" <<'PY'
+import json, os, sys
 run, lock = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))["files"]
 env, inputs = run.get("environment") or {}, run.get("inputs") or {}
 problems = [f"environment.{k} missing" for k in ("python", "platform", "numpy", "opencv", "onnxruntime", "ffmpeg") if not env.get(k)]
@@ -86,14 +91,20 @@ if backend not in ("gstreamer", "opencv"):
 if "gstreamer" not in env or (backend == "gstreamer" and not env.get("gstreamer")):
     problems.append("environment.gstreamer must be the GStreamer version when video is read through GStreamer (None when it is absent)")
 problems += [f"inputs: {name} is {(inputs.get(name) or {}).get('sha256')}, lock says {sha}" for name, sha in lock.items() if (inputs.get(name) or {}).get("sha256") != sha]
+commit = os.environ.get("COMMIT")
+if not run.get("git"):
+    problems.append("git is empty: the result does not say which commit it was made from")
+elif commit and run["git"] != commit:
+    problems.append(f"git is {run['git']!r}, but the image was built from {commit!r}")
 for p in problems:
     print("       " + p)
+print("       commit: " + str(run.get("git")))
 print("       tools: " + ", ".join(f"{k} {env.get(k)}" for k in ("python", "numpy", "opencv", "onnxruntime")))
 print("       ffmpeg: " + str(env.get("ffmpeg")))
 print("       video read through: " + str(backend) + " (gstreamer " + str(env.get("gstreamer")) + ")")
 sys.exit(1 if problems else 0)
 PY
-then ok "the result names its tools and its inputs, and the inputs are the locked files"; else bad "the result names its tools and its inputs, and the inputs are the locked files"; fi
+then ok "the result names its commit, tools and inputs, and the inputs are the locked files"; else bad "the result names its commit, tools and inputs, and the inputs are the locked files"; fi
 if python3 scripts/compare_event_eval.py "$OUT/run1.json" "$OUT/run2.json" > "$OUT/repeat.log" 2>&1; then ok "two runs give the same events ($(head -1 "$OUT/repeat.log"))"; else bad "two runs give the same events"; sed 's/^/       /' "$OUT/repeat.log" | head -8; fi
 
 echo
