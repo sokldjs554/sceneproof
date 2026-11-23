@@ -98,7 +98,7 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 | **Ack vs 새 revision** | 전송 중 새 revision이 도착하면 옛 revision의 ack로 제거하지 않음 | 새 스냅샷은 아직 서버에 없으므로 다음 패스에서 전송돼야 함 |
 | **퇴출(eviction)** | `liveBytes > max` 이면 **가장 오래된** 사건부터 DROP, `dropped_events` 집계, WARN 로그 | 장시간 오프라인 후엔 최신 에피소드가 운영자에게 더 가치 있음. 한 사건이 예산보다 크면 `ResourceExhausted`로 거부(거짓 accepted를 주지 않음) |
 | **fsync** | PUT 뒤 fsync(기본), ACK/DROP은 fsync 안 함 | PUT은 분석기에 준 `accepted=true` 약속의 근거. ACK 유실은 재전송→서버 dedup으로 흡수되므로 비용을 치르지 않음 |
-| **컴팩션** | 파일 > 2×live 이고 ≥ 1 MiB(기본) 일 때, 그리고 시작 시 죽은 레코드가 있으면 live PUT만 FIFO 순으로 새 파일에 쓰고 rename | 쓰기 비용을 사건당 O(1)로 상각. 임시 파일→fsync→rename→dir fsync 순서라 언제든 완전한 파일 하나가 존재 |
+| **컴팩션** | 파일 > 2×live 이고 ≥ 1 MiB(기본) 일 때, 그리고 시작 시 죽은 레코드가 있으면 live PUT만 FIFO 순으로 새 파일(`events.wal.tmp`)에 쓰고 rename. 실패하면 새 파일을 지우고 기존 파일로 계속. 시작할 때 남은 `.tmp`는 지움 | 쓰기 비용을 사건당 O(1)로 상각. 임시 파일→fsync→rename→dir fsync 순서라 언제든 완전한 파일 하나가 존재 |
 | **손상된 꼬리** | 첫 불량 레코드에서 멈추고 그 오프셋으로 truncate, WARN | 길이 접두 스트림 안에서 안전하게 재동기화할 방법이 없음. CRC가 맞는데 proto 파싱이 실패하는 레코드는 건너뜀(찢어진 것이 아니므로 뒤의 정상 레코드를 버리지 않음) |
 | **연결 상태 머신** | `DISCONNECTED → CONNECTING → CONNECTED`, 실패 시 ClientConn을 버리고 새로 dial | grpc-go의 내장 재연결은 상태·횟수를 숨김. 시도마다 새 연결을 만들면 `reconnect_count`, `last_error`가 정확 |
 | **세대(generation)** | 연결마다 번호를 매기고 실패 보고에 세대를 첨부 | 느린 RPC가 옛 연결의 오류를 보고해 새 건강한 연결을 끊는 일을 방지 |
@@ -125,7 +125,7 @@ D<TAB>event_id<TAB>path<TAB>sha256      done: 서버가 보유 (업로드 또는
 | **중복** | 분석기→게이트웨이: 대기 중 revision 이하이면 `duplicate=true`(쓰기 없음). 게이트웨이→서버: 서버 dedup이 최종 권위, `duplicate` ack도 큐에서 제거하고 `duplicate_acks` 집계. 업로드: 원장 + 서버 `already_present` |
 | **큐 가득 참** | 가장 오래된 사건부터 DROP(WAL에 기록되어 재시작 후에도 돌아오지 않음), `dropped_events`/`sceneproof_gateway_events_dropped_total` 증가, WARN 로그. 예산보다 큰 단일 사건은 `ResourceExhausted` 거부 |
 | **WAL 꼬리 손상** | 복구 시 첫 불량 레코드에서 truncate, `queue.truncated=true`가 `/status`에 표시 |
-| **디스크 쓰기 실패** | `SubmitEvent`가 `Internal` 오류 → 분석기는 스냅샷을 버리면 안 됨 |
+| **디스크 쓰기 실패** | `SubmitEvent`가 `Internal` 오류 → 분석기는 스냅샷을 버리면 안 됨. 큐는 마지막으로 온전히 쓴 위치(`committedBytes`)를 기억하고, 쓰다 만 레코드를 다음 쓰기 전에 잘라 냄. 자르기도 실패하면 이후 쓰기를 모두 거부(반쪽 레코드 뒤에 받은 사건을 붙이면 재시작 때 함께 잘려 나가기 때문). PUT과 그로 인한 DROP은 한 묶음으로 쓰고, 실패하면 묶음 전체를 되돌림 |
 | **분석기 미접속** | 하트비트는 빈 `cameras`로 계속 전송. 명령은 최근 32개/60 s 버퍼 |
 | **서버가 사건 거부**(`InvalidArgument` 등) | 연결 유지, 해당 사건만 30 s 쿨다운, 다른 사건은 계속 전송. 사건은 버리지 않음 |
 | **증거 파일이 끝내 안 생김** | 재시도 창 뒤 포기, ERROR 로그, `uploads_failed` 증가, 원장에 기록(재시작 후 되살아나지 않음) |

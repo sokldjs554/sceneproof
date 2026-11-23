@@ -8,7 +8,7 @@ LDFLAGS     := -s -w -X main.version=$(VERSION)
 export GOTOOLCHAIN := local
 export CGO_ENABLED := 0
 
-.PHONY: all build test vet fmt fmt-check tidy docker
+.PHONY: all build test vet fmt fmt-check tidy docker fuzz
 
 all: fmt-check vet test build
 
@@ -20,6 +20,12 @@ test:
 
 vet:
 	$(GO) vet ./...
+
+# random bytes into the WAL reader and into Open (FUZZTIME each)
+FUZZTIME ?= 30s
+fuzz:
+	$(GO) test ./internal/queue -run '^$$' -fuzz FuzzScan -fuzztime $(FUZZTIME)
+	$(GO) test ./internal/queue -run '^$$' -fuzz FuzzOpen -fuzztime $(FUZZTIME)
 
 fmt:
 	gofmt -l -w ./cmd ./internal
