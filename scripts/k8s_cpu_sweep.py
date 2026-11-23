@@ -80,6 +80,8 @@ def main():
     parser.add_argument("--runs", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cameras", default="")
+    parser.add_argument("--resume-from", type=Path, metavar="BATCH_DIR",
+                        help="reuse completed results from a previous batch under this output directory")
     args = parser.parse_args()
     if args.runs < 1:
         parser.error("--runs must be positive")
@@ -90,16 +92,28 @@ def main():
         parser.error(f"unknown cameras: {sorted(cameras - available)}")
 
     # Keep an earlier summary and its files usable until every new Job has finished.
-    directory = args.out.parent / args.out.stem
+    output_path = args.out.parent.resolve() / args.out.name
+    directory = output_path.parent / output_path.stem
+    previous = args.resume_from.resolve() if args.resume_from else None
+    if previous is not None and (previous.parent != directory.resolve() or not previous.is_dir()):
+        parser.error(f"--resume-from must be an existing batch directory inside {directory}")
     directory.mkdir(parents=True, exist_ok=True)
-    batch = Path(mkdtemp(dir=directory, prefix="sweep-"))
+    batch = None
+    commit = None
     rows = []
     for limit in args.limits:
         threads = max(1, int(limit))
         for run in range(1, args.runs + 1):
-            destination = batch / f"cpu{limit:f}-run{run}.json"
+            filename = f"cpu{limit:f}-run{run}.json"
             print(f"CPU {limit}, threads {threads}, run {run}/{args.runs}", flush=True)
-            measure(limit, threads, args.cameras, destination)
+            if previous is not None and (previous / filename).is_file():
+                destination = directory / previous.name / filename
+                print(f"Using saved result {destination}", flush=True)
+            else:
+                if batch is None:
+                    batch = Path(mkdtemp(dir=directory, prefix="sweep-"))
+                destination = batch / filename
+                measure(limit, threads, args.cameras, destination)
             result = json.loads(destination.read_text())
             videos = result["per_video"]
             dropped = sum(video["run"]["dropped"] for video in videos.values())
@@ -107,17 +121,20 @@ def main():
                     or result["config"]["detector"]["intra_op_threads"] != threads or not result["git"]
                     or set(videos) != cameras or dropped != result["dropped_frames"]):
                 raise ValueError(f"{destination}: recorded run conditions or drop count disagree with the Job")
+            if commit is not None and result["git"] != commit:
+                raise ValueError(f"{destination}: image commit {result['git']} differs from {commit}")
+            commit = result["git"]
             rows.append({
                 "cpu_limit": float(limit), "threads": threads, "run": run,
-                "result": str(destination.relative_to(args.out.parent)),
+                "result": str(destination.relative_to(output_path.parent)),
                 "frames": sum(video["run"]["frames"] for video in videos.values()),
                 "dropped_frames": dropped, "values_different": len(different_keys(recorded, result)[0]),
             })
 
-    with NamedTemporaryFile(mode="w", dir=args.out.parent, delete=False) as summary:
+    with NamedTemporaryFile(mode="w", dir=output_path.parent, delete=False) as summary:
         json.dump({"recorded": str(RECORDED), "runs": rows}, summary, indent=2)
         summary.write("\n")
-    Path(summary.name).replace(args.out)
+    Path(summary.name).replace(output_path)
     print(args.out)
 
 
