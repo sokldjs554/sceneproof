@@ -1,4 +1,4 @@
-"""Task F: concurrent_groups gives the same groups as before, without comparing every pair of events in a zone.
+"""concurrent_groups gives the same groups as before, without comparing every pair of events in a zone.
 
 `reference_groups` below states the rule pair by pair. It is the specification of the result, not the way to
 compute it: comparing every pair is exactly what makes the listing slow when a zone has thousands of events.
@@ -78,7 +78,7 @@ def random_events(seed, n=400):
     return events
 
 
-def test_f_same_groups_as_the_pairwise_rule_on_random_events():
+def test_sweep_same_groups_as_the_pairwise_rule_on_random_events():
     for seed in range(5):
         events = random_events(seed)
         for gap in (0.0, 1.5):
@@ -87,7 +87,7 @@ def test_f_same_groups_as_the_pairwise_rule_on_random_events():
             assert concurrent_groups(events, now=NOW, gap_s=gap) == want, (seed, gap)
 
 
-def test_f_the_order_of_the_input_does_not_matter():
+def test_sweep_the_order_of_the_input_does_not_matter():
     events = random_events(11)
     want = reference_groups(events, 1.0)
     shuffled = list(events)
@@ -96,20 +96,20 @@ def test_f_the_order_of_the_input_does_not_matter():
     assert concurrent_groups(list(reversed(events)), now=NOW, gap_s=1.0) == want
 
 
-def test_f_an_open_event_joins_everything_that_comes_later_in_its_zone():
+def test_sweep_an_open_event_joins_everything_that_comes_later_in_its_zone():
     events = [ev("open", 10, None), ev("b", 300, 305), ev("c", 800, 801), ev("other-zone", 300, 305, zone="z2")]
     got = concurrent_groups(events, now=NOW)
     assert got == reference_groups(events)
     assert got["open"]["event_ids"] == ["open", "b", "c"] and "other-zone" not in got
 
 
-def test_f_events_that_start_at_the_same_moment():
+def test_sweep_events_that_start_at_the_same_moment():
     events = [ev(f"s{i}", 50.0, 50.0 + i) for i in range(1, 6)] + [ev("after", 60.0, 61.0)]
     assert concurrent_groups(events, now=NOW) == reference_groups(events)
     assert concurrent_groups(events, now=NOW, gap_s=5.0) == reference_groups(events, 5.0)
 
 
-def test_f_an_event_recorded_with_its_end_before_its_start_is_judged_by_the_same_rule():
+def test_sweep_an_event_recorded_with_its_end_before_its_start_is_judged_by_the_same_rule():
     # bad data must not be grouped differently than before: both wall-clock conditions are still checked
     events = [ev("a", 10, 20, 1000.0, 1010.0), ev("bad", 12, 18, 1012.0, 900.0), ev("c", 15, 25, 1005.0, 1015.0)]
     for gap in (0.0, 2.0):
@@ -130,7 +130,7 @@ def _best_time(events):
     return best
 
 
-def test_f_time_grows_about_in_step_with_the_number_of_events_when_nothing_overlaps():
+def test_sweep_time_grows_about_in_step_with_the_number_of_events_when_nothing_overlaps():
     small, large = _best_time(_sequential(2000)), _best_time(_sequential(8000))
     # four times the events: comparing every pair takes about sixteen times as long, a sweep about four times
     assert large < 8 * small + 0.02, f"2000 events {small * 1e3:.0f} ms, 8000 events {large * 1e3:.0f} ms"

@@ -1,4 +1,4 @@
-"""Task G: read and group all events only when the stored events have changed.
+"""Read and group all events only when the stored events have changed.
 
 Store.events_version() changes when an event is stored (new, or a newer revision) and at no other time.
 GroupIndex(store).groups(gap_s) returns what concurrent_groups(store.list_events(limit=-1), gap_s=gap_s) returns,
@@ -48,7 +48,7 @@ def count_full_reads(store, delay_s=0.0):
     return calls
 
 
-def test_g_version_changes_only_when_an_event_is_stored(store):
+def test_index_version_changes_only_when_an_event_is_stored(store):
     v0 = store.events_version()
     assert isinstance(v0, int)
     store.upsert_event(event("new", 100.0, 101.0))
@@ -65,14 +65,14 @@ def test_g_version_changes_only_when_an_event_is_stored(store):
     assert store.events_version() == v2   # none of these changes when the event was in the zone
 
 
-def test_g_index_gives_the_same_groups_as_grouping_all_events(store):
+def test_index_index_gives_the_same_groups_as_grouping_all_events(store):
     index = GroupIndex(store)
     want = concurrent_groups(store.list_events(limit=-1))
     assert index.groups() == want
     assert index.groups()["g-1"]["event_ids"] == ["g-1", "g-2"] and "solo" not in index.groups()
 
 
-def test_g_index_reads_the_events_once_until_they_change(store):
+def test_index_index_reads_the_events_once_until_they_change(store):
     reads = count_full_reads(store)
     index = GroupIndex(store)
     first = index.groups()
@@ -81,7 +81,7 @@ def test_g_index_reads_the_events_once_until_they_change(store):
     assert reads["n"] == 1
 
 
-def test_g_index_sees_a_new_event_and_a_newer_revision(store):
+def test_index_index_sees_a_new_event_and_a_newer_revision(store):
     reads = count_full_reads(store)
     index = GroupIndex(store)
     assert "solo" not in index.groups()
@@ -93,7 +93,7 @@ def test_g_index_sees_a_new_event_and_a_newer_revision(store):
     assert reads["n"] == 3
 
 
-def test_g_a_review_or_a_duplicate_does_not_cause_another_read(store):
+def test_index_a_review_or_a_duplicate_does_not_cause_another_read(store):
     reads = count_full_reads(store)
     index = GroupIndex(store)
     before = index.groups()
@@ -103,7 +103,7 @@ def test_g_a_review_or_a_duplicate_does_not_cause_another_read(store):
     assert reads["n"] == 1
 
 
-def test_g_each_gap_value_is_computed_and_kept_separately(store):
+def test_index_each_gap_value_is_computed_and_kept_separately(store):
     store.upsert_event(event("near-1", 60.0, 65.0))
     store.upsert_event(event("near-2", 66.5, 70.0))   # starts 1.5 s after near-1 ends
     reads = count_full_reads(store)
@@ -116,7 +116,7 @@ def test_g_each_gap_value_is_computed_and_kept_separately(store):
         index.groups(gap_s=-1.0)
 
 
-def test_g_requests_arriving_together_share_one_computation(store):
+def test_index_requests_arriving_together_share_one_computation(store):
     reads = count_full_reads(store, delay_s=0.05)   # slow read: without a lock every thread would start its own
     index = GroupIndex(store)
     results = []

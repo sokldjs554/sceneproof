@@ -1,7 +1,7 @@
-"""Task H: GET /api/events gives every row the same group information, whatever the filter or the page.
+"""GET /api/events gives every row the same group information, whatever the filter or the page.
 
 Until now the default listing grouped only the rows it returned, so a review-state filter or a page boundary
-could hide that an event had company. `concurrent_only=true` grouped over all events. After this task both use
+could hide that an event had company. `concurrent_only=true` grouped over all events. Now both use
 the groups of all events (kept by a GroupIndex), and `group_gap_s` sets how far apart events may be.
 """
 
@@ -39,7 +39,7 @@ def by_id(body):
     return {x["event_id"]: x for x in body["items"]}
 
 
-def test_h_a_review_state_filter_keeps_the_whole_group(served):
+def test_list_a_review_state_filter_keeps_the_whole_group(served):
     client, _ = served
     assert client.post("/api/events/g-2/review", json={"state": "in_review", "actor": "reviewer"}).status_code == 200
     items = by_id(client.get("/api/events", params={"state": "needs_review"}).json())
@@ -49,7 +49,7 @@ def test_h_a_review_state_filter_keeps_the_whole_group(served):
     assert items["solo"]["concurrent"] is None
 
 
-def test_h_a_page_boundary_keeps_the_whole_group(served):
+def test_list_a_page_boundary_keeps_the_whole_group(served):
     client, _ = served
     everything = by_id(client.get("/api/events").json())
     for offset in range(len(EVENTS)):
@@ -60,7 +60,7 @@ def test_h_a_page_boundary_keeps_the_whole_group(served):
     assert everything["g-2"]["concurrent"]["event_ids"] == ["g-1", "g-2"]
 
 
-def test_h_default_and_concurrent_only_agree(served):
+def test_list_default_and_concurrent_only_agree(served):
     client, _ = served
     default = by_id(client.get("/api/events").json())
     only = by_id(client.get("/api/events", params={"concurrent_only": "true"}).json())
@@ -69,7 +69,7 @@ def test_h_default_and_concurrent_only_agree(served):
     assert {k for k, v in default.items() if v["concurrent"]} == set(only)
 
 
-def test_h_group_gap_s_joins_events_that_almost_touch(served):
+def test_list_group_gap_s_joins_events_that_almost_touch(served):
     client, _ = served
     assert by_id(client.get("/api/events").json())["near-1"]["concurrent"] is None
     wide = by_id(client.get("/api/events", params={"group_gap_s": 2}).json())
@@ -80,7 +80,7 @@ def test_h_group_gap_s_joins_events_that_almost_touch(served):
     assert by_id(client.get("/api/events", params={"group_gap_s": 1}).json())["near-1"]["concurrent"] is None
 
 
-def test_h_group_gap_s_is_limited_to_zero_through_sixty_seconds(served):
+def test_list_group_gap_s_is_limited_to_zero_through_sixty_seconds(served):
     client, _ = served
     assert client.get("/api/events", params={"group_gap_s": 0}).status_code == 200
     assert client.get("/api/events", params={"group_gap_s": 60}).status_code == 200
@@ -88,7 +88,7 @@ def test_h_group_gap_s_is_limited_to_zero_through_sixty_seconds(served):
         assert client.get("/api/events", params={"group_gap_s": bad}).status_code == 422, bad
 
 
-def test_h_all_events_are_grouped_once_until_an_event_is_stored(served, monkeypatch):
+def test_list_all_events_are_grouped_once_until_an_event_is_stored(served, monkeypatch):
     client, store = served
     calls = {"n": 0}
     real = groups_mod.concurrent_groups
@@ -110,7 +110,7 @@ def test_h_all_events_are_grouped_once_until_an_event_is_stored(served, monkeypa
     assert calls["n"] == 2
 
 
-def test_h_counts_and_rows_are_as_before(served):
+def test_list_counts_and_rows_are_as_before(served):
     client, _ = served
     body = client.get("/api/events").json()
     assert body["count"] == len(EVENTS) and body["counts"]["total"] == len(EVENTS)
