@@ -1,8 +1,13 @@
 package queue
 
 import (
+	"bufio"
+	"encoding/binary"
 	"errors"
+	"fmt"
+	"hash/crc32"
 	"io"
+	"os"
 )
 
 // WAL record layout (all integers little-endian):
@@ -39,7 +44,13 @@ var ErrCorrupt = errors.New("queue: corrupt wal record")
 
 // encodeRecord frames one record in the layout above.
 func encodeRecord(typ byte, payload []byte) []byte {
-	panic("queue: encodeRecord is not implemented")
+	record := make([]byte, headerBytes+1+len(payload))
+	body := record[headerBytes:]
+	body[0] = typ
+	copy(body[1:], payload)
+	binary.LittleEndian.PutUint32(record, uint32(len(body)))
+	binary.LittleEndian.PutUint32(record[4:], crc32.ChecksumIEEE(body))
+	return record
 }
 
 // ScanFile reads WAL records from path in order and calls fn for each one.
@@ -51,11 +62,44 @@ func encodeRecord(typ byte, payload []byte) []byte {
 // It is exported so tests (and operators' tooling) can inspect a live WAL
 // without going through Open.
 func ScanFile(path string, fn func(typ byte, payload []byte) error) (good int64, err error) {
-	panic("queue: ScanFile is not implemented")
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	return scan(bufio.NewReader(f), fn)
 }
 
 // scan is ScanFile for any reader. A length of 0 or above maxRecordBytes is
 // corrupt. It must not trust the length field before the bytes are there.
 func scan(rd io.Reader, fn func(typ byte, payload []byte) error) (good int64, err error) {
-	panic("queue: scan is not implemented")
+	var header [headerBytes]byte
+	for {
+		_, err := io.ReadFull(rd, header[:])
+		switch err {
+		case io.EOF:
+			return good, nil
+		case io.ErrUnexpectedEOF:
+			return good, fmt.Errorf("%w: partial header at %d", ErrCorrupt, good)
+		case nil:
+		default:
+			return good, err
+		}
+		length := int64(binary.LittleEndian.Uint32(header[:]))
+		if length < 1 || length > maxRecordBytes {
+			return good, fmt.Errorf("%w: length %d at %d", ErrCorrupt, length, good)
+		}
+		// Grow with bytes actually read, even if the header claims 64 MiB.
+		body, err := io.ReadAll(io.LimitReader(rd, length))
+		if err != nil {
+			return good, err
+		}
+		if int64(len(body)) != length || crc32.ChecksumIEEE(body) != binary.LittleEndian.Uint32(header[4:]) {
+			return good, fmt.Errorf("%w: incomplete or damaged body at %d", ErrCorrupt, good)
+		}
+		good += headerBytes + length
+		if err := fn(body[0], body[1:]); err != nil {
+			return good, err
+		}
+	}
 }
