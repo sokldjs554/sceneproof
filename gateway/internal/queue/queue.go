@@ -41,6 +41,7 @@ package queue
 import (
 	"container/list"
 	"encoding/binary"
+
 	"errors"
 	"io"
 	"log/slog"
@@ -130,17 +131,24 @@ type Stats struct {
 
 // Queue is safe for concurrent use.
 type Queue struct {
-	mu          sync.Mutex
-	opts        Options
-	path        string
-	wal         File
-	dir         *os.File
-	needDirSync bool
-	validBytes  int64 // start of the next transaction, even if truncating a failed write failed
-	stats       Stats
-	fifo        list.List
-	byID        map[string]*list.Element
-	wake        chan struct{}
+	mu             sync.Mutex
+	opts           Options
+	path           string
+	wal            File
+	dir            *os.File
+	needDirSync    bool
+	committedBytes int64 // last good offset; FileBytes may include a partial write
+	stats          Stats
+	fifo           list.List
+	byID           map[string]*entry
+	wake           chan struct{}
+}
+
+// Each pending event has one entry. Updating it keeps its position in the FIFO.
+type entry struct {
+	event    *sceneproofv1.Event
+	payload  []byte
+	position *list.Element
 }
 
 // Open recovers the queue from Dir (creating it if needed), truncates a
@@ -178,8 +186,14 @@ func Open(opts Options) (*Queue, error) {
 	if err != nil {
 		return nil, err
 	}
-	q := &Queue{opts: opts, dir: dir, path: filepath.Join(opts.Dir, FileName),
-		byID: make(map[string]*list.Element), wake: make(chan struct{}, 1), stats: Stats{MaxBytes: opts.MaxBytes}}
+	q := &Queue{
+		opts:  opts,
+		dir:   dir,
+		path:  filepath.Join(opts.Dir, FileName),
+		byID:  make(map[string]*entry),
+		wake:  make(chan struct{}, 1),
+		stats: Stats{MaxBytes: opts.MaxBytes},
+	}
 	q.wal, err = opts.OpenFile(q.path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		dir.Close()
@@ -201,7 +215,7 @@ func Open(opts Options) (*Queue, error) {
 func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if err := q.ready(); err != nil {
+	if err := q.prepareWAL(); err != nil {
 		return PutResult{}, err
 	}
 	id := ev.GetEventId()
@@ -209,7 +223,7 @@ func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 		return PutResult{}, ErrInvalid
 	}
 	old := q.byID[id]
-	if old != nil && old.Value.(*snapshot).event.Revision >= ev.Revision {
+	if old != nil && old.event.Revision >= ev.Revision {
 		return PutResult{Duplicate: true}, nil
 	}
 	size := int64(proto.Size(ev))
@@ -220,30 +234,12 @@ func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 	if err != nil {
 		return PutResult{}, err
 	}
-	next := &snapshot{event: proto.CloneOf(ev), payload: payload}
-	total := q.stats.LiveBytes + int64(len(payload))
-	if old != nil {
-		total -= int64(len(old.Value.(*snapshot).payload))
-	}
-	records := [][]byte{encodeRecord(recPut, payload)}
-	var victims []*list.Element
-	for e := q.fifo.Front(); total > q.opts.MaxBytes; e = e.Next() {
-		victim := e.Value.(*snapshot)
-		if e == old {
-			// The updated episode keeps its original FIFO position.
-			victim = next
-		}
-		total -= int64(len(victim.payload))
-		victims = append(victims, e)
-		records = append(records, keyRecord(recDrop, victim.event.EventId, victim.event.Revision))
-	}
-	if err := q.appendRecords(records, !q.opts.DisableFsync); err != nil {
+	// Log the whole operation before changing the FIFO.
+	if err := q.writePutAndDrops(ev, payload); err != nil {
 		return PutResult{}, err
 	}
-	q.store(next)
-	for _, e := range victims {
-		q.evict(e)
-	}
+	q.store(proto.CloneOf(ev), payload)
+	evicted := q.evictOverBudget()
 	q.maybeCompact()
 	_, stored := q.byID[id]
 	if stored {
@@ -252,7 +248,33 @@ func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 		default:
 		}
 	}
-	return PutResult{Stored: stored, Evicted: len(victims)}, nil
+	return PutResult{Stored: stored, Evicted: evicted}, nil
+}
+
+// An update still occupies its original FIFO slot. Use its new size and
+// revision when deciding which DROP records follow this PUT.
+func (q *Queue) writePutAndDrops(ev *sceneproofv1.Event, payload []byte) error {
+	if err := q.appendRecord(recPut, payload); err != nil {
+		return err
+	}
+	bytesAfterPut := q.stats.LiveBytes + int64(len(payload))
+	replaced := q.byID[ev.EventId]
+	if replaced != nil {
+		bytesAfterPut -= int64(len(replaced.payload))
+	}
+	for pos := q.fifo.Front(); bytesAfterPut > q.opts.MaxBytes; pos = pos.Next() {
+		item := pos.Value.(*entry)
+		victim, size := item.event, len(item.payload)
+		if item == replaced {
+			victim, size = ev, len(payload)
+		}
+		if err := q.appendRecord(recDrop, keyPayload(victim.EventId, victim.Revision)); err != nil {
+			return err
+		}
+		bytesAfterPut -= int64(size)
+	}
+	q.committedBytes = q.stats.FileBytes
+	return nil
 }
 
 // Ack records that the server holds revision (accepted or duplicate). The
@@ -263,16 +285,17 @@ func (q *Queue) Put(ev *sceneproofv1.Event) (PutResult, error) {
 func (q *Queue) Ack(eventID string, revision int32) (bool, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if err := q.ready(); err != nil {
+	if err := q.prepareWAL(); err != nil {
 		return false, err
 	}
 	e := q.byID[eventID]
-	if e == nil || revision < e.Value.(*snapshot).event.Revision {
+	if e == nil || revision < e.event.Revision {
 		return false, nil
 	}
-	if err := q.appendRecords([][]byte{keyRecord(recAck, eventID, revision)}, false); err != nil {
+	if err := q.appendRecord(recAck, keyPayload(eventID, revision)); err != nil {
 		return false, err
 	}
+	q.committedBytes = q.stats.FileBytes
 	q.remove(e)
 	q.maybeCompact()
 	return true, nil
@@ -286,7 +309,7 @@ func (q *Queue) Pending() []*sceneproofv1.Event {
 	defer q.mu.Unlock()
 	events := make([]*sceneproofv1.Event, 0, q.fifo.Len())
 	for e := q.fifo.Front(); e != nil; e = e.Next() {
-		events = append(events, e.Value.(*snapshot).event)
+		events = append(events, e.Value.(*entry).event)
 	}
 	return events
 }
@@ -324,7 +347,7 @@ func (q *Queue) Stats() Stats {
 func (q *Queue) Compact() error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	if err := q.ready(); err != nil {
+	if err := q.prepareWAL(); err != nil {
 		return err
 	}
 	return q.compactLocked()
@@ -338,62 +361,65 @@ func (q *Queue) Close() error {
 	if q.wal == nil {
 		return nil
 	}
-	err := errors.Join(q.ready(), q.wal.Sync(), q.wal.Close(), q.dir.Close())
+	repairErr := q.prepareWAL()
+	syncErr := q.wal.Sync()
+	closeErr := q.wal.Close()
+	dirErr := q.dir.Close()
 	q.wal = nil
-	return err
+	return errors.Join(repairErr, syncErr, closeErr, dirErr)
 }
 
-// Keep the original payload so compaction preserves its bytes, including unknown fields.
-type snapshot struct {
-	event   *sceneproofv1.Event
-	payload []byte
-}
-
-func (q *Queue) store(s *snapshot) {
-	id := s.event.EventId
-	if e := q.byID[id]; e != nil {
-		q.stats.LiveBytes -= int64(len(e.Value.(*snapshot).payload))
-		e.Value = s
-	} else {
-		q.byID[id] = q.fifo.PushBack(s)
+func (q *Queue) store(ev *sceneproofv1.Event, payload []byte) {
+	item := q.byID[ev.EventId]
+	if item == nil {
+		item = &entry{}
+		item.position = q.fifo.PushBack(item)
+		q.byID[ev.EventId] = item
 	}
-	q.stats.LiveBytes += int64(len(s.payload))
+	q.stats.LiveBytes -= int64(len(item.payload))
+	item.event = ev
+	item.payload = payload
+	q.stats.LiveBytes += int64(len(payload))
 }
 
-func (q *Queue) remove(e *list.Element) {
-	s := e.Value.(*snapshot)
-	delete(q.byID, s.event.EventId)
-	q.fifo.Remove(e)
-	q.stats.LiveBytes -= int64(len(s.payload))
+func (q *Queue) remove(item *entry) {
+	delete(q.byID, item.event.EventId)
+	q.fifo.Remove(item.position)
+	q.stats.LiveBytes -= int64(len(item.payload))
 }
 
-func (q *Queue) evict(e *list.Element) {
-	q.opts.Logger.Warn("evicting pending event", "event_id", e.Value.(*snapshot).event.EventId)
-	q.remove(e)
-	q.stats.Dropped++
-}
-
-func keyRecord(typ byte, id string, revision int32) []byte {
-	key := binary.LittleEndian.AppendUint32(nil, uint32(revision))
-	return encodeRecord(typ, append(key, id...))
+func (q *Queue) evictOverBudget() int {
+	count := 0
+	for q.stats.LiveBytes > q.opts.MaxBytes {
+		oldest := q.fifo.Front().Value.(*entry)
+		q.opts.Logger.Warn("evicting pending event", "event_id", oldest.event.EventId)
+		q.remove(oldest)
+		q.stats.Dropped++
+		count++
+	}
+	return count
 }
 
 func (q *Queue) replay(typ byte, payload []byte) error {
 	switch typ {
 	case recPut:
 		ev := new(sceneproofv1.Event)
-		if proto.Unmarshal(payload, ev) == nil && ev.EventId != "" {
-			e := q.byID[ev.EventId]
-			if e == nil || ev.Revision > e.Value.(*snapshot).event.Revision {
-				q.store(&snapshot{event: ev, payload: payload})
-			}
+		if err := proto.Unmarshal(payload, ev); err != nil || ev.EventId == "" {
+			return nil
+		}
+		old := q.byID[ev.EventId]
+		if old == nil || ev.Revision > old.event.Revision {
+			q.store(ev, payload)
 		}
 	case recAck, recDrop:
-		if len(payload) > 4 {
-			e := q.byID[string(payload[4:])]
-			if e != nil && int32(binary.LittleEndian.Uint32(payload)) >= e.Value.(*snapshot).event.Revision {
-				q.remove(e)
-			}
+		if len(payload) <= 4 {
+			return nil
+		}
+		revision := int32(binary.LittleEndian.Uint32(payload[:4]))
+		id := string(payload[4:])
+		item := q.byID[id]
+		if item != nil && revision >= item.event.Revision {
+			q.remove(item)
 		}
 	}
 	return nil
@@ -422,11 +448,9 @@ func (q *Queue) recover() error {
 		q.stats.Truncated = true
 		q.opts.Logger.Warn("truncated corrupt WAL tail", "good_bytes", good)
 	}
-	q.validBytes = good
+	q.committedBytes = good
 	q.stats.FileBytes = good
-	for q.stats.LiveBytes > q.opts.MaxBytes {
-		q.evict(q.fifo.Front())
-	}
+	q.evictOverBudget()
 	if good > q.compactBytes() {
 		return q.compactLocked()
 	}
@@ -435,7 +459,7 @@ func (q *Queue) recover() error {
 
 // Repair before the next operation. A failed truncate leaves the trusted
 // boundary intact; appending behind that boundary would hide later records on replay.
-func (q *Queue) ready() error {
+func (q *Queue) prepareWAL() error {
 	if q.wal == nil {
 		return ErrClosed
 	}
@@ -445,35 +469,26 @@ func (q *Queue) ready() error {
 		}
 		q.needDirSync = false
 	}
-	if q.stats.FileBytes != q.validBytes {
-		if err := q.wal.Truncate(q.validBytes); err != nil {
+	if q.stats.FileBytes != q.committedBytes {
+		if err := q.wal.Truncate(q.committedBytes); err != nil {
 			return err
 		}
-		q.stats.FileBytes = q.validBytes
+		q.stats.FileBytes = q.committedBytes
 	}
 	return nil
 }
 
-func writeRecord(w io.Writer, record []byte) (int, error) {
-	n, err := w.Write(record)
-	if err == nil && n != len(record) {
-		err = io.ErrShortWrite
+func (q *Queue) appendRecord(typ byte, payload []byte) error {
+	n, err := writeRecord(q.wal, typ, payload)
+	q.stats.FileBytes += int64(n)
+	if err == nil && typ == recPut && !q.opts.DisableFsync {
+		err = q.wal.Sync()
 	}
-	return n, err
-}
-
-func (q *Queue) appendRecords(records [][]byte, syncPut bool) error {
-	for i, record := range records {
-		n, err := writeRecord(q.wal, record)
-		q.stats.FileBytes += int64(n)
-		if err == nil && i == 0 && syncPut {
-			err = q.wal.Sync()
-		}
-		if err != nil {
-			return errors.Join(err, q.ready())
-		}
+	if err != nil {
+		// Roll back to before the PUT (or ACK), including any completed DROP records.
+		repairErr := q.prepareWAL()
+		return errors.Join(err, repairErr)
 	}
-	q.validBytes = q.stats.FileBytes
 	return nil
 }
 
@@ -491,34 +506,37 @@ func (q *Queue) compactLocked() error {
 	if err != nil {
 		return err
 	}
-	// Retain this open handle across rename: new appends must hit the new inode.
-	defer func() {
-		if next != nil {
-			next.Close()
-			os.Remove(path)
-		}
-	}()
-	for e := q.fifo.Front(); e != nil; e = e.Next() {
-		if _, err := writeRecord(next, encodeRecord(recPut, e.Value.(*snapshot).payload)); err != nil {
+	err = q.writeLiveRecords(next)
+	if err == nil {
+		err = os.Rename(path, q.path)
+	}
+	if err != nil {
+		next.Close()
+		os.Remove(path)
+		return err
+	}
+	// After rename the new file is the WAL, even if syncing the directory fails.
+	old := q.wal
+	q.wal = next
+	q.committedBytes = q.compactBytes()
+	q.stats.FileBytes = q.committedBytes
+	q.stats.Compactions++
+	q.needDirSync = true
+	syncErr := q.prepareWAL()
+	closeErr := old.Close()
+	if err := errors.Join(syncErr, closeErr); err != nil {
+		return err
+	}
+	q.opts.Logger.Info("compacted WAL", "bytes", q.committedBytes)
+	return nil
+}
+
+func (q *Queue) writeLiveRecords(file File) error {
+	for pos := q.fifo.Front(); pos != nil; pos = pos.Next() {
+		item := pos.Value.(*entry)
+		if _, err := writeRecord(file, recPut, item.payload); err != nil {
 			return err
 		}
 	}
-	if err := next.Sync(); err != nil {
-		return err
-	}
-	if err := os.Rename(path, q.path); err != nil {
-		return err
-	}
-	old := q.wal
-	q.wal = next
-	next = nil
-	q.validBytes = q.compactBytes()
-	q.stats.FileBytes = q.validBytes
-	q.stats.Compactions++
-	q.needDirSync = true
-	err = errors.Join(q.ready(), old.Close())
-	if err == nil {
-		q.opts.Logger.Info("compacted WAL", "bytes", q.validBytes)
-	}
-	return err
+	return file.Sync()
 }

@@ -53,6 +53,22 @@ func encodeRecord(typ byte, payload []byte) []byte {
 	return record
 }
 
+func keyPayload(id string, revision int32) []byte {
+	payload := make([]byte, 4+len(id))
+	binary.LittleEndian.PutUint32(payload[:4], uint32(revision))
+	copy(payload[4:], id)
+	return payload
+}
+
+func writeRecord(w io.Writer, typ byte, payload []byte) (int, error) {
+	record := encodeRecord(typ, payload)
+	n, err := w.Write(record)
+	if err == nil && n != len(record) {
+		err = io.ErrShortWrite
+	}
+	return n, err
+}
+
 // ScanFile reads WAL records from path in order and calls fn for each one.
 // It returns the number of bytes that were verified good. If the file ends
 // with a truncated or corrupt record, the returned error wraps ErrCorrupt and
@@ -76,13 +92,13 @@ func scan(rd io.Reader, fn func(typ byte, payload []byte) error) (good int64, er
 	var header [headerBytes]byte
 	for {
 		_, err := io.ReadFull(rd, header[:])
-		switch err {
-		case io.EOF:
+		if err == io.EOF {
 			return good, nil
-		case io.ErrUnexpectedEOF:
+		}
+		if err == io.ErrUnexpectedEOF {
 			return good, fmt.Errorf("%w: partial header at %d", ErrCorrupt, good)
-		case nil:
-		default:
+		}
+		if err != nil {
 			return good, err
 		}
 		length := int64(binary.LittleEndian.Uint32(header[:]))
@@ -94,8 +110,12 @@ func scan(rd io.Reader, fn func(typ byte, payload []byte) error) (good int64, er
 		if err != nil {
 			return good, err
 		}
-		if int64(len(body)) != length || crc32.ChecksumIEEE(body) != binary.LittleEndian.Uint32(header[4:]) {
-			return good, fmt.Errorf("%w: incomplete or damaged body at %d", ErrCorrupt, good)
+		if int64(len(body)) != length {
+			return good, fmt.Errorf("%w: incomplete body at %d", ErrCorrupt, good)
+		}
+		wantCRC := binary.LittleEndian.Uint32(header[4:])
+		if crc32.ChecksumIEEE(body) != wantCRC {
+			return good, fmt.Errorf("%w: checksum mismatch at %d", ErrCorrupt, good)
 		}
 		good += headerBytes + length
 		if err := fn(body[0], body[1:]); err != nil {
