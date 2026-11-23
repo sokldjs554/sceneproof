@@ -21,6 +21,7 @@ LOCK=docs/eval/inputs.lock.json
 RECORDED=docs/experiments/rerun-20261121/session_base.json
 IMAGE="${IMAGE:-sceneproof-eval:check}"
 OUT="${1:-$(mktemp -d)}"
+mkdir -p "$OUT"
 fails=0
 ok()  { echo "  ok   $*"; }
 bad() { echo "  FAIL $*"; fails=$((fails + 1)); }
