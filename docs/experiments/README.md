@@ -9,6 +9,8 @@
 
 **다시 돌리기(2026-11-21)**: 두 실험은 처음 실행 때 커밋되지 않은 변경이 있어 확정된 코드에서 다시 돌렸습니다([기록](rerun-20261121/README.md)). 들어감 확인 시간은 환경이 달라도 같은 결론이었고(놓침은 3건이 아니라 2건), 최소 상자 높이 40px의 효과는 ONNX Runtime 1.19인 Mac에서 반대로 나와(끝 시각 오차 1.69 → 1.97초) 실행 환경의 차이보다 작았습니다. 평가 영상을 컴퓨터마다 다시 인코딩하기 때문에 영상 파일 자체도 환경마다 다릅니다.
 
+**원인과 고정(2026-11-23)**: 환경마다 결과가 달랐던 원인은 영상을 읽는 방식(GStreamer/OpenCV), ffmpeg 스레드 수, 인코더가 쓰는 CPU 명령어였습니다. 평가 환경을 이미지(`deploy/docker/Dockerfile.eval`)로 고정하고 평가 영상은 릴리스 파일을 그대로 쓰게 해, 서로 다른 두 컴퓨터에서 같은 결과(값 291개)를 확인했습니다([기록](rerun-20261121/README.md#다시-확인한-원인-2026-11-23)).
+
 관련 코드와 테스트: 구역 판정 `src/sceneproof/edge/zones.py`(`tests/test_zones.py`, `tests/test_zones_flicker_exclude.py`), 탐지기 `src/sceneproof/edge/detector.py`(`tests/test_min_box_height.py`, `tests/test_min_box_metadata.py`). 설계 결정: `docs/design/decisions.md` D15.
 
 다시 돌리기(예: 들어감 확인 시간):

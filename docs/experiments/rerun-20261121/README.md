@@ -33,13 +33,44 @@
 
 같은 환경 안에서는 결과가 매번 같습니다. 이 세션의 기본 설정 결과는 11월 16일 같은 환경 실행과 비교한 값 291개가 모두 같았습니다.
 
+## 다시 확인한 원인 (2026-11-23)
+
+평가 환경을 이미지로 고정하면서 원인을 하나씩 재 봤습니다. 위 두 가지 설명은 맞지 않거나 부족했습니다. 확인된 원인은 세 가지입니다.
+
+| 원인 | 측정 | 결과에 미치는 영향 |
+|---|---|---|
+| **영상을 읽는 방식** | 분석기는 GStreamer가 있으면 그것으로, 없으면 OpenCV로 영상을 읽습니다(`pipeline.source_backend: auto`). 같은 입력 파일·같은 라이브러리 버전에서 OpenCV로 읽으면(`session_base_opencv.json`) 주차장에 잘못 울림 1건이 생기고 캠퍼스·매장의 중복 수가 바뀝니다. | 가장 큼. Mac에는 GStreamer가 없었습니다. 이 세션에서 OpenCV로 읽은 결과는 Mac 기록과 4편 모두 집계가 같고(12 / 0 / 1 / 6), 3편은 사건 시각까지 같습니다. |
+| **ffmpeg 스레드 수** | 같은 컴퓨터에서 `-threads`만 1, 2, 6으로 바꿔도 다른 파일이 나옵니다. 지정하지 않으면 CPU 코어 수로 정해집니다. 6으로 고정하면 코어 1·2·4개에서 모두 같은 파일이 나옵니다. | 컴퓨터마다 입력 영상이 달라집니다. `scripts/fetch_data.sh`가 이제 6으로 고정합니다(`FFMPEG_THREADS`). |
+| **인코더가 쓰는 CPU 명령어** | 스레드를 고정해도 x264는 CPU가 지원하는 명령어에 따라 계산 방식을 고릅니다. 명령어를 AVX2까지로 제한하면 매장 영상만 다른 파일이 되고 나머지 3편은 같습니다. 코드스페이스(다른 CPU)에서도 매장 영상만 달랐습니다. | 영상을 컴퓨터마다 다시 인코딩하는 방식으로는 모든 컴퓨터에서 같은 파일을 보장할 수 없습니다. |
+
+모델 파일은 원인이 아니었습니다. 공식 YOLOX-tiny ONNX 파일로 돌려도 이 세션 결과와 값 291개가 모두 같습니다. ONNX Runtime 1.19(Mac)의 영향은 따로 재지 않았습니다.
+
+**고친 방법**: 평가 환경을 이미지(`deploy/docker/Dockerfile.eval`)로 고정했습니다.
+- 기반 이미지는 다이제스트로, Python 패키지는 전부 정확한 버전으로(`deploy/docker/eval.constraints.txt`), ffmpeg·GStreamer 버전도 고정합니다.
+- 영상은 다시 인코딩하지 않고, 이 세션 결과를 만든 영상 4편을 그대로 릴리스 [`eval-videos-v1`](https://github.com/sokldjs554/sceneproof/releases/tag/eval-videos-v1)에서 받습니다. 받은 뒤 `docs/eval/inputs.lock.json`과 해시가 다르면 빌드가 멈춥니다.
+- 영상은 GStreamer로 읽습니다.
+- 평가 결과에 입력 파일의 해시, 도구 버전(ffmpeg·GStreamer 포함), 커밋 번호가 남습니다(`src/sceneproof/eval/provenance.py`).
+
+**확인**: 이 이미지로 코드스페이스와 GitHub 자동 검사(서로 다른 컴퓨터)에서 돌린 결과가 모두 이 세션의 기본 설정 결과(`session_base.json`)와 값 291개가 같습니다. 코드스페이스 결과는 `docs/eval/raw/event_eval_image_codespaces.json`, 점검은 `scripts/check_eval_image.sh`입니다(CI `eval-image` 작업).
+
 ## 남은 일
 
-- 평가 결과 파일에 입력 영상의 해시와 ffmpeg 버전을 함께 기록하기. 지금은 실험 README에 손으로 적고 있어 빠지기 쉽습니다.
-- 인코딩한 평가 영상을 그대로 배포해 컴퓨터마다 같은 파일을 쓰게 하기.
+- ~~평가 결과 파일에 입력 영상의 해시와 ffmpeg 버전을 함께 기록하기.~~ 했음(2026-11-23).
+- ~~인코딩한 평가 영상을 그대로 배포해 컴퓨터마다 같은 파일을 쓰게 하기.~~ 했음(2026-11-23, 릴리스 `eval-videos-v1`).
+- 두 설정 실험(1.0초, 40px)도 이미지로 다시 돌려, Mac 결과와 갈린 40px 효과를 같은 환경에서 확인하기.
 - 효과가 작은 설정은 한 환경의 한 번 실행으로 판단하지 않기. 이번처럼 두 환경 이상에서 방향이 같은지 확인합니다.
 
 ## 다시 돌리기
+
+평가 이미지로(어느 컴퓨터에서나 같은 입력·같은 도구):
+
+```bash
+docker build --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) -f deploy/docker/Dockerfile.eval -t sceneproof-eval .
+mkdir -p /tmp/out && chmod 777 /tmp/out
+docker run --rm -v /tmp/out:/out sceneproof-eval --out /out/ev_base.json
+```
+
+이미지 없이(결과가 컴퓨터에 따라 달라질 수 있음):
 
 ```bash
 python -m sceneproof.eval.run_eval --out /tmp/ev_base.json
