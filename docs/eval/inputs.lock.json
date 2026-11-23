@@ -1,0 +1,9 @@
+{
+ "files": {
+  "data/videos/campus-walkway.mp4": "68800e7f7eb98eae617bedd271863fc02779e8acc90ac0716f539f8b2efb89dc",
+  "data/videos/people-indoor.mp4": "8c95c6d9bd5881f3f728b34b66e48463f33569474ffc0d095e306f8bb5fdb8d0",
+  "data/videos/store-aisle.mp4": "d58be0d5181e8f6839f477e3aae841307770613e02cd03e207e981185730a87f",
+  "data/videos/parking-lot.mp4": "0289b76a544236e9ef1f1aa792aa0fdb66895ea8f7a462a47ddfdbd95678181e",
+  "models/yolox_tiny.onnx": "427cc366d34e27ff7a03e2899b5e3671425c262ea2291f88bb942bc1cc70b0f7"
+ }
+}
