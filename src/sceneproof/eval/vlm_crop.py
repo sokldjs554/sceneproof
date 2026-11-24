@@ -21,7 +21,9 @@ relation at all, which a set of only "inside" answers cannot.
     python -m sceneproof.eval.vlm_crop --dry-run --save-images /tmp/vlm-crop   # no model: just the images
 
 A model answer counts as right when zone_relation is clearly_inside for "inside" and outside for "outside";
-near_boundary and unclear are counted as abstentions, and an answer that is not JSON as unparsed.
+near_boundary and unclear are counted as abstentions. Small models often answer with the bare value
+("near_boundary") instead of the JSON object; that is accepted when exactly one of the four values appears.
+Anything else is unparsed.
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import re
 import statistics
 import subprocess
 import time
@@ -141,6 +144,9 @@ def judge(label: str, text: str) -> tuple[str | None, str]:
     """(zone_relation or None, outcome) where outcome is right | wrong | abstain | unparsed."""
     obj = extract_json(text)
     rel = obj.get("zone_relation") if isinstance(obj, dict) else None
+    if rel is None and not isinstance(obj, dict):
+        found = set(re.findall(r"\b(clearly_inside|near_boundary|outside|unclear)\b", text or ""))
+        rel = found.pop() if len(found) == 1 else None
     if rel not in ("clearly_inside", "near_boundary", "outside", "unclear"):
         return None, "unparsed"
     if rel in ("near_boundary", "unclear"):
@@ -259,6 +265,13 @@ def main(argv: list[str] | None = None) -> int:
     if bad:
         ap.error(f"unknown strategies {bad}; choose from {STRATEGIES}")
     queries = load_queries(roles=tuple(r.strip() for r in args.roles.split(",")))
+    if "crop" in strategies and queries:
+        try:
+            region(queries[0], "crop")
+        except NotImplementedError:
+            print("crop_for_vlm (src/sceneproof/server/vlm/crop.py) is not written yet: run without 'crop', "
+                  "e.g. --strategies full,split")
+            return 2
     if args.limit:
         queries = queries[: args.limit]
     labels = {lab: sum(q.label == lab for q in queries) for lab in ("inside", "outside")}
