@@ -19,8 +19,8 @@ def queries():
 def test_the_demo_evidence_gives_a_balanced_set(queries):
     inside = [q for q in queries if q.label == "inside"]
     outside = [q for q in queries if q.label == "outside"]
-    assert len(inside) == len(outside) >= 30
-    assert {q.role for q in queries} == {"entry", "dwell", "exit"}
+    assert len(inside) == len(outside) == 23          # 15 entry + 8 dwell frames
+    assert {q.role for q in queries} == {"entry", "dwell"}
     assert {q.variant for q in inside} == {"zone_true"} and {q.variant for q in outside} == {"zone_shifted"}
 
 
@@ -37,6 +37,17 @@ def test_the_shifted_zone_stays_in_the_frame(queries):
     for q in queries:
         h, w = q.image.shape[:2]
         assert all(-1 <= x <= w + 1 and -1 <= y <= h + 1 for x, y in q.zone)
+
+
+def test_exit_frames_are_left_out_by_default_but_can_be_asked_for():
+    # the exit key frame's stored box is the last position inside the zone, up to about a second before the image
+    assert "exit" not in vc.ROLES
+    assert {q.role for q in vc.load_queries(roles=vc.ALL_ROLES)} == {"entry", "dwell", "exit"}
+
+
+def test_unknown_role_is_refused():
+    with pytest.raises(SystemExit):
+        vc.main(["--dry-run", "--strategies", "full", "--roles", "entry,leave"])
 
 
 def test_shifted_zone_returns_none_when_no_step_works():

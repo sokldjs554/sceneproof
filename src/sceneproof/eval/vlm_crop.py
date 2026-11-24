@@ -10,12 +10,13 @@ Strategies (one image per request):
   split  whole frame cut into several tiles + a global view (image splitting) — detail, many tokens
   crop   the region chosen by sceneproof.server.vlm.crop.crop_for_vlm, one tile
 
-Queries. Every key frame of the demo events that has the tracked person's box (entry, dwell, exit) is
-drawn twice from the raw frame, the way the analyser draws evidence (red zone, yellow box):
+Queries. Every entry and dwell key frame of the demo events that has the tracked person's box is drawn
+twice from the raw frame, the way the analyser draws evidence (red zone, yellow box):
   zone_true     the real zone — the person's feet are inside it                       → label "inside"
   zone_shifted  the same zone moved sideways until the feet are clearly outside it   → label "outside"
 The shifted zone is a controlled counterpart, not a real scene: it tells whether the model reads the
-relation at all, which a set of only "inside" answers cannot.
+relation at all, which a set of only "inside" answers cannot. Exit frames are left out by default (see
+ALL_ROLES): their stored box lags the image.
 
     python -m sceneproof.eval.vlm_crop --strategies full,crop --out docs/experiments/vlm-crop/result.json
     python -m sceneproof.eval.vlm_crop --dry-run --save-images /tmp/vlm-crop   # no model: just the images
@@ -49,7 +50,12 @@ from sceneproof.edge.zones import point_in_polygon
 from sceneproof.server.vlm.schema import extract_json
 
 BUNDLE = Path("demo/bundle")
-ROLES = ("entry", "dwell", "exit")
+ROLES = ("entry", "dwell")
+# The exit key frame is the frame where the exit is confirmed, but the box stored with it is the person's last
+# position inside the zone, recorded up to about a second earlier: in that image the person has often already
+# walked out of the box. Its label ("inside", from that box) would then be wrong, so exit frames are left out
+# unless asked for with --roles.
+ALL_ROLES = ("entry", "dwell", "exit")
 STRATEGIES = ("full", "split", "crop")
 SHORT_PROMPT = (
     "The red polygon marks a restricted zone on the floor. The yellow box marks one tracked person. "
@@ -256,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--model", default="HuggingFaceTB/SmolVLM-500M-Instruct")
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--split-edge", type=int, default=1024, help="longest edge before splitting into 512-px tiles")
-    ap.add_argument("--roles", default=",".join(ROLES))
+    ap.add_argument("--roles", default=",".join(ROLES), help="key frames to use; exit frames carry a box that lags the image")
     ap.add_argument("--limit", type=int, default=0, help="use only the first N queries (0 = all)")
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--save-images", type=Path, default=None, help="write every image that is sent to the model here")
@@ -266,7 +272,10 @@ def main(argv: list[str] | None = None) -> int:
     bad = [s for s in strategies if s not in STRATEGIES]
     if bad:
         ap.error(f"unknown strategies {bad}; choose from {STRATEGIES}")
-    queries = load_queries(roles=tuple(r.strip() for r in args.roles.split(",")))
+    roles = tuple(r.strip() for r in args.roles.split(",") if r.strip())
+    if any(r not in ALL_ROLES for r in roles):
+        ap.error(f"unknown roles {roles}; choose from {ALL_ROLES}")
+    queries = load_queries(roles=roles)
     if "crop" in strategies and queries:
         try:
             region(queries[0], "crop")
