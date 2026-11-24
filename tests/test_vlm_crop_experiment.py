@@ -117,3 +117,72 @@ def test_dry_run_needs_no_model(tmp_path, capsys):
 def test_unknown_strategy_is_refused():
     with pytest.raises(SystemExit):
         vc.main(["--dry-run", "--strategies", "full,zoom"])
+
+
+# --- second question: do clearer marks help? -------------------------------------------------------------------
+
+def test_pairs_count_scenes_where_both_zones_were_answered_right():
+    def row(eid, role, variant, outcome):
+        return {"event_id": eid, "role": role, "variant": variant, "outcome": outcome}
+    rows = [row("a", "entry", "zone_true", "right"), row("a", "entry", "zone_shifted", "right"),
+            row("b", "entry", "zone_true", "right"), row("b", "entry", "zone_shifted", "wrong"),
+            row("c", "dwell", "zone_true", "abstain"), row("c", "dwell", "zone_shifted", "right"),
+            row("d", "entry", "zone_true", "right")]                      # its pair is missing: not counted
+    assert vc.pairs(rows) == {"pairs": 3, "pairs_both_right": 1}
+
+
+def test_a_model_that_always_says_outside_gets_half_right_and_no_pair(queries):
+    always_outside = lambda img, prompt, split: {"text": "outside", "latency_ms": 1.0, "input_tokens": 1,  # noqa: E731
+                                                  "visual_tokens": 64, "output_tokens": 1}
+    s = vc.summarize(vc.run(queries, ["full"], always_outside, log=lambda s: None))["full"]
+    assert s["accuracy"] == 0.5 and s["pairs"] == 23 and s["pairs_both_right"] == 0
+
+
+def test_marked_images_and_question_reach_the_model(queries):
+    seen = []
+
+    def stand_in(img, prompt, split):
+        seen.append((img.copy(), prompt))
+        return {"text": "unclear", "latency_ms": 1.0, "input_tokens": 1, "visual_tokens": 64, "output_tokens": 1}
+
+    def paint_feet(image, box, zone):
+        out = image.copy()
+        fx, fy = int((box[0] + box[2]) / 2), min(int(box[3]), image.shape[0] - 1)
+        out[max(0, fy - 3):fy + 1, max(0, fx - 3):fx + 4] = (0, 255, 0)
+        return out
+
+    q = queries[:2]
+    rows = vc.run(q, ["full", "crop"], stand_in, crop_fn=lambda W, H, box, zone: (0, 0, W, H), log=lambda s: None,
+                  markings=("product", "marked"), mark_fn=paint_feet, mark_prompt=" The green dot marks the feet. ")
+    assert len(rows) == 8 and {r["marking"] for r in rows} == {"product", "marked"}
+    assert sorted(vc.summarize(rows)) == ["crop", "crop+marked", "full", "full+marked"]
+    product = [p for _, p in seen[0:2]]
+    marked = [p for _, p in seen[2:4]]
+    assert product == [vc.SHORT_PROMPT] * 2
+    assert marked == [vc.SHORT_PROMPT + " The green dot marks the feet."] * 2
+    assert not np.array_equal(seen[0][0], seen[2][0]), "the marked image is the same as the product image"
+    assert np.array_equal(seen[0][0], queries[0].image), "the product image must be the analyser's drawing unchanged"
+
+
+def test_earlier_results_without_a_marking_still_summarise():
+    rows = [{"event_id": "a", "role": "entry", "variant": v, "label": lab, "strategy": "full", "outcome": "right",
+             "latency_ms": 1.0, "visual_tokens": 64, "input_tokens": 1, "region_area_share": 1.0}
+            for v, lab in (("zone_true", "inside"), ("zone_shifted", "outside"))]
+    assert vc.summarize(rows)["full"]["pairs_both_right"] == 1
+
+
+def test_unknown_marking_is_refused():
+    with pytest.raises(SystemExit):
+        vc.main(["--dry-run", "--strategies", "full", "--markings", "product,glow"])
+
+
+def test_marked_needs_the_marks_written_first(monkeypatch, capsys):
+    from sceneproof.server.vlm import marks
+
+    monkeypatch.setattr(marks, "MARK_PROMPT", "")
+    assert vc.main(["--dry-run", "--strategies", "full", "--markings", "marked"]) == 2
+    assert "MARK_PROMPT" in capsys.readouterr().out
+    monkeypatch.setattr(marks, "MARK_PROMPT", "The green dot marks the feet.")
+    monkeypatch.setattr(marks, "mark_for_vlm", lambda *a: (_ for _ in ()).throw(NotImplementedError()))
+    assert vc.main(["--dry-run", "--strategies", "full", "--markings", "marked"]) == 2
+    assert "mark_for_vlm" in capsys.readouterr().out
