@@ -18,7 +18,7 @@
 
 정답률은 전체 46문항을 분모로 하므로 보류와 형식 오류를 포함한다. `near_boundary`와 `unclear`는 보류로 집계했다. `crop`의 평균 영역은 원본 화면의 **24.4%**였다. 같은 장면의 원래·이동 구역을 모두 맞힌 경우는 세 방식 모두 0/23쌍이었다. `full`과 `crop`은 같은 64개 시각 토큰을 사용했으나, 이 실험에서는 `crop`의 정답이 11개 적었다. `split`은 `crop`보다 정답이 1개 많았고 시각 토큰은 5배였다.
 
-실행은 CPU 2스레드, Python 3.14.2, PyTorch 2.15.0+cpu, Transformers 5.24.0 조건이다. 지연은 이 환경에서의 측정이며 다른 컴퓨터나 제품 전체 응답 시간으로 일반화할 수 없다. 각 문항의 응답과 좌표는 [result.json](result.json)에 있다.
+실행은 CPU 2스레드, Python 3.14.2, PyTorch 2.15.0+cpu, Transformers 5.24.0 조건이다. 지연은 이 환경에서의 측정이며 다른 컴퓨터나 제품 전체 응답 시간으로 일반화할 수 없다. 각 문항의 응답과 좌표는 [result.json](result.json)에 있다.결과 파일의 커밋 값은 2da449b이며, 자르는 규칙은 실행 뒤 c083627로 커밋한 코드와 같다.
 
 ## 틀린 장면 직접 보기
 
@@ -29,7 +29,7 @@
 | [055f621a / dwell 전체](images/055f621a_dwell_zone_true_full.jpg), [crop](images/055f621a_dwell_zone_true_crop.jpg) | 전체 화면에서 사람의 두 발은 빨간 다각형 안쪽에 뚜렷이 보인다. crop에는 위쪽 빨간 선만 가로지르고 양쪽·아래 경계는 거의 보이지 않는다. | 사람이 볼 때 안으로 읽히는 사례다. 부분 선만 남아 어느 쪽이 구역 안인지 파악할 맥락이 줄었을 가능성이 있다. full은 보류, crop은 밖으로 답했다. |
 | [f9dd1d60 / dwell 전체](images/f9dd1d60_dwell_zone_true_full.jpg), [crop](images/f9dd1d60_dwell_zone_true_crop.jpg) | 전체 화면에서는 발이 빨간 구역 안에 있는 것으로 보인다. crop은 사람과 위쪽 경계는 보이지만 구역의 양옆 경계가 화면 밖이다. | 안으로 읽히는 사례다. 세 방식 모두 밖으로 답했으므로 잘린 영역만을 원인으로 단정하기는 어렵다. |
 | [9151ba90 / dwell 전체](images/9151ba90_dwell_zone_true_full.jpg), [crop](images/9151ba90_dwell_zone_true_crop.jpg) | 노란 상자 속 사람의 두 발이 원래 구역 안에 보인다. crop에서도 발과 인근 빨간 선은 보이지만 구역 전체 형태는 잘린다. | 안으로 읽히는 사례다. 세 방식 모두 밖으로 답했다. 이미지의 맥락 손실과 모델의 공간 관계 이해 중 무엇이 주원인인지는 추가 비교가 필요하다. |
-| [4995f023 / dwell 전체](images/4995f023_dwell_zone_true_full.jpg), [crop](images/4995f023_dwell_zone_true_crop.jpg) | 발이 대각선 경계와 겹치거나 가까워 보인다. crop에서도 빨간 선과 바닥의 사선 표시가 함께 보인다. | 두 발이 경계에 얼마나 걸쳤는지 사람이 봐도 애매하다. 박스 중심 기준의 안과 발 전체 기준이 다를 수 있다. |
+| [4995f023 / dwell 전체](images/4995f023_dwell_zone_true_full.jpg), [crop](images/4995f023_dwell_zone_true_crop.jpg) | 발이 대각선 경계와 겹치거나 가까워 보인다. crop에서도 빨간 선과 바닥의 사선 표시가 함께 보인다. | 두 발이 경계에 얼마나 걸쳤는지 사람이 봐도 애매하다. 상자 아래 중앙 기준의 안과 발 전체 기준이 다를 수 있다. |
 | [fb20fa09 / entry 전체](images/fb20fa09_entry_zone_true_full.jpg), [crop](images/fb20fa09_entry_zone_true_crop.jpg) | 사람의 다리와 발이 원본 화면 아래에 보이지 않는다. crop도 이 정보를 담을 수 없다. | 사람도 발이 어디에 있는지 화면만으로 확인하기 어렵다. 상자 아래 중앙으로 만든 안 정답과 시각적 판단 가능성은 구분해야 한다. |
 | [d35f70f9 / entry 전체](images/d35f70f9_entry_zone_true_full.jpg), [crop](images/d35f70f9_entry_zone_true_crop.jpg) | 노란 상자 속 사람의 발이 원본 하단에서 보이지 않고, crop에는 구역의 일부만 들어온다. | 화면만으로 발과 구역의 관계를 판단하기 어려운 사례다. 자르기로 원본에 없는 발 정보를 복원할 수 없다. |
 
