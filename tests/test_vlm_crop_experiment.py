@@ -67,6 +67,11 @@ def test_full_and_split_send_the_whole_frame_and_crop_sends_the_region(queries):
     ("outside", "outside", "outside", "right"),
     ("inside", ' "clearly_inside"', "clearly_inside", "right"),
     ("inside", "clearly_inside or outside", None, "unparsed"),
+    ("outside", "Near_boundary.", "near_boundary", "abstain"),
+    ("outside", "Outside.", "outside", "right"),
+    ("inside", "Clearly inside", "clearly_inside", "right"),
+    ("inside", "Near boundary.", "near_boundary", "abstain"),
+    ("inside", "Inside.", None, "unparsed"),
 ])
 def test_judge(label, text, rel, outcome):
     assert vc.judge(label, text) == (rel, outcome)

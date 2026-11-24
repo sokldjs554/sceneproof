@@ -22,7 +22,8 @@ relation at all, which a set of only "inside" answers cannot.
 
 A model answer counts as right when zone_relation is clearly_inside for "inside" and outside for "outside";
 near_boundary and unclear are counted as abstentions. Small models often answer with the bare value
-("near_boundary") instead of the JSON object; that is accepted when exactly one of the four values appears.
+("near_boundary", "Near boundary.") instead of the JSON object; that is accepted, ignoring case and a space or
+hyphen for the underscore, when exactly one of the four values appears. "Inside." is not one of them.
 Anything else is unparsed.
 """
 
@@ -145,7 +146,8 @@ def judge(label: str, text: str) -> tuple[str | None, str]:
     obj = extract_json(text)
     rel = obj.get("zone_relation") if isinstance(obj, dict) else None
     if rel is None and not isinstance(obj, dict):
-        found = set(re.findall(r"\b(clearly_inside|near_boundary|outside|unclear)\b", text or ""))
+        plain = re.sub(r"\b(clearly|near)[ -](inside|boundary)\b", r"\1_\2", (text or "").lower())
+        found = set(re.findall(r"\b(clearly_inside|near_boundary|outside|unclear)\b", plain))
         rel = found.pop() if len(found) == 1 else None
     if rel not in ("clearly_inside", "near_boundary", "outside", "unclear"):
         return None, "unparsed"
