@@ -5,6 +5,9 @@ from .base import VLMProvider
 
 
 def build_provider(s: ServerSettings) -> VLMProvider | None:
+    # No visual field has beaten its rule on independent footage in production validation.
+    if s.mode != "replay":
+        return None
     p = s.vlm_provider
     if p in ("none", "", "off"):
         return None

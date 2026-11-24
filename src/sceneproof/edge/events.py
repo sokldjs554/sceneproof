@@ -69,6 +69,9 @@ def episode_to_event(ep: Episode, ctx: RunContext, ev: EvidenceState, frame_wh: 
         dwell_seconds=ep.dwell_seconds, frame_width=frame_wh[0], frame_height=frame_wh[1], source=ctx.source,
         camera_name=ctx.camera_name,
     )
+    if ep.coordinate_review_reason:
+        e.kind = pb.EVENT_KIND_COORDINATE_REVIEW
+        e.coordinate_review_reason = ep.coordinate_review_reason
     e.entry_ts.CopyFrom(ts(ep.entry_wall_ts))
     e.detected_at.CopyFrom(ts(time.time()))
     if ep.closed and ep.exit_wall_ts is not None:

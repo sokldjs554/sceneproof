@@ -1,0 +1,295 @@
+{
+  "model": "Salesforce/blip-vqa-base",
+  "revision": "787b3d35d57e49572baabd22884b3d5a05acf072",
+  "prompt": "Look at the person in the yellow box. Are both of their feet visible in this image? Answer yes or no.",
+  "rows": [
+    {
+      "case": 1,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 1,
+      "view": "lower",
+      "rect": [
+        435,
+        185,
+        546,
+        344
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 2,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 2,
+      "view": "lower",
+      "rect": [
+        116,
+        168,
+        228,
+        305
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 3,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 3,
+      "view": "lower",
+      "rect": [
+        445,
+        157,
+        549,
+        294
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 4,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 4,
+      "view": "lower",
+      "rect": [
+        502,
+        302,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 5,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 5,
+      "view": "lower",
+      "rect": [
+        439,
+        272,
+        614,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 6,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 6,
+      "view": "lower",
+      "rect": [
+        487,
+        251,
+        648,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 7,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 7,
+      "view": "lower",
+      "rect": [
+        325,
+        219,
+        509,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 8,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 8,
+      "view": "lower",
+      "rect": [
+        69,
+        249,
+        274,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 9,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    },
+    {
+      "case": 9,
+      "view": "lower",
+      "rect": [
+        46,
+        237,
+        209,
+        404
+      ],
+      "tensor_hw": [
+        384,
+        384
+      ],
+      "text": "yes",
+      "answer": "yes"
+    }
+  ]
+}

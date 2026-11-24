@@ -61,7 +61,7 @@ class CameraPipeline:
                            track_buffer=max(5, int(tc.track_buffer_seconds * cam.fps_hint)), fuse_score=tc.fuse_score)
         self.tracker = ByteTracker(tp)
         zones = zones_override if zones_override is not None else [z.to_spec() for z in cam.zones]
-        self.monitor = ZoneMonitor(zones, cam.camera_id, pc.trajectory_stride)
+        self.monitor = ZoneMonitor(zones, cam.camera_id, pc.trajectory_stride, review_uncertain=True)
         self.ctx = RunContext(run_id, cfg.device_id, cam.camera_id, self.source_uri, cam.name or cam.camera_id, edge_version,
                               detector.info.model_name, detector.info.model_version, detector.info.backend,
                               f"bytetrack@{tp.hash()}", cfg.config_hash(),
@@ -202,7 +202,10 @@ class CameraPipeline:
     def _on_transition(self, tr: Transition, ep: Episode) -> None:
         ev = self._evidence_state.setdefault(ep.episode_id, EvidenceState())
         try:
-            if tr == Transition.OPENED:
+            if tr == Transition.REVIEW:
+                for kf in self.evidence.keyframes_for(ep, self.ring, self._frame_wh, ["entry"]):
+                    ev.key_frames[kf.role] = kf
+            elif tr == Transition.OPENED:
                 for kf in self.evidence.keyframes_for(ep, self.ring, self._frame_wh, ["context_before", "entry"]):
                     ev.key_frames[kf.role] = kf
             elif tr == Transition.DWELL:
@@ -219,6 +222,8 @@ class CameraPipeline:
             log.exception("evidence for %s failed", ep.episode_id)
             self.stats.last_error = f"evidence: {e}"[:200]
         self._emit(ep)
+        if tr == Transition.REVIEW:
+            self._evidence_state.pop(ep.episode_id, None)
 
     def _emit(self, ep: Episode) -> None:
         ev = self._evidence_state.setdefault(ep.episode_id, EvidenceState())

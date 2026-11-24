@@ -10,7 +10,7 @@
 const L = {
   review: { needs_review: '확인 필요', in_review: '검토 중', resolved: '처리 완료' },
   resolution: { confirmed: '침입 확인', dismissed: '잘못된 알림', escalated: '상위 보고', no_action: '조치 불필요' },
-  kind: { EVENT_KIND_ZONE_ENTRY: '진입', EVENT_KIND_ZONE_DWELL: '머무름' },
+  kind: { EVENT_KIND_COORDINATE_REVIEW: '좌표 검토', EVENT_KIND_ZONE_ENTRY: '진입', EVENT_KIND_ZONE_DWELL: '머무름' },
   closeReason: { CLOSE_REASON_EXITED: '구역 이탈', CLOSE_REASON_TRACK_LOST: '추적 끊김', CLOSE_REASON_STREAM_ENDED: '영상 종료', CLOSE_REASON_SHUTDOWN: '분석 중지' },
   camState: { CAMERA_STATE_CONNECTING: '연결 중', CAMERA_STATE_STREAMING: '분석 중', CAMERA_STATE_RECONNECTING: '재연결 중', CAMERA_STATE_ENDED: '영상 종료', CAMERA_STATE_STOPPED: '정지', CAMERA_STATE_ERROR: '오류', CAMERA_STATE_UNSPECIFIED: '알 수 없음' },
   assessment: { needs_attention: '확인 필요', likely_benign: '정상 가능성 높음', unclear: '판단 어려움' },
@@ -85,6 +85,7 @@ function fmtBytes(b) {
   if (b < 1048576) return `${(b / 1024).toFixed(1)} KB`;
   return `${(b / 1048576).toFixed(1)} MB`;
 }
+const reviewReason = (ev) => ({ frame_bottom: "사람 상자가 화면 하단 여백에 걸림", zone_boundary: "추적 좌표가 구역 경계에서 2px 이내", missing_zone: "구역 좌표 부족", excluded_area: "제외 영역에서 좌표 확인 필요" }[ev.coordinate_review_reason] || "추적 좌표 확인 필요");
 const kindLabel = (k) => L.kind[k] || (k ? k.replace('EVENT_KIND_', '') : '—');
 const kindClass = (k) => (k === 'EVENT_KIND_ZONE_ENTRY' ? 'kind-entry' : k === 'EVENT_KIND_ZONE_DWELL' ? 'kind-dwell' : 'kind-other');
 const camStateKey = (s) => (s || 'CAMERA_STATE_UNSPECIFIED').replace('CAMERA_STATE_', '');
@@ -659,7 +660,7 @@ function renderSelHeader() {
       h('span', { class: `chip chip-lg st-${rv.state}`, role: 'button', tabindex: '0', title: '처리 상태 탭 열기', onclick: () => setTab('review') }, `● ${L.review[rv.state] || rv.state}`),
       rv.state === 'resolved' && rv.resolution ? h('span', { class: 'chip chip-lg' }, L.resolution[rv.resolution] || rv.resolution) : null),
     h('div', { class: 'sel-sub' },
-      `${fmtDateTime(ev.entry_ts)} 진입 (영상 ${fmtMedia(ev.media_entry_s)}) → ${ev.exit_ts ? fmtClock(ev.exit_ts) : '—'} 이탈 (영상 ${fmtMedia(ev.media_exit_s)})`
+      ev.kind === "EVENT_KIND_COORDINATE_REVIEW" ? `${fmtDateTime(ev.entry_ts)} · ${reviewReason(ev)} · 트랙 #${ev.track_id}` : `${fmtDateTime(ev.entry_ts)} 진입 (영상 ${fmtMedia(ev.media_entry_s)}) → ${ev.exit_ts ? fmtClock(ev.exit_ts) : '—'} 이탈 (영상 ${fmtMedia(ev.media_exit_s)})`
       + ` · 머문 시간 ${fmtSec(ev.dwell_seconds)} · ${L.closeReason[ev.close_reason] || '종료 사유 없음'} · 트랙 #${ev.track_id ?? '—'}`),
     h('div', { class: 'sel-flow' },
       h('span', { class: `flow-step ${state.stageMode === 'frames' ? 'warn' : 'ok'}` },
@@ -939,10 +940,12 @@ function buildCvTab(ev) {
     dt('카메라'), dd(`${ev.camera_name || ev.camera_id} · 장치 ${ev.device_id || '—'}`),
     dt('사건 종류'), dd(h('span', { class: `kind-badge ${kindClass(ev.kind)}` }, kindLabel(ev.kind)), ' ', h('span', { class: 'muted' }, L.eventStatus[ev.status] || ev.status || '')),
     dt('트랙 ID'), dd(`#${ev.track_id ?? '—'}`),
-    dt('진입'), dd(`${fmtDateTime(ev.entry_ts)} · 영상 ${fmtMedia(ev.media_entry_s, true)}`),
-    dt('이탈'), dd(ev.exit_ts ? `${fmtDateTime(ev.exit_ts)} · 영상 ${fmtMedia(ev.media_exit_s, true)}` : '— (진행 중)'),
-    dt('머문 시간'), dd(fmtSec(ev.dwell_seconds)),
-    dt('종료 사유'), dd(L.closeReason[ev.close_reason] || ev.close_reason || '—'),
+    dt(ev.coordinate_review_reason ? '관측 시각' : '진입'), dd(`${fmtDateTime(ev.entry_ts)} · 영상 ${fmtMedia(ev.media_entry_s, true)}`),
+    ...(ev.coordinate_review_reason ? [dt('검토 사유'), dd(reviewReason(ev))] : [
+      dt('이탈'), dd(ev.exit_ts ? `${fmtDateTime(ev.exit_ts)} · 영상 ${fmtMedia(ev.media_exit_s, true)}` : '— (진행 중)'),
+      dt('머문 시간'), dd(fmtSec(ev.dwell_seconds)),
+      dt('종료 사유'), dd(L.closeReason[ev.close_reason] || ev.close_reason || '—'),
+    ]),
     dt('근거 상태'), dd(ev.evidence_ready
       ? `✓ 수신 완료 · 프레임 ${frameCount(ev)}장 · ${ev.evidence.clip_available ? '클립 있음' : '클립 없음'}`
       : '⏳ 업로드 대기 중 (프레임/클립이 아직 도착하지 않았습니다)'),
@@ -1004,6 +1007,7 @@ function formatPpeVisible(value) {
   return value.length ? value.join(' · ') : '보이는 보호구 없음';
 }
 function buildVlmTab(ev) {
+  if (state.status && state.status.mode === 'live') return h('div', { class: 'tab-body' }, '새 영상 검증을 통과한 VLM 보조 항목이 없습니다.');
   const x = ev.explanation; const vs = x ? x.status : null; const out = [];
   const prov = state.status && state.status.vlm ? state.status.vlm.provider : '';
   if ((x && x.provider === 'mock') || (!x && prov === 'mock')) out.push(h('div', { class: 'warn-chip', style: 'margin-bottom:10px' }, '⚠ VLM 모의 응답(mock): 실제 해석 아님'));

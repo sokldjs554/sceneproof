@@ -68,6 +68,7 @@ def _event_view(store: Store, row: dict, expl: dict | None, devices: dict[str, d
                      "clip_fps": evidence.get("clip_fps")},
         "zone_polygon": ev.get("zone_polygon", []), "frame_width": ev.get("frame_width"), "frame_height": ev.get("frame_height"),
         "trajectory": ev.get("trajectory", []), "run": ev.get("run", {}),
+        "coordinate_review_reason": ev.get("coordinate_review_reason"),
         "explanation": _expl_view(expl),
         "latency": {
             # ingest latency only makes sense for live ingestion; replayed bundles carry old detected_at values
@@ -144,7 +145,7 @@ def build_router(app_state: Any) -> APIRouter:
             rows = rows[start:] if limit < 0 else rows[start:start + limit]
         else:
             rows = store.list_events(camera_id, state, kind, since, until, limit, offset, device_id)
-        expl = store.latest_explanation_map([x["event_id"] for x in rows])
+        expl = store.latest_explanation_map([x["event_id"] for x in rows]) if s.mode == "replay" else {}
         devs = devices_view()
         items = [_event_view(store, x, expl.get(x["event_id"]), devs) for x in rows]
         for it in items:
@@ -160,7 +161,7 @@ def build_router(app_state: Any) -> APIRouter:
         row = store.get_event(event_id)
         if not row:
             raise HTTPException(404, "event not found")
-        expls = store.explanations_for(event_id)
+        expls = store.explanations_for(event_id) if s.mode == "replay" else []
         view = _event_view(store, row, expls[0] if expls else None, devices_view())
         view["explanations"] = [_expl_view(x) for x in expls]
         view["review_log"] = store.review_log(event_id)
@@ -180,7 +181,7 @@ def build_router(app_state: Any) -> APIRouter:
         if body.state == "resolved" and body.resolution not in RESOLUTIONS:
             raise HTTPException(400, f"resolution must be one of {RESOLUTIONS} when resolving")
         updated = store.set_review(event_id, body.state, body.actor, body.note, body.resolution if body.state == "resolved" else None)
-        expls = store.explanations_for(event_id)
+        expls = store.explanations_for(event_id) if s.mode == "replay" else []
         return _event_view(store, updated, expls[0] if expls else None, devices_view())
 
     @r.post("/events/{event_id}/explain")
@@ -260,7 +261,7 @@ def build_router(app_state: Any) -> APIRouter:
     @r.get("/export")
     def export(format: str = "csv", camera_id: str | None = None, state: str | None = None):
         rows = store.list_events(camera_id, state, limit=100000)
-        expl = store.latest_explanation_map([x["event_id"] for x in rows])
+        expl = store.latest_explanation_map([x["event_id"] for x in rows]) if s.mode == "replay" else {}
         devs = devices_view()
         items = [_event_view(store, x, expl.get(x["event_id"]), devs) for x in rows]
         meta = {"exported_at": time.time(), "server_version": __version__, "mode": s.mode,

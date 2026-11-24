@@ -29,7 +29,7 @@ def concurrent_groups(events: list[dict], now: float | None = None, gap_s: float
         raise ValueError("gap_s must be non-negative")
     if now is None:
         now = time.time()
-    events = list(events)
+    events = [ev for ev in events if ev.get("kind") != "EVENT_KIND_COORDINATE_REVIEW"]
     parents = list(range(len(events)))
 
     def find(i):

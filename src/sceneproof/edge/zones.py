@@ -7,6 +7,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
 
+import cv2
 import numpy as np
 
 
@@ -103,6 +104,7 @@ class Episode:
     exit_media_s: float | None = None
     exit_wall_ts: float | None = None
     trajectory: list[TrajPoint] = field(default_factory=list)
+    coordinate_review_reason: str = ""
     revision: int = 0
     rejoined_track_ids: list[int] = field(default_factory=list)  # later track ids that continued this episode
 
@@ -113,6 +115,7 @@ class Episode:
 
 
 class Transition(Enum):
+    REVIEW = "review"
     OPENED = "opened"
     DWELL = "dwell"
     CLOSED = "closed"
@@ -126,6 +129,8 @@ class EpisodeEvent:
 
 @dataclass
 class _TrackZoneState:
+    review_reported: bool = False
+    dwell_restart_s: float | None = None
     inside_count: int = 0
     outside_count: int = 0
     inside_since: float | None = None   # media time of the first consecutive inside frame
@@ -141,6 +146,16 @@ def box_clipped_at_bottom(xyxy, height: int, margin: int = 2) -> bool:
     return float(xyxy[3]) >= height - margin
 
 
+def coordinate_issue(box, anchor, height, contour) -> str:
+    if box_clipped_at_bottom(box, height, margin=max(2, round(.05 * height))):
+        return "frame_bottom"
+    if contour is None:
+        return "missing_zone"
+    if abs(cv2.pointPolygonTest(contour, anchor, True)) <= 2:
+        return "zone_boundary"
+    return ""
+
+
 @dataclass
 class FrameMeta:
     frame_index: int
@@ -153,9 +168,10 @@ class FrameMeta:
 class ZoneMonitor:
     """Feeds per-frame tracks, emits episode transitions. One instance per camera."""
 
-    def __init__(self, zones: list[ZoneSpec], camera_id: str, trajectory_stride: int = 3) -> None:
+    def __init__(self, zones: list[ZoneSpec], camera_id: str, trajectory_stride: int = 3, *, review_uncertain: bool = False) -> None:
         self.zones = zones
         self.camera_id = camera_id
+        self.review_uncertain = review_uncertain
         self.trajectory_stride = max(1, trajectory_stride)
         self._state: dict[tuple[int, str], _TrackZoneState] = {}
         self._first_seen: dict[int, float] = {}  # track id -> media time of its first frame
@@ -169,6 +185,14 @@ class ZoneMonitor:
         box = tuple(float(v) for v in xyxy)
         return Episode(eid, zone, track_id, meta.frame_index, meta.media_s, meta.wall_ts, box,
                        meta.frame_index, meta.media_s, meta.wall_ts, box)
+
+    def _coordinate_review(self, zone, track, meta, reason):
+        ep = self._new_episode(zone, track.track_id, meta, track.xyxy)
+        ep.episode_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "review:" + ep.episode_id))
+        ep.coordinate_review_reason = reason
+        ep.closed, ep.revision = True, 1
+        ep.exit_frame, ep.exit_media_s, ep.exit_wall_ts = meta.frame_index, meta.media_s, meta.wall_ts
+        return EpisodeEvent(Transition.REVIEW, ep)
 
     def _close(self, st: _TrackZoneState, reason: CloseReason, meta: FrameMeta, out: list[EpisodeEvent]) -> None:
         ep = st.episode
@@ -195,8 +219,10 @@ class ZoneMonitor:
         for t in tracks:
             self._first_seen.setdefault(t.track_id, meta.media_s)
         for zone in self.zones:
+            contour = (np.asarray(zone.polygon_px(meta.width, meta.height), dtype=np.float32)
+                       if self.review_uncertain and len(zone.polygon) >= 3 else None)
             if zone.rejoin:
-                self._rejoin(zone, tracks, meta)
+                self._rejoin(zone, tracks, meta, contour)
             for t in tracks:
                 key = (t.track_id, zone.zone_id)
                 seen.add(key)
@@ -211,6 +237,21 @@ class ZoneMonitor:
                         inside = False  # a person-shaped object here never opens an episode
                     else:
                         clipped = True  # hold an open episode (same as feet not visible)
+                if self.review_uncertain:
+                    reason = coordinate_issue(t.xyxy, (ax, ay), meta.height, contour)
+                    if clipped and not reason:
+                        reason = "excluded_area"
+                    if reason:
+                        if not st.review_reported:
+                            out.append(self._coordinate_review(zone, t, meta, reason))
+                            st.review_reported = True
+                        clipped = True
+                        st.inside_since, st.inside_count = None, 0
+                        st.dwell_restart_s = None
+                    else:
+                        if st.review_reported:
+                            st.dwell_restart_s = meta.media_s
+                        st.review_reported = False
                 if clipped:
                     # feet not visible: hold the current state, but keep an open episode alive
                     if st.episode is not None:
@@ -229,6 +270,7 @@ class ZoneMonitor:
                                      if zone.entry_confirm_seconds is not None else st.inside_count >= zone.entry_confirm_frames)
                         if confirmed:
                             ep = self._new_episode(zone, t.track_id, meta, t.xyxy)
+                            st.dwell_restart_s = None
                             ep.revision = 1
                             st.episode = ep
                             self.open_episodes[ep.episode_id] = ep
@@ -243,7 +285,8 @@ class ZoneMonitor:
                         st.outside_count, st.outside_since = 0, None
                         ep.last_frame, ep.last_media_s, ep.last_wall_ts = meta.frame_index, meta.media_s, meta.wall_ts
                         ep.last_xyxy = tuple(float(v) for v in t.xyxy)
-                        if not ep.dwell_escalated and ep.dwell_seconds >= zone.dwell_seconds:
+                        dwell_start = ep.entry_media_s if st.dwell_restart_s is None else st.dwell_restart_s
+                        if not ep.dwell_escalated and meta.media_s - dwell_start >= zone.dwell_seconds:
                             ep.dwell_escalated = True
                             ep.dwell_frame, ep.dwell_media_s = meta.frame_index, meta.media_s
                             ep.revision += 1
@@ -274,7 +317,7 @@ class ZoneMonitor:
             self._first_seen = {tid: ts for tid, ts in self._first_seen.items() if tid in live}
         return out
 
-    def _rejoin(self, zone: ZoneSpec, tracks: list, meta: FrameMeta) -> None:
+    def _rejoin(self, zone: ZoneSpec, tracks: list, meta: FrameMeta, contour=None) -> None:
         """Hand open episodes whose track vanished to a track that appeared after the loss, nearby (see module doc)."""
         present = {t.track_id for t in tracks}
         orphans = [(key, st) for key, st in self._state.items()
@@ -295,6 +338,8 @@ class ZoneMonitor:
                 if h_new <= 0 or math.hypot(ax - px, ay - py) / max(h_old, h_new) > zone.rejoin_dist_rel:
                     continue
                 near += 1
+                if self.review_uncertain and coordinate_issue(t.xyxy, (ax, ay), meta.height, contour):
+                    continue
                 st_new = self._state.get((t.track_id, zone.zone_id))
                 if st_new is not None and st_new.episode is not None:
                     continue  # already has its own episode here

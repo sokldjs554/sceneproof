@@ -1,0 +1,475 @@
+{
+  "prompt": "Look at the person in the yellow box. Are both of their feet visible in this image? Answer yes or no.",
+  "model": "HuggingFaceTB/SmolVLM-500M-Instruct",
+  "video_sha256": "3526fee39cac70d6366471e4324a6d63b337c8f8ab99c015521bee0d60ed6e04",
+  "rows": [
+    {
+      "case": 1,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1897.8,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 1,
+      "view": "lower",
+      "rect": [
+        435,
+        185,
+        546,
+        344
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 2225.8,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 2,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1759.5,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 2,
+      "view": "lower",
+      "rect": [
+        116,
+        168,
+        228,
+        305
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1777.3,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 3,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 2087.2,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 3,
+      "view": "lower",
+      "rect": [
+        445,
+        157,
+        549,
+        294
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 2509.6,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 4,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 2275.2,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 4,
+      "view": "lower",
+      "rect": [
+        502,
+        302,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1891.1,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 5,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1843.7,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 5,
+      "view": "lower",
+      "rect": [
+        439,
+        272,
+        614,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1822.8,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 6,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1809.4,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 6,
+      "view": "lower",
+      "rect": [
+        487,
+        251,
+        648,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1760.5,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 7,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1732.1,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 7,
+      "view": "lower",
+      "rect": [
+        325,
+        219,
+        509,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1731.3,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 8,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 2229.8,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 8,
+      "view": "lower",
+      "rect": [
+        69,
+        249,
+        274,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1828.0,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 9,
+      "view": "full",
+      "rect": [
+        0,
+        0,
+        720,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1885.1,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    },
+    {
+      "case": 9,
+      "view": "lower",
+      "rect": [
+        46,
+        237,
+        209,
+        404
+      ],
+      "tensor_hw": [
+        512,
+        512
+      ],
+      "active_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "answer": "no",
+      "text": " No.",
+      "latency_ms": 1763.5,
+      "input_tokens": 99,
+      "visual_tokens": 64,
+      "output_tokens": 3
+    }
+  ]
+}

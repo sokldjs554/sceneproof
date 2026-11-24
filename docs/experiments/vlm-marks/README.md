@@ -82,3 +82,5 @@ python -m sceneproof.eval.vlm_crop --strategies full,crop --markings product,mar
 ```
 
 표시 테스트 12개와 측정 도구 테스트 32개가 통과했다. 문항별 원문·응답 길이·좌표·실행 환경은 [측정 결과](result.json), 같은 장면의 네 조건 입력은 [이미지 폴더](images/)에 있다.
+
+이후 다른 매장 영상에서 화면 잘림과 물체 가림을 나누고, 같은 질문으로 전체 화면과 하반신 확대를 비교했다. [확대 입력 판독과 두 VLM의 결과](../lower-body/README.md)

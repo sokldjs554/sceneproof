@@ -26,3 +26,5 @@ SmolVLM-500M은 23장 모두에 `No.`라고 답했다. 양쪽 발을 확인할 �
 ```bash
 PYTHONPATH=src python docs/experiments/foot-visibility/run.py
 ```
+
+[후속 진단 — 새 매장 영상에서 하반신 확대와 두 모델 비교](../lower-body/README.md)

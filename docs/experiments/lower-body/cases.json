@@ -1,0 +1,11 @@
+[
+  {"frame_s": 33, "group": "visible", "target": "brown jacket", "box": [451, 78, 529, 315]},
+  {"frame_s": 51, "group": "visible", "target": "blonde in black", "box": [132, 76, 211, 280]},
+  {"frame_s": 54, "group": "visible", "target": "green shirt", "box": [460, 65, 533, 269]},
+  {"frame_s": 9, "group": "clipped", "target": "yellow hat", "box": [538, 220, 719, 403]},
+  {"frame_s": 18, "group": "clipped", "target": "brown jacket", "box": [464, 165, 588, 403]},
+  {"frame_s": 15, "group": "clipped", "target": "green shirt", "box": [510, 126, 624, 403]},
+  {"frame_s": 15, "group": "occluded", "target": "yellow hat behind dishes", "box": [351, 92, 482, 375]},
+  {"frame_s": 39, "group": "occluded", "target": "blonde behind dishes", "box": [98, 139, 244, 383]},
+  {"frame_s": 57, "group": "occluded", "target": "black T-shirt behind dishes", "box": [69, 116, 185, 385]}
+]
