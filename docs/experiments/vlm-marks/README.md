@@ -73,7 +73,7 @@
 
 ## 재현
 
-측정 도구와 테스트의 기준 커밋은 `ddbdfda477ae10121eda2117de0aa6afaee25d8b`이다. 표시 함수를 커밋한 뒤 같은 커밋 `4392019e89b108f89cb02d026e25595702828e50`에서 전체 실험을 실행했다. 모델은 `HuggingFaceTB/SmolVLM-500M-Instruct`, 가중치 리비전은 `753c1752602b5e739af7a7fa6947a635051897a3`이다. greedy decoding, 최대 출력 48토큰, CPU 2스레드를 사용했다. 지연은 모델이 한 질문을 처리한 시간으로, 이미지에 표시를 그리는 시간은 포함하지 않는다.
+측정 도구와 테스트의 기준 커밋은 `ddbdfda477ae10121eda2117de0aa6afaee25d8b`이다. 표시 함수를 커밋한 뒤 같은 커밋 `30bf625`에서 전체 실험을 실행했다. 모델은 `HuggingFaceTB/SmolVLM-500M-Instruct`, 가중치 리비전은 `753c1752602b5e739af7a7fa6947a635051897a3`이다. greedy decoding, 최대 출력 48토큰, CPU 2스레드를 사용했다. 지연은 모델이 한 질문을 처리한 시간으로, 이미지에 표시를 그리는 시간은 포함하지 않는다.
 
 ```bash
 python -m pytest tests/test_vlm_marks.py tests/test_vlm_crop_experiment.py -q
