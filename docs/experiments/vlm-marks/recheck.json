@@ -1,0 +1,30 @@
+{
+  "coordinate_labels_vs_opencv": {
+    "same": 46,
+    "tested": 46
+  },
+  "rendered_jpegs_vs_archive": {
+    "same": 184,
+    "tested": 184
+  },
+  "rows_compared": 184,
+  "identical_rows": 184,
+  "columns": [
+    "event_id",
+    "camera_id",
+    "role",
+    "variant",
+    "label",
+    "strategy",
+    "marking",
+    "region",
+    "text",
+    "input_tokens",
+    "visual_tokens",
+    "output_tokens",
+    "zone_relation",
+    "outcome"
+  ],
+  "original_rows_sha256": "235349a931f225514d8b3d81c89c53774878a8d5c8f00047e523bdc5e71a5082",
+  "rerun_rows_sha256": "235349a931f225514d8b3d81c89c53774878a8d5c8f00047e523bdc5e71a5082"
+}

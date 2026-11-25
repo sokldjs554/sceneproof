@@ -20,6 +20,10 @@ ALL_ROLES): their stored box lags the image.
 
     python -m sceneproof.eval.vlm_crop --strategies full,crop --out docs/experiments/vlm-crop/result.json
     python -m sceneproof.eval.vlm_crop --dry-run --save-images /tmp/vlm-crop   # no model: just the images
+    python -m sceneproof.eval.vlm_crop --strategies full,crop --markings product,marked --out ...   # second question
+
+Second question (2026-11-24): do clearer marks help? ``product`` is the analyser's own drawing; ``marked``
+adds the marks of sceneproof.server.vlm.marks.mark_for_vlm on top and appends its MARK_PROMPT to the question.
 
 A model answer counts as right when zone_relation is clearly_inside for "inside" and outside for "outside";
 near_boundary and unclear are counted as abstentions. Small models often answer with the bare value
@@ -62,6 +66,7 @@ SHORT_PROMPT = (
     "Where are this person's feet relative to the red polygon? Answer with ONE single-line JSON object and "
     'nothing else: {"zone_relation": "clearly_inside" | "near_boundary" | "outside" | "unclear"}')
 RIGHT = {"inside": "clearly_inside", "outside": "outside"}
+MARKINGS = ("product", "marked")
 
 
 @dataclass
@@ -137,14 +142,22 @@ def load_queries(bundle: Path = BUNDLE, roles=ROLES) -> list[Query]:
     return out
 
 
-def region(q: Query, strategy: str, crop_fn: Callable | None = None) -> tuple[np.ndarray, tuple[int, int, int, int]]:
-    h, w = q.image.shape[:2]
+def region(q: Query, strategy: str, crop_fn: Callable | None = None,
+           image: np.ndarray | None = None) -> tuple[np.ndarray, tuple[int, int, int, int]]:
+    """The image to send for ``strategy``: the whole of ``image`` (default: the query's image) or the crop of it."""
+    image = q.image if image is None else image
+    h, w = image.shape[:2]
     if strategy != "crop":
-        return q.image, (0, 0, w, h)
+        return image, (0, 0, w, h)
     if crop_fn is None:
         from sceneproof.server.vlm.crop import crop_for_vlm as crop_fn
     x1, y1, x2, y2 = crop_fn(w, h, q.box, q.zone)
-    return q.image[y1:y2, x1:x2], (x1, y1, x2, y2)
+    return image[y1:y2, x1:x2], (x1, y1, x2, y2)
+
+
+def condition(strategy: str, marking: str = "product") -> str:
+    """The name a strategy and a marking are reported under: 'crop', or 'crop+marked'."""
+    return strategy if marking == "product" else f"{strategy}+{marking}"
 
 
 def judge(label: str, text: str) -> tuple[str | None, str]:
@@ -162,10 +175,22 @@ def judge(label: str, text: str) -> tuple[str | None, str]:
     return rel, "right" if rel == RIGHT[label] else "wrong"
 
 
+def pairs(rows: list[dict]) -> dict[str, int]:
+    """Scenes asked with both the real and the shifted zone, and how many of them got both right.
+
+    A model that answers the same way whatever the zone does can get half of all questions right and no pair."""
+    by_scene: dict[tuple, dict[str, str]] = {}
+    for r in rows:
+        by_scene.setdefault((r["event_id"], r["role"]), {})[r["variant"]] = r["outcome"]
+    complete = [v for v in by_scene.values() if {"zone_true", "zone_shifted"} <= set(v)]
+    return {"pairs": len(complete), "pairs_both_right": sum(v["zone_true"] == v["zone_shifted"] == "right" for v in complete)}
+
+
 def summarize(rows: list[dict]) -> dict:
     out = {}
-    for strategy in sorted({r["strategy"] for r in rows}):
-        rs = [r for r in rows if r["strategy"] == strategy]
+    for name in sorted({condition(r["strategy"], r.get("marking", "product")) for r in rows}):
+        rs = [r for r in rows if condition(r["strategy"], r.get("marking", "product")) == name]
+        strategy = name
         outcomes = {k: sum(r["outcome"] == k for r in rs) for k in ("right", "wrong", "abstain", "unparsed")}
         by_label = {lab: {k: sum(r["outcome"] == k for r in rs if r["label"] == lab) for k in ("right", "wrong", "abstain", "unparsed")}
                     for lab in ("inside", "outside")}
@@ -179,6 +204,7 @@ def summarize(rows: list[dict]) -> dict:
             "latency_ms_median": round(statistics.median(lat), 1) if rs else None,
             "latency_ms_max": round(max(lat), 1) if rs else None,
             "region_area_share_mean": round(statistics.mean(r["region_area_share"] for r in rs), 3) if rs else None,
+            **pairs(rs),
         }
     return out
 
@@ -228,24 +254,29 @@ class SmolVLM:
 
 
 def run(queries: list[Query], strategies, answer: Callable[[np.ndarray, str, bool], dict], prompt: str = SHORT_PROMPT,
-        crop_fn: Callable | None = None, save_images: Path | None = None, log: Callable[[str], None] = print) -> list[dict]:
+        crop_fn: Callable | None = None, save_images: Path | None = None, log: Callable[[str], None] = print,
+        markings=("product",), mark_fn: Callable | None = None, mark_prompt: str = "") -> list[dict]:
     rows = []
-    total = len(queries) * len(strategies)
+    total = len(queries) * len(strategies) * len(markings)
     for q in queries:
-        for strategy in strategies:
-            img, rect = region(q, strategy, crop_fn)
-            if save_images is not None:
-                save_images.mkdir(parents=True, exist_ok=True)
-                cv2.imwrite(str(save_images / f"{q.event_id[:8]}_{q.role}_{q.variant}_{strategy}.jpg"), img)
-            res = answer(img, prompt, strategy == "split")
-            rel, outcome = judge(q.label, res["text"])
-            h, w = q.image.shape[:2]
-            rows.append({"event_id": q.event_id, "camera_id": q.camera_id, "role": q.role, "variant": q.variant,
-                         "label": q.label, "strategy": strategy, "region": list(rect),
-                         "region_area_share": round((rect[2] - rect[0]) * (rect[3] - rect[1]) / (w * h), 4),
-                         "zone_relation": rel, "outcome": outcome, **res})
-            log(f"[{len(rows)}/{total}] {q.event_id[:8]} {q.role:5} {q.variant:12} {strategy:5} label={q.label:7} "
-                f"answer={rel} {outcome} {res['latency_ms']:.0f}ms tokens={res['visual_tokens']}")
+        for marking in markings:
+            base = q.image if marking == "product" else mark_fn(q.image, q.box, q.zone)
+            asked = prompt if marking == "product" else f"{prompt} {mark_prompt.strip()}"
+            for strategy in strategies:
+                img, rect = region(q, strategy, crop_fn, image=base)
+                name = condition(strategy, marking)
+                if save_images is not None:
+                    save_images.mkdir(parents=True, exist_ok=True)
+                    cv2.imwrite(str(save_images / f"{q.event_id[:8]}_{q.role}_{q.variant}_{name}.jpg"), img)
+                res = answer(img, asked, strategy == "split")
+                rel, outcome = judge(q.label, res["text"])
+                h, w = q.image.shape[:2]
+                rows.append({"event_id": q.event_id, "camera_id": q.camera_id, "role": q.role, "variant": q.variant,
+                             "label": q.label, "strategy": strategy, "marking": marking, "region": list(rect),
+                             "region_area_share": round((rect[2] - rect[0]) * (rect[3] - rect[1]) / (w * h), 4),
+                             "zone_relation": rel, "outcome": outcome, **res})
+                log(f"[{len(rows)}/{total}] {q.event_id[:8]} {q.role:5} {q.variant:12} {name:12} label={q.label:7} "
+                    f"answer={rel} {outcome} {res['latency_ms']:.0f}ms tokens={res['visual_tokens']}")
     return rows
 
 
@@ -259,6 +290,8 @@ def _git() -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--strategies", default="full,crop", help="comma list of " + ", ".join(STRATEGIES))
+    ap.add_argument("--markings", default="product", help="comma list of " + ", ".join(MARKINGS) +
+                    "; marked = sceneproof.server.vlm.marks on top of the analyser's drawing")
     ap.add_argument("--model", default="HuggingFaceTB/SmolVLM-500M-Instruct")
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--split-edge", type=int, default=1024, help="longest edge before splitting into 512-px tiles")
@@ -272,6 +305,17 @@ def main(argv: list[str] | None = None) -> int:
     bad = [s for s in strategies if s not in STRATEGIES]
     if bad:
         ap.error(f"unknown strategies {bad}; choose from {STRATEGIES}")
+    markings = [m.strip() for m in args.markings.split(",") if m.strip()]
+    if any(m not in MARKINGS for m in markings):
+        ap.error(f"unknown markings {markings}; choose from {MARKINGS}")
+    mark_fn, mark_prompt = None, ""
+    if "marked" in markings:
+        from sceneproof.server.vlm import marks
+
+        mark_fn, mark_prompt = marks.mark_for_vlm, marks.MARK_PROMPT
+        if not mark_prompt.strip():
+            print("MARK_PROMPT (src/sceneproof/server/vlm/marks.py) is empty: write what the marks mean first")
+            return 2
     roles = tuple(r.strip() for r in args.roles.split(",") if r.strip())
     if any(r not in ALL_ROLES for r in roles):
         ap.error(f"unknown roles {roles}; choose from {ALL_ROLES}")
@@ -283,20 +327,28 @@ def main(argv: list[str] | None = None) -> int:
             print("crop_for_vlm (src/sceneproof/server/vlm/crop.py) is not written yet: run without 'crop', "
                   "e.g. --strategies full,split")
             return 2
+    if mark_fn is not None and queries:
+        try:
+            mark_fn(queries[0].image, queries[0].box, queries[0].zone)
+        except NotImplementedError:
+            print("mark_for_vlm (src/sceneproof/server/vlm/marks.py) is not written yet: run with --markings product")
+            return 2
     if args.limit:
         queries = queries[: args.limit]
     labels = {lab: sum(q.label == lab for q in queries) for lab in ("inside", "outside")}
-    print(f"{len(queries)} queries ({labels}), strategies {strategies}")
+    print(f"{len(queries)} queries ({labels}), strategies {strategies}, markings {markings}")
     if args.dry_run:
         dummy = lambda img, prompt, split: {"text": "", "latency_ms": 0.0, "input_tokens": 0, "visual_tokens": 0, "output_tokens": 0}  # noqa: E731
-        run(queries, strategies, dummy, save_images=args.save_images or Path("/tmp/vlm-crop-images"), log=lambda s: None)
+        run(queries, strategies, dummy, save_images=args.save_images or Path("/tmp/vlm-crop-images"), log=lambda s: None,
+            markings=markings, mark_fn=mark_fn, mark_prompt=mark_prompt)
         print(f"images written to {args.save_images or '/tmp/vlm-crop-images'}")
         return 0
     model = SmolVLM(args.model, threads=args.threads, split_edge=args.split_edge)
-    rows = run(queries, strategies, model, save_images=args.save_images)
+    rows = run(queries, strategies, model, save_images=args.save_images, markings=markings, mark_fn=mark_fn,
+               mark_prompt=mark_prompt)
     summary = summarize(rows)
     for s, v in summary.items():
-        print(f"{s:6} right {v['right']}/{v['queries']} (acc {v['accuracy']})  wrong {v['wrong']}  abstain {v['abstain']}  "
+        print(f"{s:12} pairs both right {v['pairs_both_right']}/{v['pairs']}  right {v['right']}/{v['queries']} (acc {v['accuracy']})  wrong {v['wrong']}  abstain {v['abstain']}  "
               f"unparsed {v['unparsed']}  visual tokens {v['visual_tokens_mean']}  median {v['latency_ms_median']}ms  "
               f"region {v['region_area_share_mean']:.0%} of the frame")
     if args.out:
@@ -305,9 +357,9 @@ def main(argv: list[str] | None = None) -> int:
 
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps({
-            "what": "where a small VLM should look: whole frame vs region (sceneproof.eval.vlm_crop)",
+            "what": "where a small VLM should look, and whether clearer marks help (sceneproof.eval.vlm_crop)",
             "git": _git(), "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "model": args.model,
-            "settings": {"strategies": strategies, "threads": args.threads, "longest_edge": 512, "split_edge": args.split_edge,
+            "settings": {"strategies": strategies, "markings": markings, "mark_prompt": mark_prompt, "threads": args.threads, "longest_edge": 512, "split_edge": args.split_edge,
                          "max_new_tokens": model.max_new_tokens, "prompt": SHORT_PROMPT, "roles": args.roles, "limit": args.limit},
             "environment": {"python": platform.python_version(), "platform": platform.platform(), "torch": torch.__version__,
                             "transformers": transformers.__version__, "cpu_count": __import__("os").cpu_count()},
